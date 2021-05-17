@@ -1,15 +1,15 @@
 /* Copy and pasted from `./JiraScopingSelectAllIssues.tsx` */
 import styled from '@emotion/styled'
+import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
 import {createFragmentContainer} from 'react-relay'
 import useMutationProps from '~/hooks/useMutationProps'
-import UpdatePokerScopeMutation from '~/mutations/UpdatePokerScopeMutation'
-import Checkbox from './Checkbox'
-import useAtmosphere from '../hooks/useAtmosphere'
-import graphql from 'babel-plugin-relay/macro'
-import {ParabolScopingSelectAllTasks_tasks} from '../__generated__/ParabolScopingSelectAllTasks_tasks.graphql'
 import useUnusedRecords from '~/hooks/useUnusedRecords'
+import UpdatePokerScopeMutation from '~/mutations/UpdatePokerScopeMutation'
+import useAtmosphere from '../hooks/useAtmosphere'
 import getSelectAllTitle from '../utils/getSelectAllTitle'
+import {ParabolScopingSelectAllTasks_tasks} from '../__generated__/ParabolScopingSelectAllTasks_tasks.graphql'
+import Checkbox from './Checkbox'
 
 const Item = styled('div')({
   display: 'flex',
@@ -31,7 +31,7 @@ const ParabolScopingSelectAllTasks = (props: Props) => {
   const {meetingId, usedServiceTaskIds, tasks} = props
   const taskIds = tasks.map((taskEdge) => taskEdge.node.id)
   const atmosphere = useAtmosphere()
-  const [unusedTasks, allSelected] = useUnusedRecords(tasks, usedServiceTaskIds)
+  const [unusedTasks, allSelected] = useUnusedRecords(taskIds, usedServiceTaskIds)
   const {submitting, submitMutation, onCompleted, onError} = useMutationProps()
   const onClick = () => {
     if (submitting) return

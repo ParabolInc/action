@@ -10,6 +10,7 @@ import {
 } from 'graphql'
 import {SprintPokerDefaults} from '~/types/constEnums'
 import JiraServiceTaskId from '../../../client/shared/gqlIds/JiraServiceTaskId'
+import EstimateStageDB from '../../database/types/EstimateStage'
 import {NewMeetingPhaseTypeEnum} from '../../database/types/GenericMeetingPhase'
 import MeetingPoker from '../../database/types/MeetingPoker'
 import db from '../../db'
@@ -24,7 +25,13 @@ import TaskServiceEnum from './TaskServiceEnum'
 import TemplateDimensionRef from './TemplateDimensionRef'
 import User from './User'
 
-const EstimateStage = new GraphQLObjectType<any, GQLContext>({
+interface Source extends EstimateStageDB {
+  teamId: string
+  meetingId: string
+  phaseType: 'ESTIMATE'
+}
+
+const EstimateStage = new GraphQLObjectType<Source, GQLContext>({
   name: 'EstimateStage',
   description: 'The stage where the team estimates & discusses a single task',
   interfaces: () => [NewMeetingStage],
@@ -44,7 +51,7 @@ const EstimateStage = new GraphQLObjectType<any, GQLContext>({
     serviceTaskId: {
       type: GraphQLNonNull(GraphQLID),
       description:
-        'The key used to fetch the task used by the service. Jira: cloudId:issueKey. Parabol: taskId'
+        'The key used to fetch the task used by the service. Jira: cloudId:issueKey. Parabol: taskId. github: nameWithOwner'
     },
     serviceField: {
       type: GraphQLNonNull(ServiceField),
@@ -150,8 +157,13 @@ const EstimateStage = new GraphQLObjectType<any, GQLContext>({
           return dataLoader
             .get('jiraIssue')
             .load({cloudId, issueKey, teamId, userId: creatorUserId})
+        } else if (service === 'github') {
+          return ''
+        } else if (service === 'PARABOL') {
+          return dataLoader.get('tasks').load(serviceTaskId)
         }
-        return dataLoader.get('tasks').load(serviceTaskId)
+        console.log('EstimateStage story has no service')
+        return null
       }
     },
     isVoting: {

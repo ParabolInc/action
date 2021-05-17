@@ -78,3 +78,5 @@ type EnumerateInternal<A extends Array<unknown>, N extends number> = {
 export type Enumerate<N extends number> = EnumerateInternal<[], N> extends (infer E)[] ? E : never
 
 export type Range<FROM extends number, TO extends number> = Exclude<Enumerate<TO>, Enumerate<FROM>>
+
+export type GQLType<T, U> = Extract<T, {__typename: U}>

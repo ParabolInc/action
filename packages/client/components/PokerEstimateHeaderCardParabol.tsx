@@ -14,6 +14,7 @@ import isAndroid from '~/utils/draftjs/isAndroid'
 import useAtmosphere from '../hooks/useAtmosphere'
 import UpdateTaskMutation from '../mutations/UpdateTaskMutation'
 import {ICON_SIZE} from '../styles/typographyV2'
+import {GQLType} from '../types/generics'
 import convertToTaskContent from '../utils/draftjs/convertToTaskContent'
 import {PokerEstimateHeaderCardParabol_stage} from '../__generated__/PokerEstimateHeaderCardParabol_stage.graphql'
 import CardButton from './CardButton'
@@ -124,7 +125,7 @@ interface Props {
 
 const PokerEstimateHeaderCardParabol = (props: Props) => {
   const {stage} = props
-  const story = stage.story as Extract<typeof stage['story'], {__typename: 'Task'}> | null
+  const story = stage.story as GQLType<typeof stage['story'], 'Task'> | null
   const content = story?.content
   const taskId = story?.id ?? ''
   const atmosphere = useAtmosphere()

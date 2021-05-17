@@ -49,7 +49,8 @@ interface Props {
 
 const GitHubScopingSearchResultItem = (props: Props) => {
   const {issue, meetingId, persistQuery, usedServiceTaskIds} = props
-  const {id: serviceTaskId, repository, title, url} = issue
+  const {id: serviceTaskId, repository, title} = issue
+  const url = issue.url as string
   const {nameWithOwner} = repository
   const isSelected = usedServiceTaskIds.has(serviceTaskId)
   const atmosphere = useAtmosphere()
@@ -80,12 +81,7 @@ const GitHubScopingSearchResultItem = (props: Props) => {
       <Checkbox active={isSelected || isTemp} disabled={disabled} />
       <Issue>
         <Title>{title}</Title>
-        <StyledLink
-          href={url}
-          rel='noopener noreferrer'
-          target='_blank'
-          title={`GitHub Issue TODO FIX ME#${nameWithOwner}`}
-        >
+        <StyledLink href={url} rel='noopener noreferrer' target='_blank'>
           {nameWithOwner}
           {isTemp && <Ellipsis />}
         </StyledLink>
@@ -96,7 +92,7 @@ const GitHubScopingSearchResultItem = (props: Props) => {
 
 export default createFragmentContainer(GitHubScopingSearchResultItem, {
   issue: graphql`
-    fragment GitHubScopingSearchResultItem_issue on GitHubIssue {
+    fragment GitHubScopingSearchResultItem_issue on _xGitHubIssue {
       id
       # use title instead of summary so the optimistic updater will use it for the sidebar
       title

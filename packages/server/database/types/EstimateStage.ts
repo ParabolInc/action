@@ -1,9 +1,10 @@
 import EstimateUserScore from './EstimateUserScore'
 import GenericMeetingStage from './GenericMeetingStage'
+import {TaskServiceEnum} from './Task'
 
 interface Input {
   creatorUserId: string
-  service: string
+  service: TaskServiceEnum
   serviceTaskId: string
   sortOrder: number
   durations: number[] | undefined
@@ -14,7 +15,7 @@ interface Input {
 
 export default class EstimateStage extends GenericMeetingStage {
   creatorUserId: string
-  service: string
+  service: TaskServiceEnum
   serviceTaskId: string
   sortOrder: number
   dimensionRefIdx: number

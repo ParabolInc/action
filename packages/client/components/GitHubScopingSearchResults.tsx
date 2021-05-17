@@ -2,19 +2,18 @@ import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
 import React, {useState} from 'react'
 import {createPaginationContainer} from 'react-relay'
-// import useGetUsedServiceTaskIds from '~/hooks/useGetUsedServiceTaskIds'
 import MockScopingList from '~/modules/meeting/components/MockScopingList'
 import useAtmosphere from '../hooks/useAtmosphere'
 import useGetUsedServiceTaskIds from '../hooks/useGetUsedServiceTaskIds'
 import PersistGitHubSearchQueryMutation from '../mutations/PersistGitHubSearchQueryMutation'
 import {SprintPokerDefaults} from '../types/constEnums'
+import {GQLType} from '../types/generics'
+import getNonNullEdges from '../utils/getNonNullEdges'
 import {gitHubQueryValidation} from '../validation/gitHubQueryValidation'
-// import useAtmosphere from '../hooks/useAtmosphere'
-// import PersistGitHubSearchQueryMutation from '../mutations/PersistGitHubSearchQueryMutation'
 import {GitHubScopingSearchResults_meeting} from '../__generated__/GitHubScopingSearchResults_meeting.graphql'
 import {GitHubScopingSearchResults_viewer} from '../__generated__/GitHubScopingSearchResults_viewer.graphql'
-// import GitHubScopingSearchResultItem from './GitHubScopingSearchResultItem'
-// import GitHubScopingSelectAllIssues from './GitHubScopingSelectAllIssues'
+import GitHubScopingSearchResultItem from './GitHubScopingSearchResultItem'
+import GitHubScopingSelectAllIssues from './GitHubScopingSelectAllIssues'
 import IntegrationScopingNoResults from './IntegrationScopingNoResults'
 import NewGitHubIssueInput from './NewGitHubIssueInput'
 import NewIntegrationRecordButton from './NewIntegrationRecordButton'
@@ -31,11 +30,16 @@ interface Props {
 const GitHubScopingSearchResults = (props: Props) => {
   const {viewer, meeting} = props
   const github = viewer?.teamMember!.integrations.github ?? null
-  const {githubSearchQuery, teamId, phases} = meeting
+  const {id: meetingId, githubSearchQuery, teamId, phases} = meeting
   const {queryString} = githubSearchQuery
   const errors = github?.api?.errors ?? null
-  const edges = github?.api?.query?.search?.edges ?? null
-  console.log({edges})
+  const nullableEdges = github?.api?.query?.search?.edges ?? null
+  const issues = nullableEdges
+    ? getNonNullEdges(nullableEdges)
+        .filter((edge) => edge.node.__typename === '_xGitHubIssue')
+        .map(({node}) => node as GQLType<typeof node, '_xGitHubIssue'>)
+    : null
+  // const issueEdges = edges!.filter((edge) => edge.node.__typename === '_xGitHubIssue') as GQLType<typeof edges[0]['node']
   const [isEditing, setIsEditing] = useState(false)
   const atmosphere = useAtmosphere()
   // const {id: meetingId, teamId, phases, githubSearchQuery} = meeting
@@ -45,8 +49,8 @@ const GitHubScopingSearchResults = (props: Props) => {
 
   // even though it's a little herky jerky, we need to give the user feedback that a search is pending
   // TODO fix flicker after viewer is present but edges isn't set
-  if (!edges) return <MockScopingList />
-  if (edges.length === 0 && !isEditing) {
+  if (!issues) return <MockScopingList />
+  if (issues.length === 0 && !isEditing) {
     const invalidQuery = gitHubQueryValidation(queryString)
     return (
       <>
@@ -76,14 +80,15 @@ const GitHubScopingSearchResults = (props: Props) => {
       })
     }
   }
-  console.log(persistQuery, usedServiceTaskIds)
   return (
     <>
-      {/* <GitHubScopingSelectAllIssues
-        usedServiceTaskIds={usedServiceTaskIds}
-        issues={edges}
-        meetingId={meetingId}
-      /> */}
+      {
+        <GitHubScopingSelectAllIssues
+          usedServiceTaskIds={usedServiceTaskIds}
+          issues={issues}
+          meetingId={meetingId}
+        />
+      }
       <ResultScroller>
         {viewer && (
           <NewGitHubIssueInput
@@ -93,7 +98,7 @@ const GitHubScopingSearchResults = (props: Props) => {
             viewer={viewer}
           />
         )}
-        {/* {edges.map(({node}) => {
+        {issues.map((node) => {
           return (
             <GitHubScopingSearchResultItem
               key={node.id}
@@ -103,7 +108,7 @@ const GitHubScopingSearchResults = (props: Props) => {
               persistQuery={persistQuery}
             />
           )
-        })} */}
+        })}
       </ResultScroller>
       {!isEditing && (
         <NewIntegrationRecordButton onClick={handleAddIssueClick} labelText={'New Issue'} />
@@ -148,6 +153,9 @@ export default createPaginationContainer(
                       node {
                         __typename
                         ... on _xGitHubIssue {
+                          ...GitHubScopingSelectAllIssues_issues
+                          ...GitHubScopingSearchResultItem_issue
+                          id
                           title
                         }
                       }

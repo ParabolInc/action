@@ -11,7 +11,6 @@ import {Threshold} from '../types/constEnums'
 import getSelectAllTitle from '../utils/getSelectAllTitle'
 import {GitHubScopingSelectAllIssues_issues} from '../__generated__/GitHubScopingSelectAllIssues_issues.graphql'
 import Checkbox from './Checkbox'
-
 const Item = styled('div')({
   display: 'flex',
   padding: '8px 16px',
@@ -29,7 +28,7 @@ const TitleAndError = styled('div')({
 })
 
 const ErrorMessage = styled('div')({
-  color: PALETTE.ERROR_MAIN,
+  color: PALETTE.ROSE_500,
   fontWeight: 600
 })
 interface Props {
@@ -40,10 +39,10 @@ interface Props {
 
 const GitHubScopingSelectAllIssues = (props: Props) => {
   const {meetingId, usedServiceTaskIds, issues} = props
-  const serviceTaskIds = issues.map((issueEdge) => issueEdge.node.id)
+  const serviceTaskIds = issues.map((issue) => issue.id)
   const atmosphere = useAtmosphere()
   const {onCompleted, onError, submitMutation, submitting, error} = useMutationProps()
-  const [unusedServiceTaskIds, allSelected] = useUnusedRecords(issues, usedServiceTaskIds)
+  const [unusedServiceTaskIds, allSelected] = useUnusedRecords(serviceTaskIds, usedServiceTaskIds)
   const availableCountToAdd = Threshold.MAX_POKER_STORIES - usedServiceTaskIds.size
   const onClick = () => {
     if (submitting) return
@@ -84,10 +83,8 @@ const GitHubScopingSelectAllIssues = (props: Props) => {
 
 export default createFragmentContainer(GitHubScopingSelectAllIssues, {
   issues: graphql`
-    fragment GitHubScopingSelectAllIssues_issues on _xGitHubIssueEdge @relay(plural: true) {
-      node {
-        id
-      }
+    fragment GitHubScopingSelectAllIssues_issues on _xGitHubIssue @relay(plural: true) {
+      id
     }
   `
 })

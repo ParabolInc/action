@@ -43,7 +43,7 @@ const JiraScopingSelectAllIssues = (props: Props) => {
   const serviceTaskIds = issues.map((issueEdge) => issueEdge.node.id)
   const atmosphere = useAtmosphere()
   const {onCompleted, onError, submitMutation, submitting, error} = useMutationProps()
-  const [unusedServiceTaskIds, allSelected] = useUnusedRecords(issues, usedServiceTaskIds)
+  const [unusedServiceTaskIds, allSelected] = useUnusedRecords(serviceTaskIds, usedServiceTaskIds)
   const availableCountToAdd = Threshold.MAX_POKER_STORIES - usedServiceTaskIds.size
   const onClick = () => {
     if (submitting) return
