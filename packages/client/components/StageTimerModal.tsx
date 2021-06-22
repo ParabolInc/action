@@ -13,7 +13,7 @@ import StageTimerModalEditTimeLimit from './StageTimerModalEditTimeLimit'
 import StageTimerModalEndTime from './StageTimerModalEndTime'
 import StageTimerModalEditTimeEnd from './StageTimerModalEditTimeEnd'
 import {StageTimerModal_facilitator} from '../__generated__/StageTimerModal_facilitator.graphql'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 
 const WIDTH = 224
 
@@ -47,7 +47,7 @@ const TabContents = styled('div')({
 })
 
 const StyledTabsBar = styled(Tabs)({
-  boxShadow: `inset 0 -1px 0 ${PALETTE.BORDER_LIGHTER}`
+  boxShadow: `inset 0 -1px 0 ${PALETTE.SLATE_300}`
 })
 
 const StageTimerModal = (props: Props) => {

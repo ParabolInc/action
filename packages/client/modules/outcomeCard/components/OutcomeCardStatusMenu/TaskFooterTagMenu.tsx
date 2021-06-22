@@ -12,13 +12,13 @@ import useAtmosphere from '../../../../hooks/useAtmosphere'
 import {MenuProps} from '../../../../hooks/useMenu'
 import TaskFooterTagMenuStatusItem from './TaskFooterTagMenuStatusItem'
 import DeleteTaskMutation from '../../../../mutations/DeleteTaskMutation'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import {TaskStatus} from '../../../../types/constEnums'
 import addContentTag from '../../../../utils/draftjs/addContentTag'
 import removeContentTag from '../../../../utils/draftjs/removeContentTag'
 import isTaskPrivate from '../../../../utils/isTaskPrivate'
 import {MenuMutationProps} from '../../../../hooks/useMutationProps'
-import {AreaEnum} from '../../../../types/graphql'
+import {AreaEnum} from '~/__generated__/UpdateTaskMutation.graphql'
 import {UseTaskChild} from '../../../../hooks/useTaskChildFocus'
 
 const statusItems = [TaskStatus.DONE, TaskStatus.ACTIVE, TaskStatus.STUCK, TaskStatus.FUTURE]
@@ -62,7 +62,7 @@ const TaskFooterTagMenu = (props: Props) => {
         key='private'
         label={
           <MenuItemLabel>
-            <MenuItemDot color={PALETTE.STATUS_PRIVATE} />
+            <MenuItemDot color={PALETTE.GOLD_300} />
             <span>
               {isPrivate ? 'Remove ' : 'Set as '}
               <b>{'#private'}</b>
@@ -76,7 +76,7 @@ const TaskFooterTagMenu = (props: Props) => {
           key='delete'
           label={
             <MenuItemLabel>
-              <MenuItemDot color={PALETTE.ERROR_MAIN} />
+              <MenuItemDot color={PALETTE.TOMATO_500} />
               {'Delete this Task'}
             </MenuItemLabel>
           }
@@ -87,7 +87,7 @@ const TaskFooterTagMenu = (props: Props) => {
           key='archive'
           label={
             <MenuItemLabel>
-              <MenuItemDot color={PALETTE.STATUS_ARCHIVED} />
+              <MenuItemDot color={PALETTE.SLATE_500} />
               <span>
                 {'Set as '}
                 <b>{'#archived'}</b>

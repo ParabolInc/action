@@ -1,10 +1,10 @@
-import { requiredId, url } from 'parabol-client/validation/templates'
+import { requiredId, optionalUrl } from 'parabol-client/validation/templates'
 import legitify from 'parabol-client/validation/legitify'
 
 export default function updateOrgValidation() {
   return legitify({
     id: requiredId,
-    picture: url,
+    picture: optionalUrl,
     name: (value) =>
       value
         .trim()

@@ -1,5 +1,4 @@
 import {GraphQLID, GraphQLInterfaceType, GraphQLNonNull} from 'graphql'
-import {NotificationEnum as ENotificationEnum} from 'parabol-client/types/graphql'
 import connectionDefinitions from '../connectionDefinitions'
 import GraphQLISO8601Type from './GraphQLISO8601Type'
 import NotificationEnum from './NotificationEnum'
@@ -47,14 +46,14 @@ const Notification = new GraphQLInterfaceType({
     // type lookup needs to be resolved in a thunk since there is a circular reference when loading
     // alternative to treating it like a DB driver if GCing is an issue
     const resolveTypeLookup = {
-      [ENotificationEnum.KICKED_OUT]: NotifyKickedOut,
-      [ENotificationEnum.PAYMENT_REJECTED]: NotifyPaymentRejected,
-      [ENotificationEnum.TASK_INVOLVES]: NotifyTaskInvolves,
-      [ENotificationEnum.PROMOTE_TO_BILLING_LEADER]: NotifyPromoteToOrgLeader,
-      [ENotificationEnum.TEAM_ARCHIVED]: NotifyTeamArchived,
-      [ENotificationEnum.TEAM_INVITATION]: NotificationTeamInvitation,
-      [ENotificationEnum.MEETING_STAGE_TIME_LIMIT_END]: NotificationMeetingStageTimeLimitEnd
-    }
+      KICKED_OUT: NotifyKickedOut,
+      PAYMENT_REJECTED: NotifyPaymentRejected,
+      TASK_INVOLVES: NotifyTaskInvolves,
+      PROMOTE_TO_BILLING_LEADER: NotifyPromoteToOrgLeader,
+      TEAM_ARCHIVED: NotifyTeamArchived,
+      TEAM_INVITATION: NotificationTeamInvitation,
+      MEETING_STAGE_TIME_LIMIT_END: NotificationMeetingStageTimeLimitEnd
+    } as const
 
     return resolveTypeLookup[value.type]
   }

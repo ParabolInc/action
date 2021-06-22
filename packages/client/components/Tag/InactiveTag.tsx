@@ -1,9 +1,9 @@
 import styled from '@emotion/styled'
 import BaseTag from './BaseTag'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 
 const InactiveTag = styled(BaseTag)({
-  backgroundColor: PALETTE.BACKGROUND_GRAY,
+  backgroundColor: PALETTE.SLATE_600,
   color: '#FFFFFF'
 })
 

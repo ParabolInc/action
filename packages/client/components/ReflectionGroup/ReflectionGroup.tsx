@@ -11,7 +11,6 @@ import {
   ReflectionStackPerspective,
   Times
 } from '../../types/constEnums'
-import {NewMeetingPhaseTypeEnum} from '../../types/graphql'
 import {GROUP} from '../../utils/constants'
 import {ReflectionGroup_meeting} from '../../__generated__/ReflectionGroup_meeting.graphql'
 import {ReflectionGroup_reflectionGroup} from '../../__generated__/ReflectionGroup_reflectionGroup.graphql'
@@ -29,6 +28,7 @@ export const getCardStackPadding = (count: number) => {
 }
 
 const Group = styled('div')<{staticReflectionCount: number}>(({staticReflectionCount}) => ({
+  height: 'max-content',
   position: 'relative',
   paddingTop: ElementWidth.REFLECTION_CARD_PADDING,
   paddingBottom: ElementWidth.REFLECTION_CARD_PADDING + getCardStackPadding(staticReflectionCount),
@@ -53,8 +53,8 @@ const ReflectionWrapper = styled('div')<{
     outline: 0,
     opacity: isHidden ? 0 : undefined,
     transform: `translateY(${translateY}px) scaleX(${scaleX})`,
-    zIndex: 3 - multiple,
-    transition: isHidden ? undefined : `transform ${Times.REFLECTION_DROP_DURATION}ms`
+    transition: isHidden ? undefined : `transform ${Times.REFLECTION_DROP_DURATION}ms`,
+    zIndex: 3 - multiple
   }
 })
 
@@ -74,6 +74,7 @@ const ReflectionGroup = (props: Props) => {
   const {isComplete} = localStage
   const {reflections, id: reflectionGroupId, titleIsUserDefined} = reflectionGroup
   const titleInputRef = useRef(null)
+  const expandedTitleInputRef = useRef(null)
   const headerRef = useRef<HTMLDivElement>(null)
   const staticReflections = useMemo(() => {
     return reflections.filter(
@@ -94,7 +95,7 @@ const ReflectionGroup = (props: Props) => {
   } = useExpandedReflections(groupRef, stackRef, reflections.length, headerRef)
   const atmosphere = useAtmosphere()
   const [isEditing, thisSetIsEditing] = useState(false)
-  const isDragPhase = phaseType === NewMeetingPhaseTypeEnum.group && !isComplete
+  const isDragPhase = phaseType === 'group' && !isComplete
   const setIsEditing = (isEditing: boolean) => {
     thisSetIsEditing(isEditing)
     const [firstReflection] = staticReflections
@@ -145,7 +146,7 @@ const ReflectionGroup = (props: Props) => {
               meeting={meeting}
               portalStatus={portalStatus}
               reflectionGroup={reflectionGroup}
-              titleInputRef={titleInputRef}
+              titleInputRef={expandedTitleInputRef}
             />
           }
           phaseRef={phaseRef}
@@ -225,7 +226,7 @@ export default createFragmentContainer(ReflectionGroup, {
   reflectionGroup: graphql`
     fragment ReflectionGroup_reflectionGroup on RetroReflectionGroup {
       ...ReflectionGroupHeader_reflectionGroup
-      retroPhaseItemId
+      promptId
       id
       sortOrder
       titleIsUserDefined
@@ -235,7 +236,7 @@ export default createFragmentContainer(ReflectionGroup, {
         ...DraggableReflectionCard_staticReflections
         ...ReflectionCard_reflection
         id
-        retroPhaseItemId
+        promptId
         sortOrder
         isViewerDragging
         isDropping

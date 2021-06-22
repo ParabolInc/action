@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import {DECELERATE} from '../../styles/animation'
 import {switchShadow} from '../../styles/elevation'
 import {Duration} from '../../types/constEnums'
@@ -24,7 +24,7 @@ const Switch = styled('div')({
 
 const Track = styled('div')<{active: boolean; disabled: boolean | undefined}>(
   ({active, disabled}) => ({
-    backgroundColor: active ? PALETTE.CONTROL_MAIN_BACKGROUND : PALETTE.CONTROL_LIGHT_BACKGROUND,
+    backgroundColor: active ? PALETTE.SLATE_400 : PALETTE.SLATE_500,
     borderRadius: TRACK_HEIGHT,
     color: 'white',
     cursor: disabled ? 'not-allowed' : 'pointer',
@@ -40,7 +40,7 @@ const Track = styled('div')<{active: boolean; disabled: boolean | undefined}>(
 )
 
 const Thumb = styled('div')<{active: boolean}>(({active}) => ({
-  backgroundColor: active ? PALETTE.CONTROL_MAIN : PALETTE.CONTROL_LIGHT,
+  backgroundColor: active ? PALETTE.GRAPE_700 : PALETTE.WHITE,
   borderRadius: '100%',
   boxShadow: switchShadow,
   display: 'block',

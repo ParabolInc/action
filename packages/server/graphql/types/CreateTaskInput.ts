@@ -14,6 +14,9 @@ const CreateTaskInput = new GraphQLInputObjectType({
     content: {
       type: GraphQLString
     },
+    plaintextContent: {
+      type: GraphQLString
+    },
     meetingId: {
       type: GraphQLID,
       description: 'foreign key for the meeting this was created in'
@@ -42,8 +45,9 @@ const CreateTaskInput = new GraphQLInputObjectType({
       description: 'teamId, the team the task is on'
     },
     userId: {
-      type: new GraphQLNonNull(GraphQLID),
-      description: 'userId, the owner of the task'
+      type: GraphQLID,
+      description:
+        'userId, the owner of the task. This can be null if the task is not assigned to anyone.'
     }
   })
 })

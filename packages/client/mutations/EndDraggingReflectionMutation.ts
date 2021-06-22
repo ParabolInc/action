@@ -1,19 +1,18 @@
-import {commitLocalUpdate, commitMutation} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
-import {Disposable, RecordProxy, RecordSourceSelectorProxy} from 'relay-runtime'
-import getInProxy from '../utils/relay/getInProxy'
-import handleAddReflectionToGroup from './handlers/handleAddReflectionToGroup'
-import safeRemoveNodeFromArray from '../utils/relay/safeRemoveNodeFromArray'
-import handleRemoveEmptyReflectionGroup from './handlers/handleRemoveEmptyReflectionGroup'
-import createProxyRecord from '../utils/relay/createProxyRecord'
-import updateProxyRecord from '../utils/relay/updateProxyRecord'
+import {commitLocalUpdate, commitMutation} from 'react-relay'
+import {RecordProxy, RecordSourceSelectorProxy} from 'relay-runtime'
+import {EndDraggingReflectionMutation_meeting} from '~/__generated__/EndDraggingReflectionMutation_meeting.graphql'
+import {EndDraggingReflectionMutation as TEndDraggingReflectionMutation} from '~/__generated__/EndDraggingReflectionMutation.graphql'
+import {SharedUpdater, SimpleMutation} from '../types/relayMutations'
 import dndNoise from '../utils/dndNoise'
 import addNodeToArray from '../utils/relay/addNodeToArray'
-import {LocalHandlers, SharedUpdater} from '../types/relayMutations'
-import {IEndDraggingReflectionOnMutationArguments} from '../types/graphql'
-import Atmosphere from '../Atmosphere'
 import clientTempId from '../utils/relay/clientTempId'
-import {EndDraggingReflectionMutation_meeting} from '~/__generated__/EndDraggingReflectionMutation_meeting.graphql'
+import createProxyRecord from '../utils/relay/createProxyRecord'
+import getInProxy from '../utils/relay/getInProxy'
+import safeRemoveNodeFromArray from '../utils/relay/safeRemoveNodeFromArray'
+import updateProxyRecord from '../utils/relay/updateProxyRecord'
+import handleAddReflectionToGroup from './handlers/handleAddReflectionToGroup'
+import handleRemoveEmptyReflectionGroup from './handlers/handleRemoveEmptyReflectionGroup'
 
 graphql`
   fragment EndDraggingReflectionMutation_meeting on EndDraggingReflectionPayload {
@@ -30,7 +29,7 @@ graphql`
       id
       meetingId
       sortOrder
-      retroPhaseItemId
+      promptId
       reflections {
         ...DraggableReflectionCard_reflection @relay(mask: false)
       }
@@ -99,16 +98,6 @@ export const moveReflectionLocation = (
 ) => {
   if (!reflection) return
   const reflectionId = reflection.getValue('id') as string
-  // if (userId) {
-  //   // else it is an autogroup
-  //   const reflection = store.get(reflectionId)
-  //   const meetingId = reflection.getValue('meetingId')
-  //   const meeting = store.get(meetingId)
-  //   // meeting.setValue(undefined, 'isViewerDragInProgress')
-  //   // const dragContext = reflection.getLinkedRecord('dragContext')
-  //   const dragUserId = reflection.getValue('dragUserId')
-  //   const isViewerDragging = reflection.getValue('isViewerDragging')
-  // }
   handleRemoveReflectionFromGroup(reflectionId, oldReflectionGroupId, store)
   handleAddReflectionToGroup(reflection, store)
   handleRemoveEmptyReflectionGroup(oldReflectionGroupId, store)
@@ -147,23 +136,19 @@ export const endDraggingReflectionMeetingOnNext = (payload, context) => {
   })
 }
 
-const EndDraggingReflectionMutation = (
-  atmosphere: Atmosphere,
-  variables: IEndDraggingReflectionOnMutationArguments,
-  {onError, onCompleted}: LocalHandlers = {}
-): Disposable => {
-  return commitMutation(atmosphere, {
+const EndDraggingReflectionMutation: SimpleMutation<TEndDraggingReflectionMutation> = (
+  atmosphere,
+  variables
+) => {
+  return commitMutation<TEndDraggingReflectionMutation>(atmosphere, {
     mutation,
     variables,
-    onCompleted,
-    onError,
     updater: (store) => {
       const payload = store.getRootField('endDraggingReflection')
       if (!payload) return
       const reflection = payload.getLinkedRecord('reflection')
       if (!reflection) return
       reflection.setValue(false, 'isViewerDragging')
-      if (!reflection) return
       const reflectionGroup = payload.getLinkedRecord('reflectionGroup')!
       const oldReflectionGroupId = getInProxy(payload, 'oldReflectionGroup', 'id')
       moveReflectionLocation(reflection, reflectionGroup, oldReflectionGroupId, store)
@@ -173,7 +158,6 @@ const EndDraggingReflectionMutation = (
       const {reflectionId, dropTargetId: reflectionGroupId, dropTargetType} = variables
       const reflection = store.get(reflectionId)
       if (!reflection) return
-
       if (!dropTargetType) {
         reflection.setValue(false, 'isViewerDragging')
         return

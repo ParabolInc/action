@@ -2,7 +2,7 @@ import {GraphQLInt, GraphQLNonNull, GraphQLObjectType} from 'graphql'
 import {GQLContext} from '../../graphql'
 import {GraphQLID} from 'graphql'
 
-const DomainCountPayload = new GraphQLObjectType<any, GQLContext, any>({
+const DomainCountPayload = new GraphQLObjectType<any, GQLContext>({
   name: 'DomainCountPayload',
   fields: () => ({
     domain: {

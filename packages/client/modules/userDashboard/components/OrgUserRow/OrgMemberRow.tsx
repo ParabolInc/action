@@ -28,7 +28,6 @@ import defaultUserAvatar from '../../../../styles/theme/images/avatar-user.svg'
 import lazyPreload from '../../../../utils/lazyPreload'
 import withMutationProps, {WithMutationProps} from '../../../../utils/relay/withMutationProps'
 import {Breakpoint} from '../../../../types/constEnums'
-import {OrgUserRole, TierEnum} from '../../../../types/graphql'
 import useTooltip from '../../../../hooks/useTooltip'
 
 const AvatarBlock = styled('div')({
@@ -115,9 +114,9 @@ const OrgMemberRow = (props: Props) => {
   } = props
   const {orgId, isViewerBillingLeader, tier} = organization
   const {newUserUntil, user, role} = organizationUser
-  const isBillingLeader = role === OrgUserRole.BILLING_LEADER
+  const isBillingLeader = role === 'BILLING_LEADER'
   const {email, inactive, picture, preferredName, userId} = user
-  const isProTier = tier === TierEnum.pro
+  const isProTier = tier === 'pro'
   const isViewerLastBillingLeader =
     isViewerBillingLeader && isBillingLeader && billingLeaderCount === 1
   const {viewerId} = atmosphere

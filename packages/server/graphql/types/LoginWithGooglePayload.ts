@@ -3,7 +3,7 @@ import StandardMutationError from './StandardMutationError'
 import User from './User'
 import {GQLContext} from '../graphql'
 
-const LoginWithGooglePayload = new GraphQLObjectType<any, GQLContext, any>({
+const LoginWithGooglePayload = new GraphQLObjectType<any, GQLContext>({
   name: 'LoginWithGooglePayload',
   fields: () => ({
     error: {

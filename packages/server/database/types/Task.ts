@@ -1,12 +1,15 @@
-import shortid from 'shortid'
 import dndNoise from 'parabol-client/utils/dndNoise'
+import extractTextFromDraftString from 'parabol-client/utils/draftjs/extractTextFromDraftString'
 import getTagsFromEntityMap from 'parabol-client/utils/draftjs/getTagsFromEntityMap'
-import TaskIntegrationJira from './TaskIntegrationJira'
+import generateUID from '../../generateUID'
+import {ThreadSourceEnum} from './ThreadSource'
 import TaskIntegrationGitHub from './TaskIntegrationGitHub'
-import {ThreadSourceEnum} from 'parabol-client/types/graphql'
+import TaskIntegrationJira from './TaskIntegrationJira'
 
-export type TaskStatus = 'active' | 'stuck' | 'done' | 'future'
-export type TaskTag = 'private' | 'archived'
+export type AreaEnum = 'meeting' | 'teamDash' | 'userDash'
+export type TaskStatusEnum = 'active' | 'stuck' | 'done' | 'future'
+export type TaskTagEnum = 'private' | 'archived'
+export type TaskServiceEnum = 'PARABOL' | 'github' | 'jira'
 
 export interface TaskInput {
   id?: string
@@ -16,15 +19,16 @@ export interface TaskInput {
   doneMeetingId?: string
   dueDate?: Date | null
   meetingId?: string | null
+  plaintextContent?: string
   sortOrder?: number | null
-  status: TaskStatus
+  status: TaskStatusEnum
   teamId: string
   threadId?: string | null
   threadParentId?: string | null
   threadSortOrder?: number | null
   threadSource?: ThreadSourceEnum | null
   updatedAt?: Date
-  userId: string
+  userId?: string | null
 }
 
 export default class Task {
@@ -36,16 +40,17 @@ export default class Task {
   dueDate?: Date | null
   integration?: TaskIntegrationJira | TaskIntegrationGitHub
   meetingId?: string
+  plaintextContent: string
   sortOrder: number
-  status: TaskStatus
-  tags: TaskTag[]
+  status: TaskStatusEnum
+  tags: TaskTagEnum[]
   teamId: string
   threadId?: string
   threadParentId?: string
   threadSortOrder?: number | null
   threadSource?: ThreadSourceEnum
   updatedAt: Date
-  userId: string
+  userId: string | null
 
   constructor(input: TaskInput) {
     const {
@@ -58,6 +63,7 @@ export default class Task {
       createdBy,
       doneMeetingId,
       dueDate,
+      plaintextContent,
       sortOrder,
       status,
       threadParentId,
@@ -67,8 +73,8 @@ export default class Task {
       updatedAt
     } = input
     const {entityMap} = JSON.parse(content)
-    const tags = getTagsFromEntityMap<TaskTag>(entityMap)
-    this.id = id || shortid.generate()
+    const tags = getTagsFromEntityMap<TaskTagEnum>(entityMap)
+    this.id = id || generateUID()
     this.threadId = threadId || undefined
     this.threadSource = threadSource || undefined
     this.content = content
@@ -77,6 +83,7 @@ export default class Task {
     this.doneMeetingId = doneMeetingId
     this.dueDate = dueDate || undefined
     this.meetingId = meetingId || undefined
+    this.plaintextContent = plaintextContent || extractTextFromDraftString(content)
     this.sortOrder = sortOrder || dndNoise()
     this.status = status
     this.tags = tags
@@ -84,6 +91,6 @@ export default class Task {
     this.threadSortOrder = threadSortOrder || undefined
     this.threadParentId = threadParentId || undefined
     this.updatedAt = updatedAt || new Date()
-    this.userId = userId
+    this.userId = userId || null
   }
 }

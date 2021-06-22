@@ -1,7 +1,7 @@
 import {TeamInvitationErrorExpired_verifiedInvitation} from '../__generated__/TeamInvitationErrorExpired_verifiedInvitation.graphql'
 import React from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {createFragmentContainer} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
 import InviteDialog from './InviteDialog'
@@ -15,7 +15,7 @@ interface Props {
 }
 
 const StyledEmailLink = styled('a')({
-  color: PALETTE.LINK_BLUE
+  color: PALETTE.SKY_500
 })
 
 const TeamName = styled('span')({

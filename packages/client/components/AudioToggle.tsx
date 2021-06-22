@@ -1,10 +1,10 @@
 import React from 'react'
 import styled from '@emotion/styled'
 import Icon from './Icon'
-import {StreamUI} from '../hooks/useSwarm'
-import MediaSwarm from '../utils/swarm/MediaSwarm'
+import MediaRoom from '../utils/mediaRoom/MediaRoom'
 import MediaControlToggle from './MediaControlToggle'
 import {ICON_SIZE} from '../styles/typographyV2'
+import {ProducersState} from '../utils/mediaRoom/reducerMediaRoom'
 
 const Toggle = styled(MediaControlToggle)({})
 const StyledIcon = styled(Icon)({
@@ -12,19 +12,20 @@ const StyledIcon = styled(Icon)({
 })
 
 interface Props {
-  localStreamUI: StreamUI
-  swarm: MediaSwarm
+  producers: ProducersState
+  mediaRoom: MediaRoom
 }
 
 const AudioToggle = (props: Props) => {
-  const {swarm, localStreamUI} = props
-  const {hasAudio} = localStreamUI
+  const {mediaRoom, producers} = props
+  const audioProducer = Object.values(producers).find((producer) => producer.track.kind === 'audio')
+  const audioEnabled = audioProducer && !audioProducer.paused
   const onClick = async () => {
-    if (hasAudio) {
-      swarm.muteWebcamAudio()
+    if (audioEnabled) {
+      mediaRoom.muteMic()
     } else {
       try {
-        await swarm.broadcastWebcam('audioOnly')
+        await mediaRoom.unmuteMic()
       } catch (e) {
         /**/
       }
@@ -32,7 +33,7 @@ const AudioToggle = (props: Props) => {
   }
   return (
     <Toggle onClick={onClick}>
-      <StyledIcon>{hasAudio ? 'mic' : 'mic_off'}</StyledIcon>
+      <StyledIcon>{audioEnabled ? 'mic' : 'mic_off'}</StyledIcon>
     </Toggle>
   )
 }

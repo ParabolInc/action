@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "../",
+    "paths": {
+      // when we import from lib, make goto-definition point to the src
+      "parabol-server/*": ["server/*"],
+      "parabol-client/*": ["client/*"]
+    },
+    "outDir": "lib",
+    "lib": ["esnext"],
+    "types": ["node"]
+  },
+  "files": ["../server/types/modules.d.ts"]
+}

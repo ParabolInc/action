@@ -3,7 +3,7 @@ import fs from 'fs'
 import fetch from 'node-fetch'
 import path from 'path'
 import {promisify} from 'util'
-import shortid from 'shortid'
+import generateUID from '../generateUID'
 
 const readFile = promisify(fs.readFile)
 
@@ -45,7 +45,7 @@ const inlineImages = async (html: string) => {
     .each((_i, img) => {
       const pathname = $(img).attr('src')
       if (!pathname) return
-      cidDict[pathname] = cidDict[pathname] || shortid.generate() + path.extname(pathname)
+      cidDict[pathname] = cidDict[pathname] || generateUID() + path.extname(pathname)
       $(img).attr('src', `cid:${cidDict[pathname]}`)
     })
   const uniquePathnames = Object.keys(cidDict)

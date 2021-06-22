@@ -7,18 +7,18 @@ import DashContent from '../../../../components/Dashboard/DashContent'
 import FlatButton from '../../../../components/FlatButton'
 import Icon from '../../../../components/Icon'
 import useRouter from '../../../../hooks/useRouter'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import {Team_team} from '../../../../__generated__/Team_team.graphql'
 import EditableTeamName from '../EditTeamName/EditableTeamName'
 // import DebugButton from '../../../userDashboard/components/UserDashMain/DebugButton'
 
 const IconButton = styled(FlatButton)({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   marginRight: 16,
   padding: '3px 0',
   width: 32,
   ':hover, :focus, :active': {
-    color: PALETTE.TEXT_MAIN
+    color: PALETTE.SLATE_700
   }
 })
 

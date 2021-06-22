@@ -19,7 +19,7 @@ interface Props {
   idx: number
   meeting: ReflectionStack_meeting
   phaseEditorRef: React.RefObject<HTMLDivElement>
-  phaseRef: React.RefObject<HTMLDivElement>
+  phaseRef: RefObject<HTMLDivElement>
   dataCy: string
   reflectionStack: readonly PhaseItemColumn_meeting['reflectionGroups'][0]['reflections'][0][]
   stackTopRef: RefObject<HTMLDivElement>

@@ -1,8 +1,9 @@
 import {GraphQLList, GraphQLString} from 'graphql'
 import ms from 'ms'
+import appOrigin from '../../../appOrigin'
 import getRethink from '../../../database/rethinkDriver'
-import notificationSummaryCreator from '../../../email/components/notificationSummaryCreator'
 import getMailManager from '../../../email/getMailManager'
+import notificationSummaryCreator from '../../../email/notificationSummaryCreator'
 import {requireSU} from '../../../utils/authorization'
 
 const sendBatchNotificationEmails = {
@@ -46,11 +47,10 @@ const sendBatchNotificationEmails = {
         notificationCount: group('reduction').count()
       }))
       .run()) as unknown) as {email: string; preferredName: string; notificationCount: number}[]
-
     await Promise.all(
       userNotifications.map((notification) => {
         const {email, preferredName, notificationCount} = notification
-        const {subject, html, body} = notificationSummaryCreator({preferredName, notificationCount})
+        const {subject, html, body} = notificationSummaryCreator({preferredName, notificationCount, appOrigin})
         return getMailManager().sendEmail({
           to: email,
           subject,

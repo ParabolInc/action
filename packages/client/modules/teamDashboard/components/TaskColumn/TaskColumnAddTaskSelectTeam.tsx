@@ -7,7 +7,7 @@ import useAtmosphere from '../../../../hooks/useAtmosphere'
 import {MenuPosition} from '../../../../hooks/useCoords'
 import useMenu from '../../../../hooks/useMenu'
 import CreateTaskMutation from '../../../../mutations/CreateTaskMutation'
-import {TaskStatusEnum} from '../../../../types/graphql'
+import {TaskStatusEnum} from '~/__generated__/UpdateTaskMutation.graphql'
 import lazyPreload from '../../../../utils/lazyPreload'
 import {taskStatusLabels} from '../../../../utils/taskStatus'
 
@@ -15,6 +15,7 @@ interface Props {
   status: TaskStatusEnum
   sortOrder: number
   teams: TaskColumnAddTaskSelectTeam_teams
+  userId: string
 }
 
 const SelectTeamDropdown = lazyPreload(() =>
@@ -25,7 +26,7 @@ const SelectTeamDropdown = lazyPreload(() =>
 )
 
 const TaskColumnAddTaskSelectTeam = (props: Props) => {
-  const {sortOrder, status, teams} = props
+  const {sortOrder, status, teams, userId} = props
   const label = taskStatusLabels[status]
   const atmosphere = useAtmosphere()
   const {menuProps, originRef, menuPortal, togglePortal} = useMenu(MenuPosition.UPPER_LEFT)
@@ -37,7 +38,7 @@ const TaskColumnAddTaskSelectTeam = (props: Props) => {
           sortOrder,
           status,
           teamId,
-          userId: atmosphere.viewerId
+          userId
         }
       },
       {}

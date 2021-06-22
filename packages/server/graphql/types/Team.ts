@@ -8,27 +8,29 @@ import {
   GraphQLString
 } from 'graphql'
 import isTaskPrivate from 'parabol-client/utils/isTaskPrivate'
-import {ITeam} from 'parabol-client/types/graphql'
 import toTeamMemberId from 'parabol-client/utils/relay/toTeamMemberId'
 import getRethink from '../../database/rethinkDriver'
 import MassInvitationDB from '../../database/types/MassInvitation'
+import ITeam from '../../database/types/Team'
+import db from '../../db'
 import {getUserId, isTeamMember} from '../../utils/authorization'
 import standardError from '../../utils/standardError'
 import {GQLContext} from '../graphql'
 import connectionFromTasks from '../queries/helpers/connectionFromTasks'
-import {resolveOrganization} from '../resolvers'
 import AgendaItem from './AgendaItem'
-import CustomPhaseItem from './CustomPhaseItem'
 import GraphQLISO8601Type from './GraphQLISO8601Type'
 import MassInvitation from './MassInvitation'
 import MeetingTypeEnum from './MeetingTypeEnum'
 import NewMeeting from './NewMeeting'
 import Organization from './Organization'
+import ReflectPrompt from './ReflectPrompt'
 import {TaskConnection} from './Task'
 import TeamInvitation from './TeamInvitation'
 import TeamMeetingSettings from './TeamMeetingSettings'
 import TeamMember from './TeamMember'
+import TemplateScale from './TemplateScale'
 import TierEnum from './TierEnum'
+import TeamIntegrations from './TeamIntegrations'
 
 const Team = new GraphQLObjectType<ITeam, GQLContext>({
   name: 'Team',
@@ -75,7 +77,7 @@ const Team = new GraphQLObjectType<ITeam, GQLContext>({
           .load(teamMemberId)
         const [newestInvitationToken] = invitationTokens
         // if the token is valid, return it
-        if (newestInvitationToken?.expiration > Date.now()) return newestInvitationToken
+        if (newestInvitationToken?.expiration > new Date()) return newestInvitationToken
         // if the token is not valid, delete it to keep the table clean of expired things
         if (newestInvitationToken) {
           await r
@@ -93,6 +95,11 @@ const Team = new GraphQLObjectType<ITeam, GQLContext>({
         invitationTokens[0] = massInvitation
         return massInvitation
       }
+    },
+    integrations: {
+      type: GraphQLNonNull(TeamIntegrations),
+      description: 'Integration details that are shared by all team members. Nothing user specific',
+      resolve: (source) => source
     },
     isPaid: {
       type: GraphQLBoolean,
@@ -116,16 +123,18 @@ const Team = new GraphQLObjectType<ITeam, GQLContext>({
       description: 'The datetime the team was last updated'
     },
     customPhaseItems: {
-      type: new GraphQLList(CustomPhaseItem),
-      resolve: ({id: teamId}, _args, {dataLoader}) => {
+      type: new GraphQLList(ReflectPrompt),
+      deprecationReason: 'Field no longer needs to exist for now',
+      resolve: () => {
         // not useful for retros since there is no templateId filter
-        return dataLoader.get('customPhaseItemsByTeamId').load(teamId)
+        return []
       }
     },
     teamInvitations: {
-      type: new GraphQLList(new GraphQLNonNull(TeamInvitation)),
+      type: GraphQLNonNull(new GraphQLList(new GraphQLNonNull(TeamInvitation))),
       description: 'The outstanding invitations to join the team',
-      resolve: async ({id: teamId}, _args, {dataLoader}) => {
+      resolve: async ({id: teamId}, _args, {authToken, dataLoader}) => {
+        if (!isTeamMember(authToken, teamId)) return []
         return dataLoader.get('teamInvitationsByTeamId').load(teamId)
       }
     },
@@ -133,6 +142,7 @@ const Team = new GraphQLObjectType<ITeam, GQLContext>({
       type: new GraphQLNonNull(GraphQLBoolean),
       description: 'true if the viewer is the team lead, else false',
       resolve: async ({id: teamId}, _args, {authToken, dataLoader}) => {
+        if (!isTeamMember(authToken, teamId)) return false
         const viewerId = getUserId(authToken)
         const teamMemberId = toTeamMemberId(teamId, viewerId)
         const teamMember = await dataLoader.get('teamMembers').load(teamMemberId)
@@ -148,14 +158,50 @@ const Team = new GraphQLObjectType<ITeam, GQLContext>({
         }
       },
       description: 'The team-specific settings for running all available types of meetings',
-      resolve: async ({id: teamId}, {meetingType}, {dataLoader}) => {
+      resolve: async ({id: teamId}, {meetingType}, {authToken, dataLoader}) => {
+        // the implicit business logic says client will never request settings for a foregin team
+        if (!isTeamMember(authToken, teamId)) return null
         return await dataLoader.get('meetingSettingsByType').load({teamId, meetingType})
+      }
+    },
+    scale: {
+      type: TemplateScale,
+      description: 'A query for the scale',
+      args: {
+        scaleId: {
+          type: new GraphQLNonNull(GraphQLID),
+          description: 'The scale ID for the desired scale'
+        }
+      },
+      resolve: async ({id: teamId}, {scaleId}, {authToken, dataLoader}) => {
+        const viewerId = getUserId(authToken)
+        const activeScales = await dataLoader.get('scalesByTeamId').load(teamId)
+        const scale = activeScales.find(({id}) => id === scaleId)
+        if (!scale) {
+          standardError(new Error('Scale not found'), {userId: viewerId})
+          return null
+        }
+        return scale
+      }
+    },
+    scales: {
+      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(TemplateScale))),
+      description: 'The list of scales this team can use',
+      resolve: async ({id: teamId}, {}, {dataLoader}) => {
+        const activeTeamScales = await dataLoader.get('scalesByTeamId').load(teamId)
+        const publicScales = await db.read('starterScales', 'aGhostTeam')
+        const activeScales = [...activeTeamScales, ...publicScales]
+        const uniqueScales = activeScales.filter(
+          (scale, index) => index === activeScales.findIndex((obj) => obj.id === scale.id)
+        )
+        return uniqueScales
       }
     },
     activeMeetings: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(NewMeeting))),
       description: 'a list of meetings that are currently in progress',
-      resolve: async ({id: teamId}, _args, {dataLoader}) => {
+      resolve: async ({id: teamId}, _args, {authToken, dataLoader}) => {
+        if (!isTeamMember(authToken, teamId)) return []
         // this is by team, not by meeting member, which caused an err in dev, not sure about prod
         // we need better perms for people to view/not view a meeting that happened before they joined the team
         return dataLoader.get('activeMeetingsByTeamId').load(teamId)
@@ -170,7 +216,8 @@ const Team = new GraphQLObjectType<ITeam, GQLContext>({
           description: 'The unique meetingId'
         }
       },
-      resolve: async ({id: teamId}, {meetingId}, {dataLoader}) => {
+      resolve: async ({id: teamId}, {meetingId}, {authToken, dataLoader}) => {
+        if (!isTeamMember(authToken, teamId)) return null
         const meeting = await dataLoader.get('newMeetings').load(meetingId)
         if (meeting && meeting.teamId === teamId) return meeting
         return null
@@ -182,12 +229,23 @@ const Team = new GraphQLObjectType<ITeam, GQLContext>({
     },
     organization: {
       type: new GraphQLNonNull(Organization),
-      resolve: resolveOrganization
+      resolve: async ({id: teamId, orgId}, _args, {authToken, dataLoader}) => {
+        const organization = await dataLoader.get('organizations').load(orgId)
+        // TODO this is bad, we should probably just put the perms on each field in the org
+        if (!isTeamMember(authToken, teamId)) {
+          return {
+            id: orgId,
+            name: organization.name
+          }
+        }
+        return organization
+      }
     },
     agendaItems: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(AgendaItem))),
       description: 'The agenda items for the upcoming or current meeting',
-      async resolve({id: teamId}, _args, {dataLoader}) {
+      async resolve({id: teamId}, _args, {authToken, dataLoader}) {
+        if (!isTeamMember(authToken, teamId)) return null
         return dataLoader.get('agendaItemsByTeamId').load(teamId)
       }
     },
@@ -205,13 +263,14 @@ const Team = new GraphQLObjectType<ITeam, GQLContext>({
       description: 'All of the tasks for this team',
       async resolve({id: teamId}, _args, {authToken, dataLoader}) {
         if (!isTeamMember(authToken, teamId)) {
-          standardError(new Error('Team not found'), {tags: {teamId}})
-          return connectionFromTasks([])
+          const err = new Error('Team not found')
+          standardError(err, {tags: {teamId}})
+          return connectionFromTasks([], 0, err)
         }
         const viewerId = getUserId(authToken)
         const allTasks = await dataLoader.get('tasksByTeamId').load(teamId)
         const tasks = allTasks.filter((task) => {
-          if (isTaskPrivate(task.tags) && task.userId !== viewerId) return false
+          if (!task.userId || (isTaskPrivate(task.tags) && task.userId !== viewerId)) return false
           return true
         })
         return connectionFromTasks(tasks)
@@ -226,7 +285,8 @@ const Team = new GraphQLObjectType<ITeam, GQLContext>({
         }
       },
       description: 'All the team members actively associated with the team',
-      async resolve({id: teamId}, {sortBy = 'preferredName'}, {dataLoader}) {
+      async resolve({id: teamId}, {sortBy = 'preferredName'}, {authToken, dataLoader}) {
+        if (!isTeamMember(authToken, teamId)) return []
         const teamMembers = await dataLoader.get('teamMembersByTeamId').load(teamId)
         teamMembers.sort((a, b) => (a[sortBy] > b[sortBy] ? 1 : -1))
         return teamMembers

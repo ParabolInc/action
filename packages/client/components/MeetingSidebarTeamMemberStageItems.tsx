@@ -63,7 +63,6 @@ const MeetingSidebarTeamMemberStageItems = (props: Props) => {
           return (
             <MeetingSubnavItem
               key={stageId}
-              label={preferredName}
               metaContent={
                 <AvatarBlock>
                   <Avatar hasBadge={false} picture={picture} size={24} />
@@ -75,7 +74,9 @@ const MeetingSidebarTeamMemberStageItems = (props: Props) => {
               isComplete={isComplete}
               isDragging={false}
               isUnsyncedFacilitatorStage={isUnsyncedFacilitatorStage}
-            />
+            >
+              {preferredName}
+            </MeetingSubnavItem>
           )
         })}
       </ScrollStageItems>

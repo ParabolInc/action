@@ -7,14 +7,14 @@ import IconLabel from '../../components/IconLabel'
 import LinkButton from '../../components/LinkButton'
 import useBreakpoint from '../../hooks/useBreakpoint'
 import {cardShadow} from '../../styles/elevation'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import {ExternalLinks} from '../../types/constEnums'
 import {NewTeam_viewer} from '../../__generated__/NewTeam_viewer.graphql'
 import NewTeamForm from './components/NewTeamForm/NewTeamForm'
 
 const NewTeamLayout = styled('div')({
   alignItems: 'center',
-  backgroundColor: PALETTE.BACKGROUND_MAIN,
+  backgroundColor: PALETTE.SLATE_200,
   display: 'flex',
   flex: 1,
   flexDirection: 'column',
@@ -37,7 +37,7 @@ const HelpBlock = styled('div')({
   backgroundColor: '#FFFFFF',
   borderRadius: 4,
   boxShadow: cardShadow,
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   margin: '16px 0',
   padding: 16,
   width: 272
@@ -74,7 +74,7 @@ const NewTeam = (props: Props) => {
   return (
     <NewTeamLayout>
       <NewTeamInner>
-        <NewTeamForm isNewOrganization={!defaultOrgId} organizations={organizations} />
+        <NewTeamForm isInitiallyNewOrg={!defaultOrgId} organizations={organizations} />
         {isDesktop && (
           <HelpLayout>
             <HelpBlock>

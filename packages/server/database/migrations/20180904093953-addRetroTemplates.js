@@ -1,7 +1,7 @@
-import { RETRO_PHASE_ITEM } from 'parabol-client/utils/constants'
-import shortid from 'shortid'
+import {RETRO_PHASE_ITEM} from 'parabol-client/utils/constants'
 
 exports.up = async (r) => {
+  let counter = 199
   try {
     await Promise.all([r.tableCreate('ReflectTemplate').run()])
   } catch (e) { }
@@ -20,7 +20,7 @@ exports.up = async (r) => {
 
   const now = new Date()
   const makeTemplate = (name, teamId) => ({
-    id: shortid.generate(),
+    id: String(counter++),
     createdAt: now,
     isActive: true,
     name,
@@ -42,7 +42,7 @@ exports.up = async (r) => {
   const sailboatPrompts = ['Wind in the sails', 'Anchors', 'Risks']
 
   const makePrompt = (teamId, templateId, question, sortOrder) => ({
-    id: shortid.generate(),
+    id: String(counter++),
     createdAt: now,
     phaseItemType: RETRO_PHASE_ITEM,
     isActive: true,
@@ -80,7 +80,7 @@ exports.up = async (r) => {
       return r({
         phaseItemUpdates: r
           .table('CustomPhaseItem')
-          .getAll(teamId, { index: 'teamId' })
+          .getAll(teamId, {index: 'teamId'})
           .update((row) => ({
             templateId,
             createdAt: retrosCreatedAtDate,
@@ -89,7 +89,7 @@ exports.up = async (r) => {
           })),
         settingsUpdates: r
           .table('MeetingSettings')
-          .getAll(teamId, { index: 'teamId' })
+          .getAll(teamId, {index: 'teamId'})
           .update({
             selectedTemplateId: templateId
           })

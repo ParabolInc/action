@@ -1,13 +1,15 @@
 import styled from '@emotion/styled'
 import React, {forwardRef, Ref} from 'react'
 import {TransitionStatus} from '~/hooks/useTransition'
-import {PALETTE} from '~/styles/paletteV2'
+import EndCheckInMutation from '~/mutations/EndCheckInMutation'
+import EndRetrospectiveMutation from '~/mutations/EndRetrospectiveMutation'
+import {PALETTE} from '~/styles/paletteV3'
 import useAtmosphere from '../hooks/useAtmosphere'
 import {MenuPosition} from '../hooks/useCoords'
 import useMutationProps from '../hooks/useMutationProps'
 import useRouter from '../hooks/useRouter'
 import useTooltip from '../hooks/useTooltip'
-import EndNewMeetingMutation from '../mutations/EndNewMeetingMutation'
+import EndSprintPokerMutation from '../mutations/EndSprintPokerMutation'
 import {ElementWidth, Times} from '../types/constEnums'
 import isDemoRoute from '../utils/isDemoRoute'
 import BottomNavControl from './BottomNavControl'
@@ -15,7 +17,7 @@ import BottomNavIconLabel from './BottomNavIconLabel'
 import Icon from './Icon'
 
 const FlagIcon = styled(Icon)({
-  color: PALETTE.BACKGROUND_BLUE,
+  color: PALETTE.SKY_500,
   height: 24
 })
 
@@ -24,13 +26,14 @@ interface Props {
   isConfirming: boolean
   setConfirmingButton: (button: string) => void
   meetingId: string
+  meetingType: string
   isEnded: boolean
   status: TransitionStatus
   onTransitionEnd: () => void
 }
 
 const EndMeetingButtonStyles = styled(BottomNavControl)({
-  width: ElementWidth.END_MEETING_BUTTON
+  width: ElementWidth.CONTROL_BAR_BUTTON
 })
 
 const EndMeetingButton = forwardRef((props: Props, ref: Ref<HTMLButtonElement>) => {
@@ -39,6 +42,7 @@ const EndMeetingButton = forwardRef((props: Props, ref: Ref<HTMLButtonElement>) 
     isConfirming,
     setConfirmingButton,
     isEnded,
+    meetingType,
     meetingId,
     status,
     onTransitionEnd
@@ -58,7 +62,13 @@ const EndMeetingButton = forwardRef((props: Props, ref: Ref<HTMLButtonElement>) 
     if (isConfirming) {
       setConfirmingButton('')
       submitMutation()
-      EndNewMeetingMutation(atmosphere, {meetingId}, {history, onError, onCompleted})
+      if (meetingType === 'poker') {
+        EndSprintPokerMutation(atmosphere, {meetingId}, {history, onError, onCompleted})
+      } else if (meetingType === 'action') {
+        EndCheckInMutation(atmosphere, {meetingId}, {history, onError, onCompleted})
+      } else {
+        EndRetrospectiveMutation(atmosphere, {meetingId}, {history, onError, onCompleted})
+      }
     } else {
       setConfirmingButton('end')
       setTimeout(openTooltip)

@@ -1,7 +1,7 @@
 import React from 'react'
 import Icon from '../../../../components/Icon'
 import styled from '@emotion/styled'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import {ICON_SIZE} from '../../../../styles/typographyV2'
 
 const Message = styled('div')({
@@ -10,7 +10,7 @@ const Message = styled('div')({
 
 const textShadow = '0 1px rgba(0, 0, 0, .15)'
 const Inner = styled('div')<{canClose: boolean}>(({canClose}) => ({
-  backgroundColor: PALETTE.ERROR_MAIN,
+  backgroundColor: PALETTE.TOMATO_500,
   borderRadius: 2,
   color: '#FFFFFF',
   display: 'block',

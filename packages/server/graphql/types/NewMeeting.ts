@@ -7,20 +7,20 @@ import {
   GraphQLNonNull,
   GraphQLString
 } from 'graphql'
-import {GQLContext} from '../graphql'
-import ActionMeeting from './ActionMeeting'
-import GraphQLISO8601Type from './GraphQLISO8601Type'
-import {resolveTeam} from '../resolvers'
-import RetrospectiveMeeting from './RetrospectiveMeeting'
-import Team from './Team'
-import NewMeetingPhase from './NewMeetingPhase'
-import MeetingTypeEnum from './MeetingTypeEnum'
-import {ACTION, RETROSPECTIVE} from 'parabol-client/utils/constants'
-import MeetingMember from './MeetingMember'
 import toTeamMemberId from 'parabol-client/utils/relay/toTeamMemberId'
 import {getUserId} from '../../utils/authorization'
-import TeamMember from './TeamMember'
+import {GQLContext} from '../graphql'
+import {resolveTeam} from '../resolvers'
+import ActionMeeting from './ActionMeeting'
+import GraphQLISO8601Type from './GraphQLISO8601Type'
+import MeetingMember from './MeetingMember'
+import MeetingTypeEnum from './MeetingTypeEnum'
+import NewMeetingPhase from './NewMeetingPhase'
 import Organization from './Organization'
+import PokerMeeting from './PokerMeeting'
+import RetrospectiveMeeting from './RetrospectiveMeeting'
+import Team from './Team'
+import TeamMember from './TeamMember'
 
 export const newMeetingFields = () => ({
   id: {
@@ -31,10 +31,16 @@ export const newMeetingFields = () => ({
     type: new GraphQLNonNull(GraphQLISO8601Type),
     description: 'The timestamp the meeting was created'
   },
-  defaultFacilitatorUserId: {
+  createdBy: {
     type: new GraphQLNonNull(GraphQLID),
-    description:
-      'The userId of the desired facilitator (different form facilitatorUserId if disconnected)'
+    description: 'The id of the user that created the meeting'
+  },
+  createdByUser: {
+    type: new GraphQLNonNull(require('./User').default),
+    description: 'The user that created the meeting',
+    resolve: ({createdBy}, _args, {dataLoader}: GQLContext) => {
+      return dataLoader.get('users').load(createdBy)
+    }
   },
   endedAt: {
     type: GraphQLISO8601Type,
@@ -86,10 +92,11 @@ export const newMeetingFields = () => ({
   phases: {
     type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(NewMeetingPhase))),
     description: 'The phases the meeting will go through, including all phase-specific state',
-    resolve: ({phases, id: meetingId}) => {
+    resolve: ({phases, id: meetingId, teamId}) => {
       return phases.map((phase) => ({
         ...phase,
-        meetingId
+        meetingId,
+        teamId
       }))
     }
   },
@@ -116,12 +123,13 @@ export const newMeetingFields = () => ({
     description: 'The last time a meeting was updated (stage completed, finished, etc)'
   },
   viewerMeetingMember: {
-    type: new GraphQLNonNull(MeetingMember),
+    type: MeetingMember,
     description: 'The meeting member of the viewer',
-    resolve: ({id: meetingId}, _args, {authToken, dataLoader}: GQLContext) => {
+    resolve: async ({id: meetingId}, _args, {authToken, dataLoader}: GQLContext) => {
       const viewerId = getUserId(authToken)
       const meetingMemberId = toTeamMemberId(meetingId, viewerId)
-      return dataLoader.get('meetingMembers').load(meetingMemberId)
+      const meetingMember = await dataLoader.get('meetingMembers').load(meetingMemberId)
+      return meetingMember || null
     }
   }
 })
@@ -132,8 +140,9 @@ const NewMeeting = new GraphQLInterfaceType({
   fields: newMeetingFields,
   resolveType: ({meetingType}) => {
     const resolveTypeLookup = {
-      [RETROSPECTIVE]: RetrospectiveMeeting,
-      [ACTION]: ActionMeeting
+      retrospective: RetrospectiveMeeting,
+      action: ActionMeeting,
+      poker: PokerMeeting
     }
     return resolveTypeLookup[meetingType]
   }

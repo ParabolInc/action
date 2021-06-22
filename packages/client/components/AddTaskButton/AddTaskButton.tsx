@@ -26,6 +26,7 @@ const AddTaskButton = forwardRef((props: Props, ref: Ref<HTMLButtonElement>) => 
       onMouseEnter={onMouseEnter}
       palette='white'
       ref={ref}
+      dataCy={`add-task-${label}`}
     >
       <IconLabel icon='add' />
     </StyledButton>

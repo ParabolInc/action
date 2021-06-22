@@ -1,11 +1,5 @@
 import {InvoiceItemType} from 'parabol-client/types/constEnums'
-import {
-  InvoiceLineItemEnum,
-  InvoiceStatusEnum,
-  OrgUserRole,
-  TierEnum
-} from 'parabol-client/types/graphql'
-import shortid from 'shortid'
+import generateUID from '../../generateUID'
 import Stripe from 'stripe'
 import getRethink from '../../database/rethinkDriver'
 import Coupon from '../../database/types/Coupon'
@@ -18,6 +12,8 @@ import QuantityChangeLineItem from '../../database/types/QuantityChangeLineItem'
 import db from '../../db'
 import {fromEpochSeconds} from '../../utils/epochTime'
 import StripeManager from '../../utils/StripeManager'
+import {InvoiceStatusEnum} from '../../database/types/Invoice'
+import {InvoiceLineItemEnum} from '../../database/types/InvoiceLineItem'
 
 interface InvoicesByStartTime {
   [start: string]: {
@@ -106,7 +102,7 @@ const reduceItemsByType = (typesDict: TypesDict, email: string) => {
       const unusedTimeAmount = unusedTime ? unusedTime.amount : 0
       const remainingTimeAmount = remainingTime ? remainingTime.amount : 0
       reducedItems[k] = ({
-        id: shortid.generate(),
+        id: generateUID(),
         amount: unusedTimeAmount + remainingTimeAmount,
         email,
         [dateField]: fromEpochSeconds(startTime)
@@ -122,7 +118,8 @@ const makeDetailedPauseEvents = (
 ) => {
   const inactivityDetails: ReducedItem[] = []
   // if an unpause happened before a pause, we know they came into this period paused, so we don't want a start date
-  if (
+  // really this should be an if clause, but there are some errors cases where multiple unpause events were sent for the same user
+  while (
     unpausedItems.length > 0 &&
     (pausedItems.length === 0 || unpausedItems[0].endAt < pausedItems[0].startAt)
   ) {
@@ -156,7 +153,7 @@ const makeQuantityChangeLineItems = (detailedLineItems: DetailedLineItemDict) =>
     const lineItemType = lineItemTypes[i]
     const details = detailedLineItems[lineItemType] as ReducedItem[]
     if (details.length > 0) {
-      const id = shortid.generate()
+      const id = generateUID()
       quantityChangeLineItems.push(
         new QuantityChangeLineItem({
           id,
@@ -335,18 +332,18 @@ export default async function generateInvoice(
   const [type] = invoiceId.split('_')
   const isUpcoming = type === 'upcoming'
 
-  let status = isUpcoming ? InvoiceStatusEnum.UPCOMING : InvoiceStatusEnum.PENDING
-  if (status === InvoiceStatusEnum.PENDING && invoice.closed === true) {
-    status = invoice.paid ? InvoiceStatusEnum.PAID : InvoiceStatusEnum.FAILED
+  let status: InvoiceStatusEnum = isUpcoming ? 'UPCOMING' : 'PENDING'
+  if (status === 'PENDING' && invoice.closed === true) {
+    status = invoice.paid ? 'PAID' : 'FAILED'
   }
-  const paidAt = status === InvoiceStatusEnum.PAID ? now : undefined
+  const paidAt = status === 'PAID' ? now : undefined
 
   const {organization, billingLeaderEmails} = await r({
     organization: (r.table('Organization').get(orgId) as unknown) as Organization,
     billingLeaderEmails: (r
       .table('OrganizationUser')
       .getAll(orgId, {index: 'orgId'})
-      .filter({removedAt: null, role: OrgUserRole.BILLING_LEADER})
+      .filter({removedAt: null, role: 'BILLING_LEADER'})
       .coerceTo('array')('userId')
       .do((userIds) => {
         return r.table('User').getAll(userIds, {index: 'id'})('email')
@@ -385,7 +382,7 @@ export default async function generateInvoice(
     startAt: fromEpochSeconds(invoice.period_start),
     startingBalance: invoice.starting_balance,
     status,
-    tier: nextPeriodCharges.interval === 'year' ? TierEnum.enterprise : TierEnum.pro
+    tier: nextPeriodCharges.interval === 'year' ? 'enterprise' : 'pro'
   })
 
   return r

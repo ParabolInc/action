@@ -3,7 +3,7 @@ import React, {Component} from 'react'
 import {createFragmentContainer} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
 import {RouteComponentProps, withRouter} from 'react-router'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import SuggestedActionButton from './SuggestedActionButton'
 import SuggestedActionCard from './SuggestedActionCard'
 import SuggestedActionCopy from './SuggestedActionCopy'
@@ -26,7 +26,7 @@ class SuggestedActionTryActionMeeting extends Component<Props> {
     const {name: teamName} = team
     return (
       <SuggestedActionCard
-        backgroundColor={PALETTE.BACKGROUND_TEAL}
+        backgroundColor={PALETTE.AQUA_400}
         iconName='change_history'
         suggestedActionId={suggestedActionId}
       >

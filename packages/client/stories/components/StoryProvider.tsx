@@ -8,7 +8,7 @@ import globalStyles from '../../styles/theme/globalStyles'
 import AtmosphereProvider from '../../components/AtmosphereProvider/AtmosphereProvider'
 
 const FullPageWrapper = styled('div')({
-  backgroundColor: '#F1F0FA',
+  backgroundColor: 'white',
   display: 'flex',
   flexDirection: 'column',
   flexShrink: 0,

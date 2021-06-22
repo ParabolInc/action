@@ -46,7 +46,7 @@ export default {
       auth: r
         .table('SlackAuth')
         .get(authId)
-        .update({accessToken: null, isActive: false, updatedAt: now}),
+        .update({botAccessToken: null, isActive: false, updatedAt: now}),
       notifications: r
         .table('SlackNotification')
         .getAll(teamId, {index: 'teamId'})

@@ -1,12 +1,12 @@
 import {GraphQLEnumType} from 'graphql'
 import {
-  LOBBY,
   AGENDA_ITEMS,
   CHECKIN,
   DISCUSS,
   FIRST_CALL,
   GROUP,
   LAST_CALL,
+  LOBBY,
   REFLECT,
   UPDATES,
   VOTE
@@ -30,7 +30,9 @@ const NewMeetingPhaseTypeEnum = new GraphQLEnumType({
     [GROUP]: {},
     [VOTE]: {},
     [DISCUSS]: {},
-    SUMMARY: {}
+    SUMMARY: {},
+    SCOPE: {},
+    ESTIMATE: {}
   }
 })
 

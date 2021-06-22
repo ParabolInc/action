@@ -4,7 +4,7 @@ import graphql from 'babel-plugin-relay/macro'
 import {RouteComponentProps, withRouter} from 'react-router'
 import DismissSuggestedActionMutation from '../mutations/DismissSuggestedActionMutation'
 import withAtmosphere, {WithAtmosphereProps} from '../decorators/withAtmosphere/withAtmosphere'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import withMutationProps, {WithMutationProps} from '../utils/relay/withMutationProps'
 import SuggestedActionButton from './SuggestedActionButton'
 import SuggestedActionCard from './SuggestedActionCard'
@@ -38,7 +38,7 @@ class SuggestedActionTryTheDemo extends Component<Props> {
     const {id: suggestedActionId} = suggestedAction
     return (
       <SuggestedActionCard
-        backgroundColor={PALETTE.BACKGROUND_YELLOW}
+        backgroundColor={PALETTE.GOLD_300}
         iconName='group_work'
         suggestedActionId={suggestedActionId}
       >

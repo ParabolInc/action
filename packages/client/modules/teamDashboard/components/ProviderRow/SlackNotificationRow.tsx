@@ -3,12 +3,14 @@ import styled from '@emotion/styled'
 import Toggle from '../../../../components/Toggle/Toggle'
 import {createFragmentContainer} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
-import {SlackNotificationRow_viewer} from '../../../../__generated__/SlackNotificationRow_viewer.graphql'
+import {
+  SlackNotificationRow_viewer,
+  SlackNotificationEventEnum
+} from '../../../../__generated__/SlackNotificationRow_viewer.graphql'
 import useAtmosphere from '../../../../hooks/useAtmosphere'
 import useMutationProps from '../../../../hooks/useMutationProps'
 import SetSlackNotificationMutation from '../../../../mutations/SetSlackNotificationMutation'
 import StyledError from '../../../../components/StyledError'
-import {SlackNotificationEventEnum} from '../../../../types/graphql'
 import {MeetingLabels} from '../../../../types/constEnums'
 
 interface Props {
@@ -19,11 +21,11 @@ interface Props {
 }
 
 const labelLookup = {
-  [SlackNotificationEventEnum.meetingEnd]: 'Meeting End',
-  [SlackNotificationEventEnum.meetingStart]: 'Meeting Start',
-  [SlackNotificationEventEnum.MEETING_STAGE_TIME_LIMIT_END]: `Meeting ${MeetingLabels.TIME_LIMIT} Ended`,
-  [SlackNotificationEventEnum.MEETING_STAGE_TIME_LIMIT_START]: `Meeting ${MeetingLabels.TIME_LIMIT} Started`
-}
+  meetingEnd: 'Meeting End',
+  meetingStart: 'Meeting Start',
+  MEETING_STAGE_TIME_LIMIT_END: `Meeting ${MeetingLabels.TIME_LIMIT} Ended`,
+  MEETING_STAGE_TIME_LIMIT_START: `Meeting ${MeetingLabels.TIME_LIMIT} Started`
+} as Record<SlackNotificationEventEnum, string>
 
 const Row = styled('div')({
   alignItems: 'center',
@@ -40,12 +42,12 @@ const Label = styled('span')({
 const SlackNotificationRow = (props: Props) => {
   const {event, localChannelId, teamId, viewer} = props
   const {teamMember} = viewer
-  const {slackNotifications} = teamMember!
+  const {integrations} = teamMember!
+  const {slack} = integrations
+  const notifications = slack?.notifications ?? []
   const label = labelLookup[event]
   const atmosphere = useAtmosphere()
-  const existingNotification = slackNotifications.find(
-    (notification) => notification.event === event
-  )
+  const existingNotification = notifications.find((notification) => notification.event === event)
   const active = !!(existingNotification && existingNotification.channelId)
   const {error, submitMutation, onCompleted, onError, submitting} = useMutationProps()
   const onClick = () => {
@@ -69,7 +71,7 @@ const SlackNotificationRow = (props: Props) => {
         <Label>{label}</Label>
         <Toggle active={active} disabled={!localChannelId} onClick={onClick} />
       </Row>
-      {error && <StyledError>{error}</StyledError>}
+      {error && <StyledError>{error.message}</StyledError>}
     </>
   )
 }
@@ -78,9 +80,13 @@ export default createFragmentContainer(SlackNotificationRow, {
   viewer: graphql`
     fragment SlackNotificationRow_viewer on User {
       teamMember(teamId: $teamId) {
-        slackNotifications {
-          channelId
-          event
+        integrations {
+          slack {
+            notifications {
+              channelId
+              event
+            }
+          }
         }
       }
     }

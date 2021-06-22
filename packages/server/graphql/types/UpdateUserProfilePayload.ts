@@ -6,7 +6,7 @@ import StandardMutationError from './StandardMutationError'
 import toTeamMemberId from 'parabol-client/utils/relay/toTeamMemberId'
 import {GQLContext} from '../graphql'
 
-const UpdateUserProfilePayload = new GraphQLObjectType<any, GQLContext, any>({
+const UpdateUserProfilePayload = new GraphQLObjectType<any, GQLContext>({
   name: 'UpdateUserProfilePayload',
   fields: () => ({
     error: {

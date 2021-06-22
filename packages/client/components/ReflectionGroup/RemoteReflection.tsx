@@ -13,7 +13,6 @@ import useAtmosphere from '../../hooks/useAtmosphere'
 import {DeepNonNullable} from '../../types/generics'
 import {getMinTop} from '../../utils/retroGroup/updateClonePosition'
 import useEditorState from '../../hooks/useEditorState'
-
 const RemoteReflectionModal = styled('div')<{isDropping?: boolean | null}>(({isDropping}) => ({
   position: 'absolute',
   left: 0,
@@ -132,6 +131,7 @@ const RemoteReflection = (props: Props) => {
       window.clearTimeout(timeoutRef.current)
     }
   }, [remoteDrag])
+
   if (!remoteDrag) return null
   const {dragUserId, dragUserName} = remoteDrag
   const {nextStyle, minTop} = getInlineStyle(remoteDrag!, isDropping, style)

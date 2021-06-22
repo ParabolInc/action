@@ -1,7 +1,6 @@
 import React, {forwardRef} from 'react'
 import useSegmentTrack from '../../hooks/useSegmentTrack'
 import {ExternalLinks} from '../../types/constEnums'
-import {NewMeetingPhaseTypeEnum} from '../../types/graphql'
 import HelpMenuContent from './HelpMenuContent'
 import HelpMenuCopy from './HelpMenuCopy'
 import HelpMenuLink from './HelpMenuLink'
@@ -10,7 +9,7 @@ interface Props {}
 
 const ActionMeetingFirstCallHelpMenu = forwardRef((_props: Props, ref: any) => {
   const {closePortal} = ref
-  useSegmentTrack('HelpMenuOpen', {phase: NewMeetingPhaseTypeEnum.firstcall})
+  useSegmentTrack('Help Menu Open', {phase: 'firstcall'})
   return (
     <HelpMenuContent closePortal={closePortal}>
       <HelpMenuCopy>{'Time to add any remaining Agenda topics for discussion!'}</HelpMenuCopy>

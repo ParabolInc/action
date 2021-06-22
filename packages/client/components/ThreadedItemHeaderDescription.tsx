@@ -1,6 +1,6 @@
 import styled from '@emotion/styled'
 import React, {ReactNode} from 'react'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 
 const Header = styled('div')({
   display: 'flex',
@@ -18,12 +18,12 @@ const HeaderDescription = styled('div')({
 })
 
 const HeaderName = styled('div')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   fontWeight: 600
 })
 
 const HeaderResult = styled('div')({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   whiteSpace: 'pre-wrap'
 })
 

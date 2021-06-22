@@ -1,15 +1,15 @@
-import React from 'react'
-import useMenu from '../hooks/useMenu'
-import {MenuPosition} from '../hooks/useCoords'
 import styled from '@emotion/styled'
-import DropdownMenuToggle from './DropdownMenuToggle'
 import ms from 'ms'
-import Icon from './Icon'
-import {shortDays, shortMonths} from '../utils/makeDateString'
+import React from 'react'
 import DayPicker, {DayModifiers} from 'react-day-picker'
+import {MenuPosition} from '../hooks/useCoords'
+import useMenu from '../hooks/useMenu'
 import '../styles/daypicker.css'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
+import {shortDays, shortMonths} from '../utils/makeDateString'
 import roundDateToNearestHalfHour from '../utils/roundDateToNearestHalfHour'
+import DropdownMenuToggle from './DropdownMenuToggle'
+import Icon from './Icon'
 
 interface Props {
   endTime: Date
@@ -23,7 +23,7 @@ const Toggle = styled(DropdownMenuToggle)({
 })
 
 const StyledIcon = styled(Icon)({
-  color: PALETTE.TEXT_GRAY
+  color: PALETTE.SLATE_600
 })
 
 const NEXT_YEAR = new Date(Date.now() + ms('1y'))
@@ -68,7 +68,7 @@ const StageTimerModalEndTimeDate = (props: Props) => {
       {menuPortal(
         <DayPicker
           disabledDays={{before: now}}
-          fromMonth={endTime}
+          fromMonth={now}
           initialMonth={endTime}
           onDayClick={handleDayClick}
           selectedDays={endTime}

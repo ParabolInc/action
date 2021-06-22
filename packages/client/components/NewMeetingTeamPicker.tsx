@@ -8,6 +8,7 @@ import useRouter from '../hooks/useRouter'
 import {NewMeetingTeamPicker_teams} from '~/__generated__/NewMeetingTeamPicker_teams.graphql'
 import {NewMeetingTeamPicker_selectedTeam} from '~/__generated__/NewMeetingTeamPicker_selectedTeam.graphql'
 import NewMeetingDropdown from './NewMeetingDropdown'
+import styled from '@emotion/styled'
 
 const SelectTeamDropdown = lazyPreload(() =>
   import(
@@ -20,6 +21,10 @@ interface Props {
   selectedTeam: NewMeetingTeamPicker_selectedTeam
   teams: NewMeetingTeamPicker_teams
 }
+
+const Dropdown = styled(NewMeetingDropdown)({
+  borderRadius: '4px 4px 0 0'
+})
 
 const NewMeetingTeamPicker = (props: Props) => {
   const {selectedTeam, teams} = props
@@ -36,7 +41,7 @@ const NewMeetingTeamPicker = (props: Props) => {
   }
   return (
     <>
-      <NewMeetingDropdown
+      <Dropdown
         icon={'group'}
         label={name}
         onClick={togglePortal}

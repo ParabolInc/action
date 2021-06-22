@@ -7,7 +7,6 @@ import {
   GraphQLObjectType,
   GraphQLString
 } from 'graphql'
-import {OrgUserRole} from 'parabol-client/types/graphql'
 import {getUserId, isSuperUser, isUserBillingLeader} from '../../utils/authorization'
 import {GQLContext} from '../graphql'
 import {resolveForBillingLeaders} from '../resolvers'
@@ -173,7 +172,7 @@ const Organization = new GraphQLObjectType<any, GQLContext>({
       resolve: async ({id: orgId}, _args, {dataLoader}) => {
         const organizationUsers = await dataLoader.get('organizationUsersByOrgId').load(orgId)
         const billingLeaderUserIds = organizationUsers
-          .filter((organizationUser) => organizationUser.role === OrgUserRole.BILLING_LEADER)
+          .filter((organizationUser) => organizationUser.role === 'BILLING_LEADER')
           .map(({userId}) => userId)
         return dataLoader.get('users').loadMany(billingLeaderUserIds)
       }

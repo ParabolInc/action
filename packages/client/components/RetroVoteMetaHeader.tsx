@@ -7,7 +7,7 @@ import {MenuPosition} from '~/hooks/useCoords'
 import useMenu from '~/hooks/useMenu'
 import lazyPreload from '~/utils/lazyPreload'
 import {RetroVoteMetaHeader_meeting} from '~/__generated__/RetroVoteMetaHeader_meeting.graphql'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {FONT_FAMILY, ICON_SIZE} from '../styles/typographyV2'
 import {Breakpoint} from '../types/constEnums'
 import Icon from './Icon'
@@ -22,7 +22,7 @@ const VoteSettingsMenu = lazyPreload(() =>
 
 const VoteMeta = styled('div')({
   alignItems: 'center',
-  borderBottom: `.0625rem solid ${PALETTE.BORDER_LIGHT}`,
+  borderBottom: `.0625rem solid ${PALETTE.SLATE_400}`,
   display: 'flex',
   justifyContent: 'center',
   margin: '0 auto 8px',
@@ -62,7 +62,7 @@ const VoteLabelHeading = styled(LabelHeading)({
 })
 
 const VoteCountLabel = styled('div')({
-  color: PALETTE.EMPHASIS_COOL,
+  color: PALETTE.SKY_500,
   fontFamily: FONT_FAMILY.MONOSPACE,
   fontSize: 14,
   fontWeight: 600,
@@ -76,11 +76,11 @@ const VoteCountLabel = styled('div')({
 })
 
 const FacilitatorLabel = styled(VoteLabelHeading)({
-  color: PALETTE.TEXT_MAIN_DARK
+  color: PALETTE.SLATE_800
 })
 
 const FacilitatorDropdownIcon = styled(Icon)({
-  color: PALETTE.TEXT_MAIN_DARK,
+  color: PALETTE.SLATE_800,
   fontSize: ICON_SIZE.MD24
 })
 
@@ -103,7 +103,7 @@ const RetroVoteMetaHeader = (props: Props) => {
     MenuPosition.UPPER_RIGHT
   )
   const teamVotesRemaining = meeting.votesRemaining || 0
-  const myVotesRemaining = viewerMeetingMember.votesRemaining || 0
+  const myVotesRemaining = viewerMeetingMember?.votesRemaining || 0
   const isFacilitating = facilitatorUserId === viewerId && !endedAt
   return (
     <VoteMeta>

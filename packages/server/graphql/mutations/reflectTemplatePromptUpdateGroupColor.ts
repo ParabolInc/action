@@ -25,12 +25,15 @@ const reflectTemplatePromptUpdateGroupColor = {
     const viewerId = getUserId(authToken)
 
     const prompt = await r
-      .table('CustomPhaseItem')
+      .table('ReflectPrompt')
       .get(promptId)
       .run()
 
     // AUTH
-    if (!prompt || !isTeamMember(authToken, prompt.teamId) || !prompt.isActive) {
+    if (!prompt || prompt.removedAt) {
+      return standardError(new Error('Prompt not found'), {userId: viewerId})
+    }
+    if (!isTeamMember(authToken, prompt.teamId)) {
       return standardError(new Error('Team not found'), {userId: viewerId})
     }
 
@@ -39,7 +42,7 @@ const reflectTemplatePromptUpdateGroupColor = {
 
     // RESOLUTION
     await r
-      .table('CustomPhaseItem')
+      .table('ReflectPrompt')
       .get(promptId)
       .update({
         groupColor,

@@ -8,21 +8,21 @@ import CreateMassInvitationMutation from '~/mutations/CreateMassInvitationMutati
 import makeMinWidthQuery from '~/utils/makeMinWidthMediaQuery'
 import useAtmosphere from '../hooks/useAtmosphere'
 import CopyShortLink from '../modules/meeting/components/CopyShortLink/CopyShortLink'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {Threshold} from '../types/constEnums'
 import makeHref from '../utils/makeHref'
 import {MassInvitationTokenLink_viewer} from '../__generated__/MassInvitationTokenLink_viewer.graphql'
 
 const StyledCopyShortLink = styled(CopyShortLink)({
   borderRadius: 4,
-  border: `1px dashed ${PALETTE.EMPHASIS_COOL_LIGHTER}`,
-  color: PALETTE.EMPHASIS_COOL,
+  border: `1px dashed ${PALETTE.SKY_400}`,
+  color: PALETTE.SKY_500,
   fontSize: 15,
   fontWeight: 600,
   margin: '0 0 32px',
   padding: 11,
   ':hover': {
-    color: PALETTE.EMPHASIS_COOL_LIGHTER
+    color: PALETTE.SKY_400
   },
   [makeMinWidthQuery(400)]: {
     // make sure the length doesn't change the width
@@ -65,7 +65,7 @@ const MassInvitationTokenLink = (props: Props) => {
       url={url}
       label={linkLabel}
       title={'Copy invite link'}
-      tooltip={'Copied! Valid for 1 day'}
+      tooltip={'Copied! Valid for 30 days'}
     />
   )
 }

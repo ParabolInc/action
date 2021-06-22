@@ -1,7 +1,7 @@
 import ms from 'ms'
+import makeSuggestedIntegrationId from 'parabol-client/utils/makeSuggestedIntegrationId'
 import getRethink from '../../../database/rethinkDriver'
 import {DataLoaderWorker} from '../../graphql'
-import makeSuggestedIntegrationId from 'parabol-client/utils/makeSuggestedIntegrationId'
 
 export interface IntegrationByUserId {
   id: string
@@ -89,25 +89,14 @@ export const getPermsByTaskService = async (
   teamId: string,
   userId: string
 ) => {
-  const r = await getRethink()
   // we need to see which team integrations the user has access to
-  const [atlassianAuths, githubAuthForTeam] = await Promise.all([
-    dataLoader.get('atlassianAuthByUserId').load(userId),
-    r
-      .table('Provider')
-      .getAll(teamId, {index: 'teamId'})
-      .filter({
-        userId,
-        service: 'GitHubIntegration',
-        isActive: true
-      })
-      .nth(0)
-      .default(null)
-      .run()
+  const [atlassianAuth, githubAuth] = await Promise.all([
+    dataLoader.get('freshAtlassianAuth').load({teamId, userId}),
+    dataLoader.get('githubAuth').load({teamId, userId})
   ])
 
   return {
-    jira: !!atlassianAuths.find((auth) => auth.teamId === teamId),
-    github: !!githubAuthForTeam
+    jira: !!atlassianAuth,
+    github: !!githubAuth
   }
 }

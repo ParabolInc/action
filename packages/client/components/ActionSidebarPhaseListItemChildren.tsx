@@ -3,20 +3,20 @@ import {createFragmentContainer} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
 import ActionSidebarAgendaItemsSection from './ActionSidebarAgendaItemsSection'
 import MeetingSidebarTeamMemberStageItems from './MeetingSidebarTeamMemberStageItems'
-import {NewMeetingPhaseTypeEnum} from '../types/graphql'
+import {NewMeetingPhaseTypeEnum} from '../__generated__/ActionSidebarAgendaItemsSection_meeting.graphql'
 import {ActionSidebarPhaseListItemChildren_meeting} from '~/__generated__/ActionSidebarPhaseListItemChildren_meeting.graphql'
 import useGotoStageId from '../hooks/useGotoStageId'
 
 interface Props {
   gotoStageId: ReturnType<typeof useGotoStageId>
   handleMenuClick: () => void
-  phaseType: keyof typeof NewMeetingPhaseTypeEnum | string
+  phaseType: NewMeetingPhaseTypeEnum | string
   meeting: ActionSidebarPhaseListItemChildren_meeting
 }
 
 const ActionSidebarPhaseListItemChildren = (props: Props) => {
   const {gotoStageId, handleMenuClick, phaseType, meeting} = props
-  if (phaseType === NewMeetingPhaseTypeEnum.agendaitems) {
+  if (phaseType === 'agendaitems') {
     return (
       <ActionSidebarAgendaItemsSection
         gotoStageId={gotoStageId}

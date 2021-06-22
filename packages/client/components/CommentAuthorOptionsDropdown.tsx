@@ -10,13 +10,14 @@ interface Props {
   menuProps: MenuProps
   commentId: string
   editComment: () => void
+  meetingId: string
 }
 
 const CommentAuthorOptionsDropdown = (props: Props) => {
-  const {commentId, editComment, menuProps} = props
+  const {commentId, editComment, meetingId, menuProps} = props
   const atmosphere = useAtmosphere()
   const deleteComment = () => {
-    DeleteCommentMutation(atmosphere, {commentId})
+    DeleteCommentMutation(atmosphere, {commentId, meetingId})
   }
   return (
     <Menu ariaLabel={'Select the action for your comment'} {...menuProps}>

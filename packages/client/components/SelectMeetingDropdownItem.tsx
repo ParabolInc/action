@@ -4,7 +4,7 @@ import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
 import {createFragmentContainer} from 'react-relay'
 import useRouter from '~/hooks/useRouter'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import {ICON_SIZE} from '~/styles/typographyV2'
 import getMeetingPhase from '~/utils/getMeetingPhase'
 import {meetingTypeToIcon, phaseLabelLookup} from '~/utils/meetings/lookups'
@@ -18,8 +18,12 @@ const Wrapper = styled('div')({
 })
 
 const MeetingIcon = styled(Icon)({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: ICON_SIZE.MD24,
+  padding: 16
+})
+
+const MeetingSVG = styled('div')({
   padding: 16
 })
 
@@ -29,14 +33,14 @@ const MeetingInfo = styled('div')({
 })
 
 const Title = styled('div')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   fontSize: 16,
   lineHeight: '24px',
   fontWeight: 600
 })
 
 const Subtitle = styled('div')({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: 12
 })
 
@@ -67,13 +71,13 @@ const SelectMeetingDropdownItem = (props: Props) => {
   const gotoMeeting = () => {
     history.push(`/meet/${meetingId}`)
   }
-  const icon = meetingTypeToIcon[meetingType]
+  const IconOrSVG = meetingTypeToIcon[meetingType]
   const meetingPhase = getMeetingPhase(phases)
   const meetingPhaseLabel = (meetingPhase && phaseLabelLookup[meetingPhase.phaseType]) || 'Complete'
 
   return (
     <Wrapper onClick={gotoMeeting}>
-      <MeetingIcon>{icon}</MeetingIcon>
+      {typeof IconOrSVG === 'string' ? <MeetingIcon>{IconOrSVG}</MeetingIcon> : <MeetingSVG><IconOrSVG /></MeetingSVG>}
       <MeetingInfo>
         <Title>{name}</Title>
         <Subtitle>

@@ -5,7 +5,7 @@ import {createFragmentContainer} from 'react-relay'
 import {ArchiveOrganization_organization} from '~/__generated__/ArchiveOrganization_organization.graphql'
 import IconLabel from '../../../../components/IconLabel'
 import LinkButton from '../../../../components/LinkButton'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import ArchiveOrganizationForm from './ArchiveOrganizationForm'
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 }
 
 const Hint = styled('div')({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: 13,
   marginTop: 8
 })

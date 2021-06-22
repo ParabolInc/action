@@ -1,10 +1,11 @@
 import {GraphQLID, GraphQLNonNull} from 'graphql'
-import {AuthIdentityTypeEnum} from 'parabol-client/types/graphql'
+import {AuthIdentityTypeEnum} from '../../../client/types/constEnums'
 import getRethink from '../../database/rethinkDriver'
 import AuthIdentityGoogle from '../../database/types/AuthIdentityGoogle'
 import AuthToken from '../../database/types/AuthToken'
 import User from '../../database/types/User'
 import db from '../../db'
+import generateUID from '../../generateUID'
 import encodeAuthToken from '../../utils/encodeAuthToken'
 import GoogleServerManager from '../../utils/GoogleServerManager'
 import standardError from '../../utils/standardError'
@@ -12,6 +13,7 @@ import {GQLContext} from '../graphql'
 import rateLimit from '../rateLimit'
 import LoginWithGooglePayload from '../types/LoginWithGooglePayload'
 import bootstrapNewUser from './helpers/bootstrapNewUser'
+import updateUser from '../../postgres/queries/updateUser'
 
 const loginWithGoogle = {
   type: new GraphQLNonNull(LoginWithGooglePayload),
@@ -75,7 +77,10 @@ const loginWithGoogle = {
             id: sub
           })
           identities.push(googleIdentity) // mutative
-          await db.write('User', viewerId, {identities})
+          await Promise.all([
+            db.write('User', viewerId, {identities}),
+            updateUser({identities}, viewerId)
+          ])
         }
         // MUTATIVE
         context.authToken = new AuthToken({sub: viewerId, rol, tms: existingUser.tms})
@@ -87,9 +92,9 @@ const loginWithGoogle = {
       }
 
       // it's a new user!
+      const userId = `google-oauth2|${generateUID()}`
       const nickname = name || email.substring(0, email.indexOf('@'))
       const preferredName = nickname.length === 1 ? nickname.repeat(2) : nickname
-      const userId = `google-oauth2|${sub}`
       const identity = new AuthIdentityGoogle({
         id: sub,
         isEmailVerified: email_verified !== 'false'

@@ -1,7 +1,7 @@
 import React, {Children, ReactNode} from 'react'
 import SwipeableViews from 'react-swipeable-views'
 import styled from '@emotion/styled'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 
 interface Props {
   activeIdx: number
@@ -26,10 +26,10 @@ const StepperDots = styled('div')({
 const StepperDot = styled('div')<{isLocal: boolean; isFocused: boolean}>(
   ({isLocal, isFocused}) => ({
     backgroundColor: isLocal
-      ? PALETTE.CONTROL_MAIN
+      ? PALETTE.GRAPE_700
       : isFocused
-      ? PALETTE.EMPHASIS_WARM
-      : PALETTE.TEXT_GRAY,
+        ? PALETTE.ROSE_500
+        : PALETTE.SLATE_600,
     borderRadius: '50%',
     height: 8,
     margin: '0 2px',

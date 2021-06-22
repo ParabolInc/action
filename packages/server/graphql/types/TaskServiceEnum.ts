@@ -5,7 +5,8 @@ const TaskServiceEnum = new GraphQLEnumType({
   description: 'The list of services for task integrations',
   values: {
     github: {},
-    jira: {}
+    jira: {},
+    PARABOL: {}
   }
 })
 

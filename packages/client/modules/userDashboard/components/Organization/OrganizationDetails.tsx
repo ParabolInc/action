@@ -2,7 +2,7 @@ import React from 'react'
 import styled from '@emotion/styled'
 import TagBlock from '../../../../components/Tag/TagBlock'
 import makeDateString from '../../../../utils/makeDateString'
-import {TierEnum} from '../../../../types/graphql'
+import {TierEnum} from '~/__generated__/StandardHub_viewer.graphql'
 import TierTag from '../../../../components/Tag/TierTag'
 
 const StyledTagBlock = styled(TagBlock)({
@@ -28,7 +28,7 @@ const OrganizationDetails = (props: Props) => {
     <OrgDetails>
       {'Created '}
       {makeDateString(createdAt)}
-      {tier !== TierEnum.personal && (
+      {tier !== 'personal' && (
         <StyledTagBlock>
           <TierTag tier={tier} />
         </StyledTagBlock>

@@ -8,7 +8,7 @@ import {MenuPosition} from '../../../../hooks/useCoords'
 import useMenu from '../../../../hooks/useMenu'
 import {UseTaskChild} from '../../../../hooks/useTaskChildFocus'
 import textOverflow from '../../../../styles/helpers/textOverflow'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import {Radius} from '../../../../types/constEnums'
 import lazyPreload from '../../../../utils/lazyPreload'
 import {TaskFooterTeamAssignee_task} from '../../../../__generated__/TaskFooterTeamAssignee_task.graphql'
@@ -20,7 +20,7 @@ const TeamToggleButton = styled(CardButton)({
   ...textOverflow,
   border: 0,
   borderRadius: Radius.BUTTON_PILL,
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   display: 'block',
   fontSize: 12,
   fontWeight: 400,
@@ -33,7 +33,7 @@ const TeamToggleButton = styled(CardButton)({
   padding: '0 8px',
   textAlign: 'left',
   ':hover, :focus': {
-    color: PALETTE.TEXT_MAIN,
+    color: PALETTE.SLATE_700,
     opacity: 1
   }
 })

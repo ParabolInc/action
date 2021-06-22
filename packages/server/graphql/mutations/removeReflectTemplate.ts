@@ -1,10 +1,7 @@
 import {GraphQLID, GraphQLNonNull} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import {
-  IReflectTemplate,
-  IRetrospectiveMeetingSettings,
-  MeetingTypeEnum
-} from 'parabol-client/types/graphql'
+import MeetingSettingsRetrospective from '../../database/types/MeetingSettingsRetrospective'
+import ReflectTemplate from '../../database/types/ReflectTemplate'
 import getRethink from '../../database/rethinkDriver'
 import {getUserId, isTeamMember} from '../../utils/authorization'
 import publish from '../../utils/publish'
@@ -24,14 +21,14 @@ const removeReflectTemplate = {
     const now = new Date()
     const operationId = dataLoader.share()
     const subOptions = {operationId, mutatorId}
-    const template = await r
-      .table('ReflectTemplate')
-      .get(templateId)
-      .run()
+    const template = await dataLoader.get('meetingTemplates').load(templateId)
     const viewerId = getUserId(authToken)
 
     // AUTH
-    if (!template || !isTeamMember(authToken, template.teamId) || !template.isActive) {
+    if (!template || !template.isActive) {
+      return standardError(new Error('Template not found'), {userId: viewerId})
+    }
+    if (!isTeamMember(authToken, template.teamId)) {
       return standardError(new Error('Team not found'), {userId: viewerId})
     }
 
@@ -39,52 +36,47 @@ const removeReflectTemplate = {
     const {teamId} = template
     const {templates, settings} = await r({
       templates: (r
-        .table('ReflectTemplate')
+        .table('MeetingTemplate')
         .getAll(teamId, {index: 'teamId'})
-        .filter({isActive: true})
+        .filter({isActive: true, type: 'retrospective'})
         .orderBy('name')
-        .coerceTo('array') as unknown) as IReflectTemplate[],
+        .coerceTo('array') as unknown) as ReflectTemplate[],
       settings: (r
         .table('MeetingSettings')
         .getAll(teamId, {index: 'teamId'})
-        .filter({meetingType: MeetingTypeEnum.retrospective})
-        .nth(0) as unknown) as IRetrospectiveMeetingSettings
+        .filter({meetingType: 'retrospective'})
+        .nth(0) as unknown) as MeetingSettingsRetrospective
     }).run()
-
-    if (templates.length <= 1) {
-      return standardError(new Error('No templates'), {userId: viewerId})
-    }
 
     // RESOLUTION
     const {id: settingsId} = settings
     await r({
       template: r
-        .table('ReflectTemplate')
+        .table('MeetingTemplate')
         .get(templateId)
         .update({isActive: false, updatedAt: now}),
-      phaseItems: r
-        .table('CustomPhaseItem')
+      reflectPrompts: r
+        .table('ReflectPrompt')
         .getAll(teamId, {index: 'teamId'})
         .filter({
           templateId
         })
         .update({
-          isActive: false,
+          removedAt: now,
           updatedAt: now
         })
     }).run()
 
     if (settings.selectedTemplateId === templateId) {
       const nextTemplate = templates.find((template) => template.id !== templateId)
-      if (nextTemplate) {
-        await r
-          .table('MeetingSettings')
-          .get(settingsId)
-          .update({
-            selectedTemplateId: nextTemplate.id
-          })
-          .run()
-      }
+      const nextTemplateId = nextTemplate?.id ?? 'workingStuckTemplate'
+      await r
+        .table('MeetingSettings')
+        .get(settingsId)
+        .update({
+          selectedTemplateId: nextTemplateId
+        })
+        .run()
     }
 
     const data = {templateId, settingsId}

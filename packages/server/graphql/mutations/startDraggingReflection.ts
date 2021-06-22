@@ -4,7 +4,6 @@ import {getUserId, isTeamMember} from '../../utils/authorization'
 import publish from '../../utils/publish'
 import isPhaseComplete from 'parabol-client/utils/meetings/isPhaseComplete'
 import standardError from '../../utils/standardError'
-import {NewMeetingPhaseTypeEnum} from 'parabol-client/types/graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
 
 export default {
@@ -36,7 +35,7 @@ export default {
       return standardError(new Error('Team not found'), {userId: viewerId})
     }
     if (endedAt) return standardError(new Error('Meeting already ended'), {userId: viewerId})
-    if (isPhaseComplete(NewMeetingPhaseTypeEnum.group, phases)) {
+    if (isPhaseComplete('group', phases)) {
       return standardError(new Error('Meeting already completed'), {userId: viewerId})
     }
 

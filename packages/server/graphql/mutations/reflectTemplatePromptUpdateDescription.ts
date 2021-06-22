@@ -23,13 +23,16 @@ const reflectTemplatePromptUpdateDescription = {
     const operationId = dataLoader.share()
     const subOptions = {operationId, mutatorId}
     const prompt = await r
-      .table('CustomPhaseItem')
+      .table('ReflectPrompt')
       .get(promptId)
       .run()
     const viewerId = getUserId(authToken)
 
     // AUTH
-    if (!prompt || !isTeamMember(authToken, prompt.teamId) || !prompt.isActive) {
+    if (!prompt || prompt.removedAt) {
+      return standardError(new Error('Prompt not found'), {userId: viewerId})
+    }
+    if (!isTeamMember(authToken, prompt.teamId)) {
       return standardError(new Error('Team not found'), {userId: viewerId})
     }
 
@@ -39,7 +42,7 @@ const reflectTemplatePromptUpdateDescription = {
 
     // RESOLUTION
     await r
-      .table('CustomPhaseItem')
+      .table('ReflectPrompt')
       .get(promptId)
       .update({
         description: normalizedDescription,

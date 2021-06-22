@@ -106,32 +106,30 @@ function editGroupTitle(column, newText) {
     .should('have.value', `${column}-${newText}`)
 }
 
-const click = ($el) => {
-  return $el.click()
-}
-
 describe('Test Group page Demo', () => {
-  before(function () {
+  before(function() {
     // runs before all tests in the block
     cy.visitReflect().visitPhase('group')
 
     cy.get('[data-cy=help-menu-close]')
       .should('be.visible')
-      .pipe(click)
+      .pipe(($el) => $el.click())
       .should('not.exist')
 
     cy.screenshot('parabol-retrospective-visit-group-open-sidebar')
-    cy.get('[data-cy=sidebar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=sidebar-toggle]')
+      .should('be.visible')
+      .click({force: true})
     cy.screenshot('parabol-retrospective-visit-group-closed-sidebar')
-
   })
 
   it('Take screenshots of grouping cards', () => {
-
     cy.wait(790)
 
     cy.screenshot('parabol-retrospective-move-group-1-closed-sidebar')
-    cy.get('[data-cy=topbar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=topbar-toggle]')
+      .should('be.visible')
+      .click({force: true})
 
     cy.wait(1300)
 
@@ -140,14 +138,18 @@ describe('Test Group page Demo', () => {
     cy.wait(300)
 
     cy.screenshot('parabol-retrospective-move-group-2-open-sidebar')
-    cy.get('[data-cy=sidebar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=sidebar-toggle]')
+      .should('be.visible')
+      .click({force: true})
 
     cy.wait(1300)
 
     cy.screenshot('parabol-retrospective-move-group-2-closed-sidebar')
 
     cy.screenshot('parabol-retrospective-move-group-3-closed-sidebar')
-    cy.get('[data-cy=topbar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=topbar-toggle]')
+      .should('be.visible')
+      .click({force: true})
 
     cy.wait(300)
 
@@ -160,26 +162,29 @@ describe('Test Group page Demo', () => {
   })
 
   it('Test adding a new reflection during grouping', () => {
-
     addReflection('Start', 'Start testing code before merging')
 
     cy.screenshot('parabol-retrospective-add-group-1-open-sidebar')
-    cy.get('[data-cy=sidebar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=sidebar-toggle]')
+      .should('be.visible')
+      .click({force: true})
     cy.screenshot('parabol-retrospective-add-group-1-closed-sidebar')
-
 
     addReflection('Stop', 'Stop pushing directly to master')
 
     cy.screenshot('parabol-retrospective-add-group-2-closed-sidebar')
-    cy.get('[data-cy=topbar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=topbar-toggle]')
+      .should('be.visible')
+      .click({force: true})
     cy.screenshot('parabol-retrospective-add-group-2-open-sidebar')
 
     addReflection('Continue', 'Continue using best practices')
 
     cy.screenshot('parabol-retrospective-add-group-3-open-sidebar')
-    cy.get('[data-cy=sidebar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=sidebar-toggle]')
+      .should('be.visible')
+      .click({force: true})
     cy.screenshot('parabol-retrospective-add-group-3-closed-sidebar')
-
   })
 
   it('Test editing a new reflection during grouping', () => {
@@ -212,7 +217,6 @@ describe('Test Group page Demo', () => {
     addReflection('Stop', 'New Group 2')
 
     createGroup('Start', 'Stop')
-
   })
 
   it('Verify that robots can group cards', () => {

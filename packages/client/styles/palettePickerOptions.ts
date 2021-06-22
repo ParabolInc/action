@@ -1,53 +1,53 @@
-import {PALETTE} from './paletteV2'
+import {PALETTE} from './paletteV3'
 
 const palettePickerOptions = [
   {
-    name: 'Radical raspberry',
-    hex: PALETTE.PROMPT_RED
+    name: 'Tomato',
+    hex: PALETTE.TOMATO_500
   },
   {
-    name: 'Orangecicle in summer',
-    hex: PALETTE.PROMPT_ORANGE
+    name: 'Terra',
+    hex: PALETTE.TERRA_300
   },
   {
-    name: 'Buttered pineapple',
-    hex: PALETTE.PROMPT_YELLOW
+    name: 'Gold',
+    hex: PALETTE.GOLD_300
   },
   {
-    name: 'Zesty limón',
-    hex: PALETTE.PROMPT_LIGHT_GREEN
+    name: 'Grass',
+    hex: PALETTE.GRASS_300
   },
   {
-    name: 'Avocado hold the toast',
-    hex: PALETTE.PROMPT_GREEN
+    name: 'Forest',
+    hex: PALETTE.FOREST_400
   },
   {
-    name: 'Dinner mint delight',
-    hex: PALETTE.PROMPT_CYAN
+    name: 'Jade',
+    hex: PALETTE.JADE_400
   },
   {
-    name: 'Arctic breeze on ice',
-    hex: PALETTE.PROMPT_LIGHT_BLUE
+    name: 'Aqua',
+    hex: PALETTE.AQUA_400
   },
   {
-    name: 'blue.',
-    hex: PALETTE.PROMPT_BLUE
+    name: 'Sky',
+    hex: PALETTE.SKY_500
   },
   {
-    name: 'Blueberry-stained fingers',
-    hex: PALETTE.PROMPT_PURPLE
+    name: 'Lilac',
+    hex: PALETTE.LILAC_500
   },
   {
-    name: 'Grape jelly',
-    hex: PALETTE.PROMPT_VIOLET
+    name: 'Grape',
+    hex: PALETTE.GRAPE_500
   },
   {
-    name: 'Pink lemonade powder',
-    hex: PALETTE.PROMPT_FUCHSIA
+    name: 'Fuscia',
+    hex: PALETTE.FUSCIA_400
   },
   {
-    name: 'Too-pink health drink',
-    hex: PALETTE.PROMPT_PINK
+    name: 'Rose',
+    hex: PALETTE.ROSE_500
   }
 ] as {name: string; hex: string}[]
 export default palettePickerOptions

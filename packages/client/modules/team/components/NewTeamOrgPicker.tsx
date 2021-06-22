@@ -7,7 +7,6 @@ import {MenuPosition} from '../../../hooks/useCoords'
 import useMenu from '../../../hooks/useMenu'
 import lazyPreload from '../../../utils/lazyPreload'
 import styled from '@emotion/styled'
-import {TierEnum} from '../../../types/graphql'
 import TierTag from '../../../components/Tag/TierTag'
 import sortByTier from '../../../utils/sortByTier'
 
@@ -74,7 +73,7 @@ const NewTeamOrgPicker = (props: Props) => {
         defaultText={
           <MenuToggleInner>
             <MenuToggleLabel>{defaultText}</MenuToggleLabel>
-            {org && org.tier !== TierEnum.personal && <TierTag tier={org.tier as TierEnum} />}
+            {org && org.tier !== 'personal' && <TierTag tier={org.tier} />}
           </MenuToggleInner>
         }
       />

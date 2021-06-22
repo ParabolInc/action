@@ -3,11 +3,11 @@ import styled from '@emotion/styled'
 import {createFragmentContainer} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
 import useAtmosphere from '../../../hooks/useAtmosphere'
-import {PALETTE} from '../../../styles/paletteV2'
+import {PALETTE} from '../../../styles/paletteV3'
 import {ActionMeetingUpdatesPromptTeamHelpText_currentMeetingMember} from '../../../__generated__/ActionMeetingUpdatesPromptTeamHelpText_currentMeetingMember.graphql'
 
 const AgendaControl = styled('span')({
-  color: PALETTE.LINK_BLUE,
+  color: PALETTE.SKY_500,
   cursor: 'pointer',
   '&:hover': {
     textDecoration: 'underline'

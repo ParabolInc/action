@@ -5,7 +5,7 @@ import {createFragmentContainer} from 'react-relay'
 import useAtmosphere from '~/hooks/useAtmosphere'
 import useMutationProps from '~/hooks/useMutationProps'
 import UpdateRetroMaxVotesMutation from '~/mutations/UpdateRetroMaxVotesMutation'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import {MeetingSettingsThreshold} from '~/types/constEnums'
 import {VoteSettingsMenu_meeting} from '~/__generated__/VoteSettingsMenu_meeting.graphql'
 import {MenuProps} from '../hooks/useMenu'
@@ -24,7 +24,7 @@ const VoteOption = styled('div')({
   justifyContent: 'space-between',
   padding: '8px 16px',
   fontWeight: 600,
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: 14
 })
 

@@ -1,5 +1,5 @@
 import AuthIdentity from './AuthIdentity'
-import {AuthIdentityTypeEnum} from 'parabol-client/types/graphql'
+import {AuthIdentityTypeEnum} from '../../../client/types/constEnums'
 
 interface Input {
   id: string

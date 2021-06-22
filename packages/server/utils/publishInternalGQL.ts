@@ -4,7 +4,6 @@ import getGraphQLExecutor from './getGraphQLExecutor'
 import sendToSentry from './sendToSentry'
 
 interface Options {
-  type: string
   socketId: string
   ip: string
   query: string
@@ -12,11 +11,9 @@ interface Options {
 }
 
 const publishInternalGQL = async (options: Options) => {
-  const {socketId, type, query, ip, authToken} = options
-  const jobId = `${socketId}:${type}`
+  const {socketId, query, ip, authToken} = options
   try {
     return await getGraphQLExecutor().publish({
-      jobId,
       socketId,
       authToken,
       query,
@@ -26,7 +23,7 @@ const publishInternalGQL = async (options: Options) => {
   } catch (e) {
     const viewerId = getUserId(authToken)
     const error = typeof e === 'string' ? new Error(e) : e
-    sendToSentry(error, {userId: viewerId, tags: {jobId}})
+    sendToSentry(error, {userId: viewerId})
     return undefined
   }
 }

@@ -1,18 +1,13 @@
 import {GraphQLNonNull} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import {
-  ICreateTaskOnMutationArguments,
-  ITeamMember,
-  NewMeetingPhaseTypeEnum,
-  ThreadSourceEnum
-} from 'parabol-client/types/graphql'
 import getTypeFromEntityMap from 'parabol-client/utils/draftjs/getTypeFromEntityMap'
 import toTeamMemberId from 'parabol-client/utils/relay/toTeamMemberId'
 import normalizeRawDraftJS from 'parabol-client/validation/normalizeRawDraftJS'
-import shortid from 'shortid'
 import getRethink from '../../database/rethinkDriver'
 import NotificationTaskInvolves from '../../database/types/NotificationTaskInvolves'
-import Task from '../../database/types/Task'
+import Task, {TaskStatusEnum} from '../../database/types/Task'
+import TeamMember from '../../database/types/TeamMember'
+import generateUID from '../../generateUID'
 import {getUserId, isTeamMember} from '../../utils/authorization'
 import publish, {SubOptions} from '../../utils/publish'
 import segmentIo from '../../utils/segmentIo'
@@ -23,6 +18,8 @@ import CreateTaskInput from '../types/CreateTaskInput'
 import CreateTaskPayload from '../types/CreateTaskPayload'
 import getUsersToIgnore from './helpers/getUsersToIgnore'
 import validateThreadableThreadSourceId from './validateThreadableThreadSourceId'
+import {ThreadSourceEnum} from '../../database/types/ThreadSource'
+import {NewMeetingPhaseTypeEnum} from '../../database/types/GenericMeetingPhase'
 
 const validateTaskAgendaItemId = async (
   threadSource: ThreadSourceEnum | null,
@@ -30,7 +27,7 @@ const validateTaskAgendaItemId = async (
   teamId: string,
   dataLoader: DataLoaderWorker
 ) => {
-  const agendaItemId = threadSource === ThreadSourceEnum.AGENDA_ITEM ? threadId : undefined
+  const agendaItemId = threadSource === 'AGENDA_ITEM' ? threadId : undefined
   if (agendaItemId) {
     const agendaItem = await dataLoader.get('agendaItems').load(agendaItemId)
     if (!agendaItem || agendaItem.teamId !== teamId) {
@@ -55,10 +52,11 @@ const validateTaskMeetingId = async (
 }
 
 export const validateTaskUserId = async (
-  userId: string,
+  userId: string | null | undefined,
   teamId: string,
   dataLoader: DataLoaderWorker
 ) => {
+  if (!userId) return undefined
   const teamMemberId = toTeamMemberId(teamId, userId)
   const teamMember = await dataLoader.get('teamMembers').load(teamMemberId)
   return teamMember ? undefined : 'Invalid user ID'
@@ -77,9 +75,8 @@ const sendToSentryTaskCreated = async (
     if (!meeting) return
     const {phases} = meeting
     const discussPhase = phases.find(
-      ({phaseType}) =>
-        phaseType === NewMeetingPhaseTypeEnum.discuss ||
-        phaseType === NewMeetingPhaseTypeEnum.agendaitems
+      ({phaseType}: {phaseType: NewMeetingPhaseTypeEnum}) =>
+        phaseType === 'discuss' || phaseType === 'agendaitems'
     )
     if (discussPhase) {
       const {stages} = discussPhase
@@ -104,18 +101,17 @@ const handleAddTaskNotifications = async (
   task: Task,
   viewerId: string,
   teamId: string,
-  subOptions: SubOptions,
-  dataLoader: DataLoaderWorker
+  subOptions: SubOptions
 ) => {
   const r = await getRethink()
   const {id: taskId, content, tags, userId} = task
-  const usersIdsToIgnore = await getUsersToIgnore(viewerId, teamId, dataLoader)
+  const usersIdsToIgnore = await getUsersToIgnore(viewerId, teamId)
 
   // Handle notifications
   // Almost always you start out with a blank card assigned to you (except for filtered team dash)
   const changeAuthorId = toTeamMemberId(teamId, viewerId)
   const notificationsToAdd = [] as NotificationTaskInvolves[]
-  if (viewerId !== userId && !usersIdsToIgnore.includes(userId)) {
+  if (userId && viewerId !== userId && !usersIdsToIgnore.includes(userId)) {
     notificationsToAdd.push(
       new NotificationTaskInvolves({
         involvement: 'ASSIGNEE',
@@ -169,6 +165,22 @@ const handleAddTaskNotifications = async (
   })
 }
 
+export type CreateTaskInput = {
+  newTask: {
+    content?: string | null
+    plaintextContent?: string | null
+    meetingId?: string | null
+    threadId?: string | null
+    threadSource?: ThreadSourceEnum | null
+    threadSortOrder?: number | null
+    threadParentId?: string | null
+    sortOrder?: number | null
+    status: TaskStatusEnum
+    teamId: string
+    userId?: string | null
+  }
+}
+
 export default {
   type: GraphQLNonNull(CreateTaskPayload),
   description: 'Create a new task, triggering a CreateCard for other viewers',
@@ -184,7 +196,7 @@ export default {
   },
   async resolve(
     _source,
-    {newTask}: ICreateTaskOnMutationArguments,
+    {newTask}: CreateTaskInput,
     {authToken, dataLoader, socketId: mutatorId}: GQLContext
   ) {
     const r = await getRethink()
@@ -202,7 +214,6 @@ export default {
       userId
     } = newTask
     const threadSource = newTask.threadSource as ThreadSourceEnum | null
-    // const {teamId, userId, content} = validNewTask
     if (!isTeamMember(authToken, teamId)) {
       return standardError(new Error('Team not found'), {userId: viewerId})
     }
@@ -235,7 +246,7 @@ export default {
     })
     const {id: taskId, updatedAt} = task
     const history = {
-      id: shortid.generate(),
+      id: generateUID(),
       content,
       taskId,
       status,
@@ -253,17 +264,13 @@ export default {
         .filter({
           isNotRemoved: true
         })
-        .coerceTo('array') as unknown) as ITeamMember[]
+        .coerceTo('array') as unknown) as TeamMember[]
     }).run()
 
-    handleAddTaskNotifications(
-      teamMembers,
-      task,
-      viewerId,
-      teamId,
-      {operationId, mutatorId},
-      dataLoader
-    ).catch()
+    handleAddTaskNotifications(teamMembers, task, viewerId, teamId, {
+      operationId,
+      mutatorId
+    }).catch()
 
     sendToSentryTaskCreated(meetingId, viewerId, teamId, !!threadParentId, dataLoader).catch()
     return {taskId}

@@ -1,7 +1,7 @@
 import styled from '@emotion/styled'
 import React from 'react'
 import useRouter from '~/hooks/useRouter'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import getTeamIdFromPathname from '~/utils/getTeamIdFromPathname'
 import makeMinWidthMediaQuery from '~/utils/makeMinWidthMediaQuery'
 import {Breakpoint, Layout, ZIndex} from '../types/constEnums'
@@ -22,7 +22,7 @@ const Block = styled('div')({
 
 const Button = styled(FloatingActionButton)({
   color: '#fff',
-  backgroundImage: PALETTE.GRADIENT_WARM,
+  backgroundImage: PALETTE.GRADIENT_TOMATO_600_ROSE_500,
   height: 56,
   padding: 0,
   overflow: 'hidden',
@@ -42,10 +42,10 @@ const MeetingLabel = styled('div')({
   width: 158
 })
 
-interface Props {}
+interface Props { }
 
 const StartMeetingFAB = (props: Props) => {
-  const {} = props
+  const { } = props
   const teamId = getTeamIdFromPathname()
   const {history} = useRouter()
   const onClick = () => {

@@ -4,7 +4,7 @@ import React, {useMemo, Fragment} from 'react'
 import {createFragmentContainer} from 'react-relay'
 import {DashNavList_viewer} from '../../__generated__/DashNavList_viewer.graphql'
 import LeftDashNavItem from '../Dashboard/LeftDashNavItem'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import {Breakpoint} from '~/types/constEnums'
 import makeMinWidthMediaQuery from '~/utils/makeMinWidthMediaQuery'
 
@@ -19,7 +19,7 @@ const OrgName = styled('div')({
   fontWeight: 600,
   fontSize: 12,
   lineHeight: '24px',
-  color: PALETTE.TEXT_MAIN_40A,
+  color: PALETTE.SLATE_500,
   [makeMinWidthMediaQuery(Breakpoint.SIDEBAR_LEFT)]: {
     paddingLeft: 16
   }
@@ -33,7 +33,7 @@ const EmptyTeams = styled('div')({
 })
 
 const DashHR = styled('div')({
-  borderBottom: `1px solid ${PALETTE.BACKGROUND_TOGGLE_ACTIVE}`,
+  borderBottom: `1px solid ${PALETTE.SLATE_300}`,
   width: 'calc(100% + 8px)'
 })
 
@@ -73,35 +73,35 @@ const DashNavList = (props: Props) => {
     <DashNavListStyles>
       {isSingleOrg
         ? teams.map((team) => (
-            <LeftDashNavItem
-              className={className}
-              onClick={onClick}
-              key={team.id}
-              icon={team.isPaid ? 'group' : 'warning'}
-              href={`/team/${team.id}`}
-              label={team.name}
-            />
-          ))
+          <LeftDashNavItem
+            className={className}
+            onClick={onClick}
+            key={team.id}
+            icon={team.isPaid ? 'group' : 'warning'}
+            href={`/team/${team.id}`}
+            label={team.name}
+          />
+        ))
         : teamsByOrgKey.map((entry, idx) => {
-            const [key, teams] = entry
-            const name = key.slice(0, key.lastIndexOf(':'))
-            return (
-              <Fragment key={key}>
-                <OrgName>{name}</OrgName>
-                {teams.map((team) => (
-                  <LeftDashNavItem
-                    className={className}
-                    onClick={onClick}
-                    key={team.id}
-                    icon={team.isPaid ? 'group' : 'warning'}
-                    href={`/team/${team.id}`}
-                    label={team.name}
-                  />
-                ))}
-                {idx !== teamsByOrgKey.length - 1 && <DashHR />}
-              </Fragment>
-            )
-          })}
+          const [key, teams] = entry
+          const name = key.slice(0, key.lastIndexOf(':'))
+          return (
+            <Fragment key={key}>
+              <OrgName>{name}</OrgName>
+              {teams.map((team) => (
+                <LeftDashNavItem
+                  className={className}
+                  onClick={onClick}
+                  key={team.id}
+                  icon={team.isPaid ? 'group' : 'warning'}
+                  href={`/team/${team.id}`}
+                  label={team.name}
+                />
+              ))}
+              {idx !== teamsByOrgKey.length - 1 && <DashHR />}
+            </Fragment>
+          )
+        })}
     </DashNavListStyles>
   )
 }

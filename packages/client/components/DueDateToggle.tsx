@@ -7,7 +7,7 @@ import useTooltip from '~/hooks/useTooltip'
 import {MenuPosition} from '../hooks/useCoords'
 import useMenu from '../hooks/useMenu'
 import {UseTaskChild} from '../hooks/useTaskChildFocus'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {ICON_SIZE} from '../styles/typographyV2'
 import lazyPreload from '../utils/lazyPreload'
 import {shortMonths} from '../utils/makeDateString'
@@ -22,20 +22,20 @@ interface StyleProps {
   isPastDue?: boolean
 }
 
-const DUE_DATE_BG = PALETTE.BACKGROUND_MAIN
-const DUE_DATE_BG_HOVER = '#DCD9F2'
-const DUE_DATE_COLOR = '#65637A'
-const DUE_DATE_COLOR_HOVER = '#575569'
+const DUE_DATE_BG = PALETTE.SLATE_200
+const DUE_DATE_BG_HOVER = PALETTE.SLATE_300
+const DUE_DATE_COLOR = PALETTE.SLATE_600
+const DUE_DATE_COLOR_HOVER = PALETTE.SLATE_700
 
-const DUE_DATE_PAST_BG = '#FFE2E2'
-const DUE_DATE_PAST_BG_HOVER = '#FFB4B4'
-const DUE_DATE_PAST_COLOR = PALETTE.ERROR_MAIN
-const DUE_DATE_PAST_COLOR_HOVER = '#E9222F'
+const DUE_DATE_PAST_BG = PALETTE.TOMATO_100
+const DUE_DATE_PAST_BG_HOVER = PALETTE.TOMATO_200
+const DUE_DATE_PAST_COLOR = PALETTE.TOMATO_500
+const DUE_DATE_PAST_COLOR_HOVER = PALETTE.TOMATO_700
 
-const DUE_DATE_SOON_BG = '#FFF0D1'
-const DUE_DATE_SOON_BG_HOVER = '#FFE1A3'
-const DUE_DATE_SOON_COLOR = '#F28934'
-const DUE_DATE_SOON_COLOR_HOVER = '#E9710F'
+const DUE_DATE_SOON_BG = PALETTE.GOLD_100
+const DUE_DATE_SOON_BG_HOVER = PALETTE.GOLD_200
+const DUE_DATE_SOON_COLOR = PALETTE.GOLD_500
+const DUE_DATE_SOON_COLOR_HOVER = PALETTE.TERRA_500
 
 const Toggle = styled(CardButton)<StyleProps>(
   {
@@ -99,6 +99,7 @@ interface Props {
   cardIsActive: boolean
   task: DueDateToggle_task
   useTaskChild: UseTaskChild
+  isArchived?: boolean
 }
 
 const formatDueDate = (dueDate) => {
@@ -129,7 +130,7 @@ const DueDatePicker = lazyPreload(() =>
 )
 
 const DueDateToggle = (props: Props) => {
-  const {cardIsActive, task, useTaskChild} = props
+  const {cardIsActive, task, useTaskChild, isArchived} = props
   const {dueDate} = task
   const {menuProps, menuPortal, originRef, togglePortal} = useMenu(MenuPosition.UPPER_RIGHT)
   const {tooltipPortal, openTooltip, closeTooltip, originRef: tipRef} = useTooltip<HTMLDivElement>(
@@ -138,8 +139,9 @@ const DueDateToggle = (props: Props) => {
   const {title, isPastDue, isDueSoon} = getDateInfo(dueDate)
   return (
     <>
-      <Toggle
+      {!isArchived && <Toggle
         cardIsActive={!dueDate && cardIsActive}
+        tabIndex={0}
         dueDate={!!dueDate}
         isPastDue={isPastDue}
         isDueSoon={isDueSoon}
@@ -156,7 +158,7 @@ const DueDateToggle = (props: Props) => {
           access_time
         </DueDateIcon>
         {dueDate && <DateString>{formatDueDate(dueDate)}</DateString>}
-      </Toggle>
+      </Toggle>}
       {tooltipPortal(<div>{title}</div>)}
       {menuPortal(<DueDatePicker menuProps={menuProps} task={task} useTaskChild={useTaskChild} />)}
     </>

@@ -1,11 +1,11 @@
 // Styled component for useTooltip
 import styled from '@emotion/styled'
 import {Radius} from '../types/constEnums'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 
 const TooltipStyled = styled('div')({
   color: '#FFF',
-  backgroundColor: PALETTE.BACKGROUND_DARK_90A,
+  backgroundColor: PALETTE.SLATE_700,
   borderRadius: Radius.TOOLTIP,
   fontSize: 11,
   fontWeight: 600,

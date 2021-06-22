@@ -17,7 +17,7 @@ const getSAMLURLFromEmail = async (email: string, isInvited?: boolean | null) =>
   const r = await getRethink()
   const baseURL = (await r
     .table('SAML')
-    .getAll(domainName, {index: 'domain'})
+    .getAll(domainName, {index: 'domains'})
     .nth(0)('url')
     .default(null)
     .run()) as string | null

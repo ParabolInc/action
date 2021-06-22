@@ -1,6 +1,7 @@
 import {GraphQLID} from 'graphql'
 import {requireSU} from '../../../utils/authorization'
 import getDomainFromEmail from '../../../utils/getDomainFromEmail'
+import isCompanyDomain from '../../../utils/isCompanyDomain'
 import Company from '../../types/Company'
 
 const company = {
@@ -23,6 +24,7 @@ const company = {
     if (!user) throw new Error('User not found')
     const {email} = user
     const userDomain = getDomainFromEmail(email)
+    if (!isCompanyDomain(userDomain)) return null
     return {id: userDomain}
   }
 }

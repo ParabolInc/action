@@ -9,7 +9,7 @@ const fetchAllIntegrations = async (
 ) => {
   const [atlassianProjects, githubRepos] = await Promise.all([
     fetchAtlassianProjects(dataLoader, teamId, userId),
-    fetchGitHubRepos(teamId, userId)
+    fetchGitHubRepos(teamId, userId, dataLoader)
   ])
   const allIntegrations = [...atlassianProjects, ...githubRepos]
   const getValue = (item) => (item.nameWithOwner || item.projectName).toLowerCase()

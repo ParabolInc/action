@@ -1,11 +1,11 @@
 import React from 'react'
-import MenuItem from './MenuItem'
-import Menu from './Menu'
 import useAtmosphere from '../hooks/useAtmosphere'
 import {MenuProps} from '../hooks/useMenu'
-import RemoveGitHubAuthMutation from '../mutations/RemoveGitHubAuthMutation'
 import {MenuMutationProps} from '../hooks/useMutationProps'
+import RemoveGitHubAuthMutation from '../mutations/RemoveGitHubAuthMutation'
 import GitHubClientManager from '../utils/GitHubClientManager'
+import Menu from './Menu'
+import MenuItem from './MenuItem'
 
 interface Props {
   menuProps: MenuProps
@@ -24,7 +24,10 @@ const GitHubConfigMenu = (props: Props) => {
   const removeGitHub = () => {
     if (submitting) return
     submitMutation()
-    RemoveGitHubAuthMutation(atmosphere, {teamId}, {onCompleted, onError})
+    // wait for the portal to animate closed before removing, otherwise it'll stick around forever
+    setTimeout(() => {
+      RemoveGitHubAuthMutation(atmosphere, {teamId}, {onCompleted, onError})
+    }, 300)
   }
   return (
     <Menu ariaLabel={'Configure your GitHub integration'} {...menuProps}>

@@ -40,6 +40,10 @@ To get started, simply follow these steps:
    with the agreed upon number of points. Once you accrue more than
    100 points we issue options for equity in Parabol, Inc.
 
+# Git Strategy
+
+`git pull --ff-only` is recommended git pull stratagey if possible to keep the history as clean as possible.
+
 # Compensation
 
 For giving us a hand and helping the broader Parabol community, your

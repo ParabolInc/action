@@ -1,5 +1,5 @@
 import {RetroDemo} from '~/types/constEnums'
-import {DragReflectionDropTargetTypeEnum} from '../../types/graphql'
+import {DragReflectionDropTargetTypeEnum} from '~/__generated__/EndDraggingReflectionMutation.graphql'
 import {demoTeamId} from './initDB'
 
 // 3 -> 1
@@ -23,7 +23,7 @@ const initBotScript = () => {
         delay: 1000,
         botId: 'bot1',
         variables: {
-          phaseItemId: 'startId',
+          promptId: 'startId',
           isEditing: true
         }
       },
@@ -32,7 +32,7 @@ const initBotScript = () => {
         delay: 300,
         botId: 'bot2',
         variables: {
-          phaseItemId: 'startId',
+          promptId: 'startId',
           isEditing: true
         }
       },
@@ -45,7 +45,7 @@ const initBotScript = () => {
             id: 'botRef1',
             groupId: 'botGroup1',
             content: `{"blocks":[{"key":"2t965","text":"I'd like to give our interns and junior staff more space to share their ideas & fresh thinking","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`,
-            retroPhaseItemId: 'startId',
+            promptId: 'startId',
             sortOrder: 0
           }
         }
@@ -59,7 +59,7 @@ const initBotScript = () => {
             id: 'botRef2',
             groupId: 'botGroup2',
             content: `{"blocks":[{"key":"2t966","text":"Writing down our processes","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`,
-            retroPhaseItemId: 'startId',
+            promptId: 'startId',
             sortOrder: 0
           }
         }
@@ -69,7 +69,7 @@ const initBotScript = () => {
         delay: 3000,
         botId: 'bot1',
         variables: {
-          phaseItemId: 'startId',
+          promptId: 'startId',
           isEditing: false
         }
       },
@@ -78,7 +78,7 @@ const initBotScript = () => {
         delay: 500,
         botId: 'bot1',
         variables: {
-          phaseItemId: 'stopId',
+          promptId: 'stopId',
           isEditing: true
         }
       },
@@ -91,7 +91,7 @@ const initBotScript = () => {
             id: 'botRef3',
             groupId: 'botGroup3',
             content: `{"blocks":[{"key":"2t967","text":"Some people always take all the air time. It's hard to get my ideas on the floor","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`,
-            retroPhaseItemId: 'stopId',
+            promptId: 'stopId',
             sortOrder: 1
           }
         }
@@ -101,7 +101,7 @@ const initBotScript = () => {
         delay: 1000,
         botId: 'bot2',
         variables: {
-          phaseItemId: 'startId',
+          promptId: 'startId',
           isEditing: false
         }
       },
@@ -110,7 +110,7 @@ const initBotScript = () => {
         delay: 500,
         botId: 'bot2',
         variables: {
-          phaseItemId: 'stopId',
+          promptId: 'stopId',
           isEditing: true
         }
       },
@@ -123,7 +123,7 @@ const initBotScript = () => {
             id: 'botRef4',
             groupId: 'botGroup4',
             content: `{"blocks":[{"key":"2t968","text":"Making important decisions in chat","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`,
-            retroPhaseItemId: 'stopId',
+            promptId: 'stopId',
             sortOrder: 1
           }
         }
@@ -137,7 +137,7 @@ const initBotScript = () => {
             id: 'botRef5',
             groupId: 'botGroup5',
             content: `{"blocks":[{"key":"2t969","text":"Having debates that go nowhere over group chat","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`,
-            retroPhaseItemId: 'stopId',
+            promptId: 'stopId',
             sortOrder: 2
           }
         }
@@ -151,7 +151,7 @@ const initBotScript = () => {
             id: 'botRef6',
             groupId: 'botGroup6',
             content: `{"blocks":[{"key":"2t970","text":"Having so many meetings","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`,
-            retroPhaseItemId: 'stopId',
+            promptId: 'stopId',
             sortOrder: 2
           }
         }
@@ -165,7 +165,7 @@ const initBotScript = () => {
             id: 'botRef7',
             groupId: 'botGroup7',
             content: `{"blocks":[{"key":"2t971","text":" Prioritizing so much work every sprint, we can't get it all done!","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`,
-            retroPhaseItemId: 'stopId',
+            promptId: 'stopId',
             sortOrder: 2
           }
         }
@@ -175,7 +175,7 @@ const initBotScript = () => {
         delay: 1000,
         botId: 'bot2',
         variables: {
-          phaseItemId: 'stopId',
+          promptId: 'stopId',
           isEditing: false
         }
       },
@@ -184,7 +184,7 @@ const initBotScript = () => {
         delay: 500,
         botId: 'bot2',
         variables: {
-          phaseItemId: 'continueId',
+          promptId: 'continueId',
           isEditing: true
         }
       },
@@ -193,7 +193,7 @@ const initBotScript = () => {
         delay: 5000,
         botId: 'bot1',
         variables: {
-          phaseItemId: 'stopId',
+          promptId: 'stopId',
           isEditing: false
         }
       },
@@ -202,7 +202,7 @@ const initBotScript = () => {
         delay: 2000,
         botId: 'bot1',
         variables: {
-          phaseItemId: 'continueId',
+          promptId: 'continueId',
           isEditing: true
         }
       },
@@ -215,7 +215,7 @@ const initBotScript = () => {
             id: 'botRef8',
             groupId: 'botGroup8',
             content: `{"blocks":[{"key":"2t971","text":"Team retreats every quarter","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}}`,
-            retroPhaseItemId: 'continueId',
+            promptId: 'continueId',
             sortOrder: 3
           }
         }
@@ -234,7 +234,7 @@ const initBotScript = () => {
         delay: 2000,
         botId: 'bot1',
         variables: {
-          phaseItemId: 'continueId',
+          promptId: 'continueId',
           isEditing: false
         }
       },
@@ -243,7 +243,7 @@ const initBotScript = () => {
         delay: 2000,
         botId: 'bot2',
         variables: {
-          phaseItemId: 'continueId',
+          promptId: 'continueId',
           isEditing: false
         }
       },
@@ -318,7 +318,7 @@ const initBotScript = () => {
         botId: 'bot1',
         variables: {
           reflectionId: 'botRef3',
-          dropTargetType: DragReflectionDropTargetTypeEnum.REFLECTION_GROUP,
+          dropTargetType: 'REFLECTION_GROUP' as DragReflectionDropTargetTypeEnum,
           dropTargetId: 'botGroup1',
           dragId: 'botDrag1'
         }
@@ -383,7 +383,7 @@ const initBotScript = () => {
         botId: 'bot2',
         variables: {
           reflectionId: 'botRef4',
-          dropTargetType: DragReflectionDropTargetTypeEnum.REFLECTION_GROUP,
+          dropTargetType: 'REFLECTION_GROUP' as DragReflectionDropTargetTypeEnum,
           dropTargetId: 'botGroup1',
           dragId: 'botDrag2'
         }
@@ -448,7 +448,7 @@ const initBotScript = () => {
         botId: 'bot1',
         variables: {
           reflectionId: 'botRef7',
-          dropTargetType: DragReflectionDropTargetTypeEnum.REFLECTION_GROUP,
+          dropTargetType: 'REFLECTION_GROUP' as DragReflectionDropTargetTypeEnum,
           dropTargetId: 'botGroup8',
           dragId: 'botDrag3'
         }
@@ -522,7 +522,7 @@ const initBotScript = () => {
         botId: 'bot2',
         variables: {
           reflectionId: 'botRef5',
-          dropTargetType: DragReflectionDropTargetTypeEnum.REFLECTION_GROUP,
+          dropTargetType: 'REFLECTION_GROUP' as DragReflectionDropTargetTypeEnum,
           dropTargetId: 'botGroup8',
           dragId: 'botDrag4'
         }

@@ -1,8 +1,8 @@
 import React from 'react'
-import {InvoiceStatusEnum} from '../../../../types/graphql'
+import {InvoiceStatusEnum} from '~/__generated__/InvoiceRow_invoice.graphql'
 import styled from '@emotion/styled'
 import {Breakpoint} from '../../../../types/constEnums'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import BaseTag from '../../../../components/Tag/BaseTag'
 
 const TagBlock = styled('div')({
@@ -16,25 +16,25 @@ const TagBlock = styled('div')({
 })
 
 const StyledBaseTag = styled(BaseTag)({
-  backgroundColor: PALETTE.BACKGROUND_MAIN,
-  color: PALETTE.TEXT_MAIN
+  backgroundColor: PALETTE.SLATE_200,
+  color: PALETTE.SLATE_700
 })
 
 const lookup = {
-  [InvoiceStatusEnum.PENDING]: {
+  PENDING: {
     label: 'Payment Processing'
   },
-  [InvoiceStatusEnum.UPCOMING]: {
+  UPCOMING: {
     label: 'Current Estimation'
   }
-}
+} as const
 
 interface Props {
   status: InvoiceStatusEnum
 }
 const InvoiceTag = (props: Props) => {
   const {status} = props
-  if (status !== InvoiceStatusEnum.UPCOMING && status !== InvoiceStatusEnum.PENDING) return null
+  if (status !== 'UPCOMING' && status !== 'PENDING') return null
   const {label} = lookup[status]
   return (
     <TagBlock>

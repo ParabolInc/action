@@ -1,6 +1,5 @@
 import {GraphQLBoolean, GraphQLID, GraphQLNonNull} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import {NewMeetingPhaseTypeEnum} from 'parabol-client/types/graphql'
 import getRethink from '../../database/rethinkDriver'
 import {getUserId} from '../../utils/authorization'
 import publish from '../../utils/publish'
@@ -44,11 +43,9 @@ const setCheckInEnabled = {
       .get(settingsId)
       .update((row) => ({
         phaseTypes: r.branch(
-          row('phaseTypes').contains(NewMeetingPhaseTypeEnum.checkin),
-          isEnabled
-            ? row('phaseTypes')
-            : row('phaseTypes').difference([NewMeetingPhaseTypeEnum.checkin]),
-          isEnabled ? row('phaseTypes').prepend(NewMeetingPhaseTypeEnum.checkin) : row('phaseTypes')
+          row('phaseTypes').contains('checkin'),
+          isEnabled ? row('phaseTypes') : row('phaseTypes').difference(['checkin']),
+          isEnabled ? row('phaseTypes').prepend('checkin') : row('phaseTypes')
         )
       }))
       .run()

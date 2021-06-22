@@ -7,17 +7,17 @@ import {TaskColumn_teams} from '~/__generated__/TaskColumn_teams.graphql'
 import withAtmosphere, {
   WithAtmosphereProps
 } from '../../../../decorators/withAtmosphere/withAtmosphere'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import {BezierCurve, DroppableType} from '../../../../types/constEnums'
-import {AreaEnum, TaskStatusEnum} from '../../../../types/graphql'
 import {TEAM_DASH, USER_DASH} from '../../../../utils/constants'
 import {taskStatusLabels} from '../../../../utils/taskStatus'
 import {TaskColumn_tasks} from '../../../../__generated__/TaskColumn_tasks.graphql'
+import {AreaEnum, TaskStatusEnum} from '~/__generated__/UpdateTaskMutation.graphql'
 import TaskColumnAddTask from './TaskColumnAddTask'
 import TaskColumnInner from './TaskColumnInner'
 
 const Column = styled('div')<{isDragging: boolean}>(({isDragging}) => ({
-  background: isDragging ? PALETTE.BACKGROUND_MAIN_DARKENED : undefined,
+  background: isDragging ? PALETTE.SLATE_300 : undefined,
   display: 'flex',
   flex: 1,
   flexDirection: 'column',
@@ -26,7 +26,7 @@ const Column = styled('div')<{isDragging: boolean}>(({isDragging}) => ({
 }))
 
 const ColumnHeader = styled('div')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   display: 'flex !important',
   lineHeight: '24px',
   padding: 12,
@@ -48,7 +48,7 @@ const StatusLabel = styled('div')({
 })
 
 const TasksCount = styled('div')({
-  color: PALETTE.TEXT_MAIN_40A,
+  color: PALETTE.SLATE_500,
   marginLeft: 8
 })
 

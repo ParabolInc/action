@@ -1,14 +1,14 @@
 import {GraphQLBoolean, GraphQLID, GraphQLInterfaceType, GraphQLNonNull} from 'graphql'
+import toTeamMemberId from 'parabol-client/utils/relay/toTeamMemberId'
+import {GQLContext} from '../graphql'
+import {resolveUser} from '../resolvers'
 import ActionMeetingMember from './ActionMeetingMember'
 import GraphQLISO8601Type from './GraphQLISO8601Type'
 import MeetingTypeEnum from './MeetingTypeEnum'
-import {ACTION, RETROSPECTIVE} from 'parabol-client/utils/constants'
+import PokerMeetingMember from './PokerMeetingMember'
 import RetrospectiveMeetingMember from './RetrospectiveMeetingMember'
-import {resolveUser} from '../resolvers'
-import User from './User'
 import TeamMember from './TeamMember'
-import {GQLContext} from '../graphql'
-import toTeamMemberId from 'parabol-client/utils/relay/toTeamMemberId'
+import User from './User'
 
 export const meetingMemberFields = () => ({
   id: {
@@ -17,6 +17,8 @@ export const meetingMemberFields = () => ({
   },
   isCheckedIn: {
     type: GraphQLBoolean,
+    deprecationReason:
+      'Members are checked in when they enter the meeting now & not created beforehand',
     description: 'true if present, false if absent, else null'
   },
   meetingId: {
@@ -54,8 +56,9 @@ const MeetingMember = new GraphQLInterfaceType({
   fields: meetingMemberFields,
   resolveType: ({meetingType}) => {
     const resolveTypeLookup = {
-      [RETROSPECTIVE]: RetrospectiveMeetingMember,
-      [ACTION]: ActionMeetingMember
+      retrospective: RetrospectiveMeetingMember,
+      action: ActionMeetingMember,
+      poker: PokerMeetingMember
     }
     return resolveTypeLookup[meetingType]
   }

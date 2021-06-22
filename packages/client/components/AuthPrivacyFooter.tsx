@@ -1,8 +1,8 @@
 import React from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 
-const color = PALETTE.LINK_BLUE
+const color = PALETTE.SKY_500
 
 const Link = styled('a')({
   color,
@@ -15,7 +15,7 @@ const Link = styled('a')({
 })
 
 const FooterCopy = styled('div')({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: 11,
   lineHeight: '24px',
   marginTop: 8,

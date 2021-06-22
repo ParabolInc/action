@@ -1,13 +1,13 @@
 import {GraphQLList, GraphQLString} from 'graphql'
-import {OrgUserRole, TierEnum} from 'parabol-client/types/graphql'
 import {months} from 'parabol-client/utils/makeDateString'
+import {Threshold} from '../../../../client/types/constEnums'
 import getRethink from '../../../database/rethinkDriver'
-import {UpcomingInvoiceEmailProps} from '../../../email/components/UpcomingInvoiceEmail'
-import UpcomingInvoiceEmailTemplate from '../../../email/components/UpcomingInvoiceEmailTemplate'
+import {UpcomingInvoiceEmailProps} from 'parabol-client/modules/email/components/UpcomingInvoiceEmail'
+import UpcomingInvoiceEmailTemplate from '../../../email/UpcomingInvoiceEmailTemplate'
 import getMailManager from '../../../email/getMailManager'
 import {requireSU} from '../../../utils/authorization'
-import makeAppLink from '../../../utils/makeAppLink'
-import {UPCOMING_INVOICE_EMAIL_WARNING} from '../../../utils/serverConstants'
+import makeAppURL from 'parabol-client/utils/makeAppURL'
+import appOrigin from '../../../appOrigin'
 
 interface Details extends UpcomingInvoiceEmailProps {
   emails: string[]
@@ -31,9 +31,10 @@ const getEmailDetails = (organizations) => {
       name: newUser.user.preferredName
     }))
     details.push({
+      appOrigin,
       emails: billingLeaders.map((billingLeader) => billingLeader.user.email),
       periodEndStr: makePeriodEndStr(periodEnd),
-      memberUrl: makeAppLink(`me/organizations/${orgId}/members`),
+      memberUrl: makeAppURL(appOrigin, `me/organizations/${orgId}/members`),
       newUsers
     })
   }
@@ -48,12 +49,12 @@ const sendUpcomingInvoiceEmails = {
     requireSU(authToken)
     const r = await getRethink()
     const now = new Date()
-    const periodEndThresh = new Date(Date.now() + UPCOMING_INVOICE_EMAIL_WARNING)
-    const lastSentThresh = new Date(Date.now() - UPCOMING_INVOICE_EMAIL_WARNING)
+    const periodEndThresh = new Date(Date.now() + Threshold.UPCOMING_INVOICE_EMAIL_WARNING)
+    const lastSentThresh = new Date(Date.now() - Threshold.UPCOMING_INVOICE_EMAIL_WARNING)
 
     const organizations = await r
       .table('Organization')
-      .getAll(TierEnum.pro, {index: 'tier'})
+      .getAll('pro', {index: 'tier'})
       .filter((organization) =>
         r.and(
           organization('periodEnd')
@@ -88,7 +89,7 @@ const sendUpcomingInvoiceEmails = {
         billingLeaders: r
           .table('OrganizationUser')
           .getAll(organization('id'), {index: 'orgId'})
-          .filter({role: OrgUserRole.BILLING_LEADER, removedAt: null})
+          .filter({role: 'BILLING_LEADER', removedAt: null})
           .coerceTo('array')
           .merge((organizationUser) => ({
             user: r

@@ -8,7 +8,7 @@ const EditReflectionPayload = new GraphQLObjectType<any, GQLContext>({
     error: {
       type: StandardMutationError
     },
-    phaseItemId: {
+    promptId: {
       type: GraphQLID
     },
     editorId: {

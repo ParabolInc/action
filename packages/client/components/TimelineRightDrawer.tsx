@@ -5,7 +5,7 @@ import {createFragmentContainer} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
 import ErrorBoundary from './ErrorBoundary'
 import TimelinePriorityTasks from './TimelinePriorityTasks'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import TimelineNewFeature from './TimelineNewFeature'
 import {Breakpoint, DashTimeline, NavSidebar} from '../types/constEnums'
 import makeMinWidthMediaQuery from '~/utils/makeMinWidthMediaQuery'
@@ -24,7 +24,7 @@ export const RightDrawer = styled('div')({
   display: 'none',
   minWidth: DashTimeline.TIMELINE_DRAWER_WIDTH,
   maxWidth: DashTimeline.TIMELINE_DRAWER_WIDTH,
-  borderLeft: `1px solid ${PALETTE.BORDER_LIGHT}`,
+  borderLeft: `1px solid ${PALETTE.SLATE_400}`,
   height: 'fit-content',
   padding: 16,
   [makeMinWidthMediaQuery(MIN_WIDTH)]: {

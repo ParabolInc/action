@@ -7,7 +7,7 @@ import useMutationProps from '~/hooks/useMutationProps'
 import Atmosphere from '../Atmosphere'
 import withAtmosphere, {WithAtmosphereProps} from '../decorators/withAtmosphere/withAtmosphere'
 import VoteForReflectionGroupMutation from '../mutations/VoteForReflectionGroupMutation'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {ICON_SIZE} from '../styles/typographyV2'
 import getGraphQLError from '../utils/relay/getGraphQLError'
 import isTempId from '../utils/relay/isTempId'
@@ -35,8 +35,8 @@ const UpvoteIcon = styled(Icon)<{isExpanded: boolean; isEnabled: boolean}>(
         ? '#fff'
         : 'rgba(255, 255, 255, .25)'
       : isEnabled
-      ? PALETTE.TEXT_GRAY
-      : PALETTE.BORDER_GRAY,
+        ? PALETTE.SLATE_600
+        : PALETTE.SLATE_400,
     cursor: isEnabled ? 'pointer' : undefined,
     fontSize: ICON_SIZE.MD18,
     height: 24,
@@ -51,11 +51,11 @@ const VoteCount = styled('span')<{voteCount: number; isExpanded: boolean}>(
   ({voteCount, isExpanded}) => ({
     color: isExpanded
       ? voteCount === 0
-        ? PALETTE.TEXT_LIGHT
+        ? PALETTE.SLATE_200
         : '#fff'
       : voteCount === 0
-      ? PALETTE.TEXT_GRAY_DARK
-      : PALETTE.TEXT_BLUE,
+        ? PALETTE.SLATE_700
+        : PALETTE.SKY_500,
     fontWeight: 600,
     padding: '0 4px',
     userSelect: 'none'
@@ -86,7 +86,7 @@ const ReflectionGroupVoting = (props: Props) => {
   const {id: reflectionGroupId} = reflectionGroup
   const {id: meetingId, localStage, maxVotesPerGroup, viewerMeetingMember} = meeting
   const {isComplete} = localStage!
-  const {votesRemaining} = viewerMeetingMember
+  const votesRemaining = viewerMeetingMember?.votesRemaining ?? 0
   const viewerVoteCount = Math.max(0, reflectionGroup.viewerVoteCount || 0)
   const canUpvote = viewerVoteCount < maxVotesPerGroup && votesRemaining > 0 && !isComplete
   const canDownvote = viewerVoteCount > 0 && !isComplete
@@ -121,7 +121,7 @@ const ReflectionGroupVoting = (props: Props) => {
           data-cy={`remove-vote`}
           isExpanded={isExpanded}
           isEnabled={canDownvote}
-          color={isExpanded ? PALETTE.EMPHASIS_COOL_LIGHTER : PALETTE.EMPHASIS_COOL}
+          color={isExpanded ? PALETTE.SKY_400 : PALETTE.SKY_500}
           onClick={downvote}
         >
           {'thumb_down'}
@@ -137,7 +137,7 @@ const ReflectionGroupVoting = (props: Props) => {
           data-cy={`add-vote`}
           isExpanded={isExpanded}
           isEnabled={canUpvote}
-          color={isExpanded ? 'rgba(255, 255, 255, .65)' : PALETTE.TEXT_GRAY}
+          color={isExpanded ? 'rgba(255, 255, 255, .65)' : PALETTE.SLATE_600}
           onClick={vote}
         >
           {'thumb_up'}

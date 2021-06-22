@@ -2,7 +2,7 @@ import React, {forwardRef} from 'react'
 import styled from '@emotion/styled'
 import Icon from './Icon'
 import PlainButton from './PlainButton/PlainButton'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 
 const ButtonIcon = styled(Icon)({})
 
@@ -17,8 +17,8 @@ const Badge = styled('div')({
   top: 15,
   position: 'absolute',
   left: 22,
-  background: PALETTE.BACKGROUND_PINK,
-  border: `1px solid ${PALETTE.PRIMARY_MAIN}`,
+  background: PALETTE.ROSE_500,
+  border: `1px solid ${PALETTE.GRAPE_700}`,
   // +1 for borders
   width: 9,
   height: 9

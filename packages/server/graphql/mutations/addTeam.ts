@@ -1,10 +1,9 @@
 import {GraphQLNonNull} from 'graphql'
 import {SubscriptionChannel, Threshold} from 'parabol-client/types/constEnums'
-import {SuggestedActionTypeEnum, TierEnum} from 'parabol-client/types/graphql'
+import {SuggestedActionTypeEnum} from '../../../client/types/constEnums'
 import toTeamMemberId from 'parabol-client/utils/relay/toTeamMemberId'
-import shortid from 'shortid'
-import getRethink from '../../database/rethinkDriver'
 import AuthToken from '../../database/types/AuthToken'
+import generateUID from '../../generateUID'
 import removeSuggestedAction from '../../safeMutations/removeSuggestedAction'
 import {getUserId, isUserInOrg} from '../../utils/authorization'
 import encodeAuthToken from '../../utils/encodeAuthToken'
@@ -16,6 +15,8 @@ import AddTeamPayload from '../types/AddTeamPayload'
 import NewTeamInput from '../types/NewTeamInput'
 import addTeamValidation from './helpers/addTeamValidation'
 import createTeamAndLeader from './helpers/createTeamAndLeader'
+import {TierEnum} from '../../database/types/Invoice'
+import getTeamsByOrgId from '../../postgres/queries/getTeamsByOrgId'
 
 export default {
   type: new GraphQLNonNull(AddTeamPayload),
@@ -30,7 +31,6 @@ export default {
     async (_source, args, {authToken, dataLoader, socketId: mutatorId}) => {
       const operationId = dataLoader.share()
       const subOptions = {mutatorId, operationId}
-      const r = await getRethink()
 
       // AUTH
       const {orgId} = args.newTeam
@@ -40,12 +40,8 @@ export default {
       }
 
       // VALIDATION
-      const orgTeams = await r
-        .table('Team')
-        .getAll(orgId, {index: 'orgId'})
-        .run()
-
-      const orgTeamNames = orgTeams.map((team) => !team.isArchived && team.name)
+      const orgTeams = await getTeamsByOrgId(orgId, {isArchived: false})
+      const orgTeamNames = orgTeams.map((team) => team.name)
       const {
         data: {newTeam},
         errors
@@ -62,14 +58,14 @@ export default {
       }
       if (orgTeams.length >= Threshold.MAX_FREE_TEAMS) {
         const organization = await dataLoader.get('organizations').load(orgId)
-        const {tier} = organization
-        if (tier === TierEnum.personal) {
+        const {tier}: {tier: TierEnum} = organization
+        if (tier === 'personal') {
           return standardError(new Error('Max free teams reached'), {userId: viewerId})
         }
       }
 
       // RESOLUTION
-      const teamId = shortid.generate()
+      const teamId = generateUID()
       await createTeamAndLeader(viewerId, {id: teamId, isOnboardTeam: false, ...newTeam})
 
       const {tms} = authToken
@@ -109,7 +105,7 @@ export default {
 
       return {
         ...data,
-        authToken: encodeAuthToken(new AuthToken({tms, sub: viewerId}))
+        authToken: encodeAuthToken(new AuthToken({tms, sub: viewerId, rol: authToken.rol}))
       }
     }
   )

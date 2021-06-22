@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from '@emotion/styled'
 import useAtmosphere from '../hooks/useAtmosphere'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import Icon from './Icon'
 import {keyframes} from '@emotion/core'
 import BaseTag from './Tag/BaseTag'
@@ -17,7 +17,7 @@ const keyframesOpacity = keyframes`
 
 const Header = styled('div')({
   bottom: '100%',
-  color: PALETTE.TEXT_RED,
+  color: PALETTE.TOMATO_600,
   fontSize: 11,
   lineHeight: '18px',
   position: 'absolute',
@@ -37,7 +37,7 @@ const Arrow = styled(Icon)({
 })
 
 const StyledTag = styled(BaseTag)({
-  backgroundColor: PALETTE.TAG_USER_DRAGGING,
+  backgroundColor: PALETTE.GRAPE_500,
   color: '#FFFFFF'
 })
 

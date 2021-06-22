@@ -2,17 +2,20 @@ import {GraphQLID, GraphQLList, GraphQLNonNull} from 'graphql'
 import SetSlackNotificationPayload from '../types/SetSlackNotificationPayload'
 import {getUserId, isTeamMember} from '../../utils/authorization'
 import getRethink from '../../database/rethinkDriver'
-import SlackServerManager from '../../utils/SlackServerManager'
 import standardError from '../../utils/standardError'
 import publish from '../../utils/publish'
 import {GQLContext} from '../graphql'
 import SlackNotification, {
-  slackNotificationEventTypeLookup
+  SlackNotificationEventEnum as TSlackNotificationEventEnum
 } from '../../database/types/SlackNotification'
-import SlackNotificationEventEnum from '../types/SlackNotificationEventEnum'
-import {ISetSlackNotificationOnMutationArguments} from 'parabol-client/types/graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
+import SlackNotificationEventEnum from '../types/SlackNotificationEventEnum'
 
+type SetSlackNotificationMutationVariables = {
+  slackNotificationEvents: Array<TSlackNotificationEventEnum>
+  slackChannelId?: string | null
+  teamId: string
+}
 export default {
   name: 'SetSlackNotification',
   type: new GraphQLNonNull(SetSlackNotificationPayload),
@@ -29,7 +32,7 @@ export default {
   },
   resolve: async (
     _source,
-    {slackChannelId, slackNotificationEvents, teamId}: ISetSlackNotificationOnMutationArguments,
+    {slackChannelId, slackNotificationEvents, teamId}: SetSlackNotificationMutationVariables,
     {authToken, dataLoader, socketId: mutatorId}: GQLContext
   ) => {
     const viewerId = getUserId(authToken)
@@ -48,32 +51,6 @@ export default {
 
     if (!slackAuth) {
       return standardError(new Error('Slack authentication not found'), {userId: viewerId})
-    }
-
-    if (slackChannelId) {
-      // use accessToken as a fallback for folks who haven't refreshed their auth lately
-      const manager = new SlackServerManager(slackAuth.botAccessToken || slackAuth.accessToken)
-      const channelInfo = await manager.getConversationInfo(slackChannelId)
-
-      if (!channelInfo.ok) {
-        return standardError(new Error(channelInfo.error), {userId: viewerId})
-      }
-      const {channel} = channelInfo
-      if (!channel.is_im) {
-        const {is_archived: isArchived} = channel
-        if (isArchived) {
-          return standardError(new Error('Slack channel archived'), {userId: viewerId})
-        }
-      }
-      if (
-        slackNotificationEvents.every((event) => slackNotificationEventTypeLookup[event] === 'team')
-      ) {
-        await r
-          .table('SlackAuth')
-          .get(slackAuth.id)
-          .update({defaultTeamChannelId: slackChannelId})
-          .run()
-      }
     }
 
     // RESOLUTION

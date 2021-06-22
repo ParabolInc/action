@@ -12,7 +12,7 @@ import Legitity from '../validation/Legitity'
 import AuthenticationDialog from './AuthenticationDialog'
 import {GotoAuthPage} from './GenericAuthentication'
 import DialogTitle from './DialogTitle'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import IconLabel from './IconLabel'
 import EmailPasswordResetMutation from '../mutations/EmailPasswordResetMutation'
 import useForm from '../hooks/useForm'
@@ -43,9 +43,9 @@ const Container = styled('div')({
 })
 
 const LinkButton = styled(PlainButton)({
-  color: PALETTE.LINK_BLUE,
+  color: PALETTE.SKY_500,
   ':hover': {
-    color: PALETTE.LINK_BLUE,
+    color: PALETTE.SKY_500,
     textDecoration: 'underline'
   }
 })
@@ -60,9 +60,9 @@ const StyledPrimaryButton = styled(PrimaryButton)({
 })
 
 const BrandedLink = styled(PlainButton)({
-  color: PALETTE.LINK_BLUE,
+  color: PALETTE.SKY_500,
   ':hover,:focus': {
-    color: PALETTE.LINK_BLUE,
+    color: PALETTE.SKY_500,
     textDecoration: 'underline'
   }
 })
@@ -115,8 +115,8 @@ const ForgotPasswordPage = (props: Props) => {
       atmosphere,
       {email},
       {
-        onCompleted: () => {},
-        onError: () => {}
+        onCompleted: () => { },
+        onError: () => { }
       }
     )
     onCompleted()

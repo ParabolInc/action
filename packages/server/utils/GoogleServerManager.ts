@@ -1,6 +1,7 @@
 import GoogleManager from 'parabol-client/utils/GoogleManager'
 import {stringify} from 'querystring'
-import makeAppLink from './makeAppLink'
+import makeAppURL from 'parabol-client/utils/makeAppURL'
+import appOrigin from '../appOrigin'
 import fetch from 'node-fetch'
 import {decode} from 'jsonwebtoken'
 
@@ -41,7 +42,7 @@ export default class GoogleServerManager extends GoogleManager {
       client_secret: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
       code,
       grant_type: 'authorization_code',
-      redirect_uri: makeAppLink('auth/google')
+      redirect_uri: makeAppURL(appOrigin, 'auth/google')
     }
 
     const uri = `https://oauth2.googleapis.com/token?${stringify(queryParams)}`

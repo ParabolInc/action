@@ -8,7 +8,7 @@ import useMutationProps from '~/hooks/useMutationProps'
 import {TemplatePromptItem_prompts} from '~/__generated__/TemplatePromptItem_prompts.graphql'
 import Icon from '../../../components/Icon'
 import RemoveReflectTemplatePromptMutation from '../../../mutations/RemoveReflectTemplatePromptMutation'
-import {PALETTE} from '../../../styles/paletteV2'
+import {PALETTE} from '../../../styles/paletteV3'
 import {ICON_SIZE} from '../../../styles/typographyV2'
 import {TemplatePromptItem_prompt} from '../../../__generated__/TemplatePromptItem_prompt.graphql'
 import EditableTemplateDescription from './EditableTemplateDescription'
@@ -16,6 +16,7 @@ import EditableTemplatePrompt from './EditableTemplatePrompt'
 import EditableTemplatePromptColor from './EditableTemplatePromptColor'
 
 interface Props {
+  isOwner: boolean
   isDragging: boolean
   prompt: TemplatePromptItem_prompt
   prompts: TemplatePromptItem_prompts
@@ -27,42 +28,49 @@ interface StyledProps {
   isHover?: boolean
 }
 
-const lineHeight = '2.75rem'
-
-const PromptItem = styled('li')<StyledProps>(({isHover, isDragging}) => ({
-  alignItems: 'flex-start',
-  backgroundColor: isHover || isDragging ? PALETTE.BACKGROUND_MAIN_LIGHTENED : undefined,
-  borderRadius: '.125rem',
-  display: 'flex',
-  fontSize: 18,
-  lineHeight,
-  padding: '0 .6875rem 0 1rem'
-}))
+const PromptItem = styled('div')<StyledProps & {isOwner: boolean}>(
+  ({isOwner, isHover, isDragging}) => ({
+    alignItems: 'flex-start',
+    backgroundColor:
+      isOwner && (isHover || isDragging) ? PALETTE.SLATE_100 : undefined,
+    cursor: isOwner ? 'pointer' : undefined,
+    display: 'flex',
+    fontSize: 14,
+    lineHeight: '24px',
+    padding: '4px 16px',
+    width: '100%'
+  })
+)
 
 const RemovePromptIcon = styled(Icon)<StyledProps>(({isHover}) => ({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   cursor: 'pointer',
   display: 'block',
   fontSize: ICON_SIZE.MD18,
-  lineHeight,
+  height: 24,
+  lineHeight: '24px',
   marginLeft: 'auto',
-  opacity: isHover ? 1 : 0
+  padding: 0,
+  opacity: isHover ? 1 : 0,
+  textAlign: 'center',
+  width: 24
 }))
 
 const PromptAndDescription = styled('div')({
   width: '100%',
   display: 'flex',
-  flexDirection: 'column'
+  flexDirection: 'column',
+  paddingLeft: 16
 })
 
 const TemplatePromptItem = (props: Props) => {
-  const {dragProvided, isDragging, prompt, prompts} = props
+  const {dragProvided, isDragging, isOwner, prompt, prompts} = props
   const {id: promptId, description, question} = prompt
   const [isHover, setIsHover] = useState(false)
   const [isEditingDescription, setIsEditingDescription] = useState(false)
   const {submitting, submitMutation, onError, onCompleted} = useMutationProps()
   const atmosphere = useAtmosphere()
-  const canRemove = prompts.length > 1
+  const canRemove = prompts.length > 1 && isOwner
   const onMouseEnter = () => {
     setIsHover(true)
   }
@@ -76,7 +84,7 @@ const TemplatePromptItem = (props: Props) => {
       return
     }
     submitMutation()
-    RemoveReflectTemplatePromptMutation(atmosphere, {promptId}, {}, onError, onCompleted)
+    RemoveReflectTemplatePromptMutation(atmosphere, {promptId}, {onError, onCompleted})
   }
 
   return (
@@ -86,12 +94,14 @@ const TemplatePromptItem = (props: Props) => {
       {...dragProvided.draggableProps}
       isDragging={isDragging}
       isHover={isHover}
+      isOwner={isOwner}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <EditableTemplatePromptColor prompt={prompt} prompts={prompts} />
+      <EditableTemplatePromptColor isOwner={isOwner} prompt={prompt} prompts={prompts} />
       <PromptAndDescription>
         <EditableTemplatePrompt
+          isOwner={isOwner}
           isEditingDescription={isEditingDescription}
           isHover={isHover}
           question={question}
@@ -99,6 +109,7 @@ const TemplatePromptItem = (props: Props) => {
           prompts={prompts}
         />
         <EditableTemplateDescription
+          isOwner={isOwner}
           description={description}
           onEditingChange={setIsEditingDescription}
           promptId={promptId}
@@ -114,13 +125,13 @@ const TemplatePromptItem = (props: Props) => {
 }
 export default createFragmentContainer(TemplatePromptItem, {
   prompts: graphql`
-    fragment TemplatePromptItem_prompts on RetroPhaseItem @relay(plural: true) {
+    fragment TemplatePromptItem_prompts on ReflectPrompt @relay(plural: true) {
       ...EditableTemplatePromptColor_prompts
       ...EditableTemplatePrompt_prompts
     }
   `,
   prompt: graphql`
-    fragment TemplatePromptItem_prompt on RetroPhaseItem {
+    fragment TemplatePromptItem_prompt on ReflectPrompt {
       ...EditableTemplatePromptColor_prompt
       id
       question

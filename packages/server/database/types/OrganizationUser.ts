@@ -1,6 +1,7 @@
-import shortid from 'shortid'
-import {OrgUserRole, TierEnum} from 'parabol-client/types/graphql'
+import generateUID from '../../generateUID'
+import {TierEnum} from './Invoice'
 
+export type OrgUserRole = 'BILLING_LEADER'
 interface Input {
   orgId: string
   userId: string
@@ -26,7 +27,7 @@ export default class OrganizationUser {
 
   constructor(input: Input) {
     const {userId, id, removedAt, inactive, orgId, joinedAt, newUserUntil, role, tier} = input
-    this.id = id || shortid.generate()
+    this.id = id || generateUID()
     this.inactive = inactive || false
     this.joinedAt = joinedAt || new Date()
     this.newUserUntil = newUserUntil || new Date()

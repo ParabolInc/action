@@ -6,13 +6,14 @@ import teamSubscription from './subscriptions/teamSubscription'
 import meetingSubscription from './subscriptions/meetingSubscription'
 import {GQLContext} from './graphql'
 
-export default new GraphQLObjectType<any, GQLContext, any>({
+export default new GraphQLObjectType<any, GQLContext>({
   name: 'Subscription',
-  fields: () => ({
-    meetingSubscription,
-    notificationSubscription,
-    organizationSubscription,
-    taskSubscription,
-    teamSubscription
-  })
+  fields: () =>
+    ({
+      meetingSubscription,
+      notificationSubscription,
+      organizationSubscription,
+      taskSubscription,
+      teamSubscription
+    } as any)
 })

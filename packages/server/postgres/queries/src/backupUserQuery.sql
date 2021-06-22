@@ -1,0 +1,68 @@
+/*
+  @name backupUserQuery
+  @param users -> ((
+    id,
+    email,
+    createdAt,
+    updatedAt,
+    inactive,
+    lastSeenAt,
+    preferredName,
+    tier,
+    picture,
+    tms,
+    featureFlags,
+    lastSeenAtURLs,
+    identities,
+    segmentId,
+    newFeatureId,
+    overLimitCopy,
+    isRemoved,
+    reasonRemoved,
+    rol,
+    payLaterClickCount
+  )...)
+*/
+  INSERT INTO "User" ( 
+    "id",
+    "email",
+    "createdAt", 
+    "updatedAt",
+    "inactive",
+    "lastSeenAt",
+    "preferredName",
+    "tier",
+    "picture",
+    "tms",
+    "featureFlags",
+    "lastSeenAtURLs",
+    "identities",
+    "segmentId",
+    "newFeatureId",
+    "overLimitCopy",
+    "isRemoved",
+    "reasonRemoved",
+    "rol",
+    "payLaterClickCount"
+  ) VALUES :users
+  ON CONFLICT (id) DO UPDATE SET
+    email = EXCLUDED."email",
+    "createdAt" = EXCLUDED."createdAt",
+    "updatedAt" = EXCLUDED."updatedAt",
+    inactive = EXCLUDED."inactive",
+    "lastSeenAt" = EXCLUDED."lastSeenAt",
+    "preferredName" = EXCLUDED."preferredName",
+    tier = EXCLUDED."tier",
+    picture = EXCLUDED."picture",
+    tms = EXCLUDED."tms",
+    "featureFlags" = EXCLUDED."featureFlags",
+    "lastSeenAtURLs" = EXCLUDED."lastSeenAtURLs",
+    identities = EXCLUDED."identities",
+    "segmentId" = EXCLUDED."segmentId",
+    "newFeatureId" = EXCLUDED."newFeatureId",
+    "overLimitCopy" = EXCLUDED."overLimitCopy",
+    "isRemoved" = EXCLUDED."isRemoved",
+    "reasonRemoved" = EXCLUDED."reasonRemoved",
+    rol = EXCLUDED."rol",
+    "payLaterClickCount" = EXCLUDED."payLaterClickCount"
+  ;

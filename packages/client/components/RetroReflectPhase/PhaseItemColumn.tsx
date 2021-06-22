@@ -1,18 +1,17 @@
 import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
 import {EditorState} from 'draft-js'
-import React, {useEffect, useMemo, useRef} from 'react'
+import React, {RefObject, useEffect, useMemo, useRef} from 'react'
 import {createFragmentContainer} from 'react-relay'
 import {PhaseItemColumn_prompt} from '~/__generated__/PhaseItemColumn_prompt.graphql'
 import useAtmosphere from '../../hooks/useAtmosphere'
 import {MenuPosition} from '../../hooks/useCoords'
-import useRefState from '../../hooks/useRefState'
+import useForceUpdate from '../../hooks/useForceUpdate'
 import useTooltip from '../../hooks/useTooltip'
 import SetPhaseFocusMutation from '../../mutations/SetPhaseFocusMutation'
 import {DECELERATE} from '../../styles/animation'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import {BezierCurve, ElementWidth, Gutters} from '../../types/constEnums'
-import {NewMeetingPhaseTypeEnum} from '../../types/graphql'
 import getNextSortOrder from '../../utils/getNextSortOrder'
 import {PhaseItemColumn_meeting} from '../../__generated__/PhaseItemColumn_meeting.graphql'
 import RetroPrompt from '../RetroPrompt'
@@ -31,7 +30,7 @@ const ColumnWrapper = styled('div')<{isDesktop: boolean}>(({isDesktop}) => ({
 }))
 
 const ColumnHighlight = styled('div')<{isDesktop: boolean}>(({isDesktop}) => ({
-  backgroundColor: PALETTE.BACKGROUND_REFLECTION,
+  backgroundColor: PALETTE.SLATE_300,
   borderRadius: 8,
   display: 'flex',
   flex: 1,
@@ -71,7 +70,7 @@ const ReflectionStackSection = styled('div')<{isDesktop: boolean}>(({isDesktop})
 }))
 
 const Description = styled('div')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   fontSize: 12,
   fontStyle: 'italic',
   fontWeight: 400,
@@ -88,7 +87,7 @@ const ColorSpacer = styled('div')({
 const ColumnColorDrop = styled('div')<{groupColor: string; isFocused: boolean}>(
   ({groupColor, isFocused}) => ({
     backgroundColor: groupColor,
-    boxShadow: `0 0 0 1px ${PALETTE.BACKGROUND_MAIN}`,
+    boxShadow: `0 0 0 1px ${PALETTE.SLATE_200}`,
     borderRadius: '50%',
     display: 'inline-block',
     verticalAlign: 'middle',
@@ -136,16 +135,16 @@ interface Props {
   idx: number
   isDesktop: boolean
   meeting: PhaseItemColumn_meeting
-  phaseRef: React.RefObject<HTMLDivElement>
+  phaseRef: RefObject<HTMLDivElement>
   prompt: PhaseItemColumn_prompt
 }
 
 const PhaseItemColumn = (props: Props) => {
   const {idx, meeting, phaseRef, prompt, isDesktop} = props
-  const {id: retroPhaseItemId, editorIds, question, groupColor, description} = prompt
+  const {id: promptId, editorIds, question, groupColor, description} = prompt
   const {id: meetingId, facilitatorUserId, localPhase, phases, reflectionGroups} = meeting
-  const {id: phaseId, focusedPhaseItemId} = localPhase
-  const groupPhase = phases.find((phase) => phase.phaseType === NewMeetingPhaseTypeEnum.group)!
+  const {id: phaseId, focusedPromptId} = localPhase
+  const groupPhase = phases.find((phase) => phase.phaseType === 'group')!
   const {stages: groupStages} = groupPhase
   const [groupStage] = groupStages
   const {isComplete} = groupStage
@@ -156,24 +155,26 @@ const PhaseItemColumn = (props: Props) => {
   const hasFocusedRef = useRef(false)
   const phaseEditorRef = useRef<HTMLDivElement>(null)
   const stackTopRef = useRef<HTMLDivElement>(null)
-  const [cardsInFlightRef, setCardsInFlight] = useRefState<ReflectColumnCardInFlight[]>([])
+  const cardsInFlightRef = useRef<ReflectColumnCardInFlight[]>([])
+  const forceUpdateColumn = useForceUpdate()
   const isFacilitator = viewerId === facilitatorUserId
+
   useEffect(() => {
     hasFocusedRef.current = true
-  }, [focusedPhaseItemId])
+  }, [focusedPromptId])
 
   const setColumnFocus = () => {
     if (!isFacilitator || isComplete) return
     const variables = {
       meetingId,
-      focusedPhaseItemId: focusedPhaseItemId === retroPhaseItemId ? null : retroPhaseItemId
+      focusedPromptId: focusedPromptId === promptId ? null : promptId
     }
     SetPhaseFocusMutation(atmosphere, variables, {phaseId})
   }
 
   const nextSortOrder = () => getNextSortOrder(reflectionGroups)
 
-  const isFocused = focusedPhaseItemId === retroPhaseItemId
+  const isFocused = focusedPromptId === promptId
 
   const columnStack = useMemo(() => {
     return reflectionGroups
@@ -182,11 +183,11 @@ const PhaseItemColumn = (props: Props) => {
       .flatMap(({reflections}) => reflections || [])
       .filter((reflection) => {
         return (
-          reflection.retroPhaseItemId === retroPhaseItemId &&
+          reflection.promptId === promptId &&
           !cardsInFlightRef.current.find((card) => card.key === reflection.content)
         )
       })
-  }, [reflectionGroups, retroPhaseItemId, cardsInFlightRef.current])
+  }, [reflectionGroups, promptId, cardsInFlightRef.current])
 
   const reflectionStack = useMemo(() => {
     return columnStack.filter(({isViewerCreator}) => isViewerCreator)
@@ -220,13 +221,13 @@ const PhaseItemColumn = (props: Props) => {
                 isGroupingComplete={isComplete}
               >
                 <PhaseItemEditor
-                  dataCy={`phase-item-editor-${question}`}
                   cardsInFlightRef={cardsInFlightRef}
-                  setCardsInFlight={setCardsInFlight}
+                  dataCy={`phase-item-editor-${question}`}
                   phaseEditorRef={phaseEditorRef}
                   meetingId={meetingId}
                   nextSortOrder={nextSortOrder}
-                  retroPhaseItemId={retroPhaseItemId}
+                  forceUpdateColumn={forceUpdateColumn}
+                  promptId={promptId}
                   stackTopRef={stackTopRef}
                 />
               </EditorAndStatus>
@@ -257,7 +258,7 @@ const PhaseItemColumn = (props: Props) => {
 
 export default createFragmentContainer(PhaseItemColumn, {
   prompt: graphql`
-    fragment PhaseItemColumn_prompt on RetroPhaseItem {
+    fragment PhaseItemColumn_prompt on ReflectPrompt {
       id
       description
       editorIds
@@ -274,7 +275,7 @@ export default createFragmentContainer(PhaseItemColumn, {
         id
         phaseType
         ... on ReflectPhase {
-          focusedPhaseItemId
+          focusedPromptId
         }
       }
       localStage {
@@ -287,7 +288,7 @@ export default createFragmentContainer(PhaseItemColumn, {
           isComplete
         }
         ... on ReflectPhase {
-          focusedPhaseItemId
+          focusedPromptId
         }
       }
       reflectionGroups {
@@ -302,7 +303,7 @@ export default createFragmentContainer(PhaseItemColumn, {
           id
           isEditing
           isViewerCreator
-          retroPhaseItemId
+          promptId
           sortOrder
         }
       }

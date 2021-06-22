@@ -1,10 +1,7 @@
 import {RemoveSlackAuthMutation as TRemoveSlackAuthMutation} from '../__generated__/RemoveSlackAuthMutation.graphql'
 import {commitMutation} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
-import {Disposable} from 'relay-runtime'
-import Atmosphere from '../Atmosphere'
-import {IRemoveSlackAuthOnMutationArguments} from '../types/graphql'
-import {LocalHandlers} from '../types/relayMutations'
+import {StandardMutation} from '../types/relayMutations'
 
 graphql`
   fragment RemoveSlackAuthMutation_team on RemoveSlackAuthPayload {
@@ -25,11 +22,11 @@ const mutation = graphql`
   }
 `
 
-const RemoveSlackAuthMutation = (
-  atmosphere: Atmosphere,
-  variables: IRemoveSlackAuthOnMutationArguments,
-  {onError, onCompleted}: LocalHandlers
-): Disposable => {
+const RemoveSlackAuthMutation: StandardMutation<TRemoveSlackAuthMutation> = (
+  atmosphere,
+  variables,
+  {onError, onCompleted}
+) => {
   return commitMutation<TRemoveSlackAuthMutation>(atmosphere, {
     mutation,
     variables,

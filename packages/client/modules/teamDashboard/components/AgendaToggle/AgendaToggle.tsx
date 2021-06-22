@@ -7,7 +7,7 @@ import withAtmosphere, {
   WithAtmosphereProps
 } from '../../../../decorators/withAtmosphere/withAtmosphere'
 import ToggleAgendaListMutation from '../../../../mutations/ToggleAgendaListMutation'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import {Breakpoint} from '../../../../types/constEnums'
 import {CompletedHandler, ErrorHandler} from '../../../../types/relayMutations'
 import {AGENDA_ITEM_LABEL} from '../../../../utils/constants'
@@ -16,12 +16,12 @@ import withMutationProps, {WithMutationProps} from '../../../../utils/relay/with
 const desktopBreakpoint = makeMinWidthMediaQuery(Breakpoint.SIDEBAR_LEFT)
 
 const StyledLinkButton = styled(LinkButton)({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontWeight: 600,
   height: 24,
   marginTop: 16,
   ':hover, :focus, :active': {
-    color: PALETTE.TEXT_MAIN
+    color: PALETTE.SLATE_700
   },
   [desktopBreakpoint]: {
     marginTop: 0

@@ -1,5 +1,5 @@
-import shortid from 'shortid'
 import {Threshold} from 'parabol-client/types/constEnums'
+import generateUID from '../../generateUID'
 
 interface Input {
   id?: string
@@ -21,7 +21,7 @@ export default class EmailVerification {
   segmentId?: string
   constructor(input: Input) {
     const {id, invitationToken, token, email, expiration, hashedPassword, segmentId} = input
-    this.id = id || shortid.generate()
+    this.id = id || generateUID()
     this.invitationToken = invitationToken || undefined
     this.token = token
     this.email = email

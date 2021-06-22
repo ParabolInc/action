@@ -1,5 +1,4 @@
 import {InvoiceItemType} from 'parabol-client/types/constEnums'
-import {OrgUserRole, TierEnum} from '../../../../client/types/graphql'
 import adjustUserCount from '../../../billing/helpers/adjustUserCount'
 import getRethink from '../../../database/rethinkDriver'
 import OrganizationUser from '../../../database/types/OrganizationUser'
@@ -7,6 +6,7 @@ import db from '../../../db'
 import {DataLoaderWorker} from '../../graphql'
 import removeTeamMember from './removeTeamMember'
 import resolveDowngradeToPersonal from './resolveDowngradeToPersonal'
+import getTeamsByOrgid from '../../../postgres/queries/getTeamsByOrgId'
 
 const removeFromOrg = async (
   userId: string,
@@ -16,10 +16,8 @@ const removeFromOrg = async (
 ) => {
   const r = await getRethink()
   const now = new Date()
-  const teamIds = await r
-    .table('Team')
-    .getAll(orgId, {index: 'orgId'})('id')
-    .run()
+  const orgTeams = await getTeamsByOrgid(orgId)
+  const teamIds = orgTeams.map((team) => team.id)
   const teamMemberIds = (await r
     .table('TeamMember')
     .getAll(r.args(teamIds), {index: 'teamId'})
@@ -60,18 +58,18 @@ const removeFromOrg = async (
   // need to make sure the org doc is updated before adjusting this
   const {joinedAt, newUserUntil, role} = organizationUser
   const prorationDate = newUserUntil >= now ? new Date(joinedAt) : undefined
-  if (role === OrgUserRole.BILLING_LEADER) {
+  if (role === 'BILLING_LEADER') {
     const organization = await r
       .table('Organization')
       .get(orgId)
       .run()
-    if (organization.tier !== TierEnum.personal) {
+    if (organization.tier !== 'personal') {
       // if paid org & no other billing leader, promote the oldest
       // if no other member, downgrade to personal
       const otherBillingLeaders = await r
         .table('OrganizationUser')
         .getAll(orgId, {index: 'orgId'})
-        .filter({removedAt: null, role: OrgUserRole.BILLING_LEADER})
+        .filter({removedAt: null, role: 'BILLING_LEADER'})
         .run()
       if (otherBillingLeaders.length === 0) {
         const nextInLine = await r
@@ -86,7 +84,7 @@ const removeFromOrg = async (
             .table('OrganizationUser')
             .get(nextInLine.id)
             .update({
-              role: OrgUserRole.BILLING_LEADER
+              role: 'BILLING_LEADER'
             })
             .run()
         } else {

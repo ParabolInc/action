@@ -1,8 +1,8 @@
 import styled from '@emotion/styled'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 
 const MeetingPhaseHeading = styled('div')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   fontSize: 34,
   fontWeight: 600,
   lineHeight: 1.25,

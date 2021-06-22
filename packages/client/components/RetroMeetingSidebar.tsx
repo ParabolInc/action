@@ -3,10 +3,12 @@ import useRouter from '~/hooks/useRouter'
 import React from 'react'
 import {createFragmentContainer} from 'react-relay'
 import isDemoRoute from '~/utils/isDemoRoute'
-import {RetroMeetingSidebar_meeting} from '~/__generated__/RetroMeetingSidebar_meeting.graphql'
+import {
+  NewMeetingPhaseTypeEnum,
+  RetroMeetingSidebar_meeting
+} from '~/__generated__/RetroMeetingSidebar_meeting.graphql'
 import useAtmosphere from '../hooks/useAtmosphere'
 import useGotoStageId from '../hooks/useGotoStageId'
-import {NewMeetingPhaseTypeEnum} from '../types/graphql'
 import getSidebarItemStage from '../utils/getSidebarItemStage'
 import findStageById from '../utils/meetings/findStageById'
 import isPhaseComplete from '../utils/meetings/isPhaseComplete'
@@ -22,10 +24,7 @@ interface Props {
   meeting: RetroMeetingSidebar_meeting
 }
 
-const collapsiblePhases: string[] = [
-  NewMeetingPhaseTypeEnum.checkin,
-  NewMeetingPhaseTypeEnum.discuss
-]
+const collapsiblePhases: NewMeetingPhaseTypeEnum[] = ['checkin', 'discuss']
 
 const RetroMeetingSidebar = (props: Props) => {
   const atmosphere = useAtmosphere()
@@ -66,19 +65,15 @@ const RetroMeetingSidebar = (props: Props) => {
             handleMenuClick()
           }
           const discussPhase = phases.find((phase) => {
-            return phase.phaseType === NewMeetingPhaseTypeEnum.discuss
+            return phase.phaseType === 'discuss'
           })!
-          const showDiscussSection = isPhaseComplete(NewMeetingPhaseTypeEnum.vote, phases)
+          const showDiscussSection = isPhaseComplete('vote', phases)
           const phaseCount =
-            phaseType === NewMeetingPhaseTypeEnum.discuss && showDiscussSection
-              ? discussPhase.stages.length
-              : undefined
+            phaseType === 'discuss' && showDiscussSection ? discussPhase.stages.length : undefined
           return (
             <NewMeetingSidebarPhaseListItem
               handleClick={canNavigate ? handleClick : undefined}
-              isActive={
-                phaseType === NewMeetingPhaseTypeEnum.discuss ? false : localPhaseType === phaseType
-              }
+              isActive={phaseType === 'discuss' ? false : localPhaseType === phaseType}
               isCollapsible={collapsiblePhases.includes(phaseType)}
               isFacilitatorPhase={phaseType === facilitatorPhaseType}
               isUnsyncedFacilitatorPhase={
@@ -100,7 +95,7 @@ const RetroMeetingSidebar = (props: Props) => {
         })}
         {endedAt && (
           <NewMeetingSidebarPhaseListItem
-            key={'summary'}
+            key='summary'
             isActive={false}
             isFacilitatorPhase={false}
             isUnsyncedFacilitatorPhase={false}
@@ -111,7 +106,7 @@ const RetroMeetingSidebar = (props: Props) => {
                 history.push(`/new-summary/${meetingId}`)
               }
             }}
-            phaseType={NewMeetingPhaseTypeEnum.SUMMARY}
+            phaseType='SUMMARY'
           />
         )}
       </MeetingNavList>

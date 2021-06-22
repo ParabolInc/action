@@ -4,19 +4,18 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - name: Use Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: 13.x
-    - name: Typecheck
-      run: |
-        cp .env.example .env
-        yarn
-        yarn build
-        yarn typecheck
-      env:
-        CI: true
+      - uses: actions/checkout@v1
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14.10'
+      - name: Typecheck
+        run: |
+          cp .env.example .env
+          yarn
+          yarn build
+          yarn typecheck
+        env:
+          CI: true

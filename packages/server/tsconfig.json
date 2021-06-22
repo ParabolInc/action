@@ -26,7 +26,11 @@
   ],
   "files": [
     "types/modules.d.ts",
-    "email/components/SummaryEmail/MeetingSummaryEmail/MeetingSummaryEmail.tsx",
-    "server.ts"
+    "../client/modules/email/components/SummaryEmail/MeetingSummaryEmail/MeetingSummaryEmail.tsx",
+    "graphql/queries/tasks.ts",
+    "graphql/queries/archivedTasks.ts",
+    "billing/debug.ts",
+    "server.ts",
+    "debugJira.ts"
   ],
 }

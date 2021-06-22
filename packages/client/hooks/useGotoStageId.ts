@@ -5,7 +5,7 @@ import {useGotoStageId_meeting} from '~/__generated__/useGotoStageId_meeting.gra
 import {demoTeamId} from '../modules/demo/initDB'
 import LocalAtmosphere from '../modules/demo/LocalAtmosphere'
 import NavigateMeetingMutation from '../mutations/NavigateMeetingMutation'
-import {INavigateMeetingOnMutationArguments} from '../types/graphql'
+import {NavigateMeetingMutationVariables} from '~/__generated__/NavigateMeetingMutation.graphql'
 import findStageById from '../utils/meetings/findStageById'
 import isForwardProgress from '../utils/meetings/isForwardProgress'
 import updateLocalStage from '../utils/relay/updateLocalStage'
@@ -65,7 +65,7 @@ const useGotoStageId = (meetingRef: any) => {
         const variables = {
           meetingId,
           facilitatorStageId: stageId
-        } as INavigateMeetingOnMutationArguments
+        } as NavigateMeetingMutationVariables
         if (!isComplete && isForwardProgress(phases, facilitatorStageId, stageId)) {
           variables.completedStageId = facilitatorStageId
         }

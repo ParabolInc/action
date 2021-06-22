@@ -1,13 +1,14 @@
 import {GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLString} from 'graphql'
-import CreatePicturePutUrlPayload from '../types/CreatePicturePutUrlPayload'
+import validateAvatarUpload from '../../fileStorage/validateAvatarUpload'
+import generateUID from '../../generateUID'
 import {getUserId, isUserBillingLeader} from '../../utils/authorization'
-import getS3PutUrl from '../../utils/getS3PutUrl'
-import validateAvatarUpload from '../../utils/validateAvatarUpload'
-import shortid from 'shortid'
+import getS3SignedPutUrl from '../../utils/getS3SignedPutUrl'
 import standardError from '../../utils/standardError'
+import CreatePicturePutUrlPayload from '../types/CreatePicturePutUrlPayload'
 
 const createOrgPicturePutUrl = {
   type: CreatePicturePutUrlPayload,
+  deprecationReason: 'Replaced with `uploadOrgImage` mutation',
   description: 'Create a PUT URL on the CDN for an organization’s profile picture',
   args: {
     contentType: {
@@ -23,7 +24,7 @@ const createOrgPicturePutUrl = {
       description: 'The organization id to update'
     }
   },
-  async resolve (source, {orgId, contentType, contentLength}, {authToken, dataLoader}) {
+  async resolve(source, {orgId, contentType, contentLength}, {authToken, dataLoader}) {
     // AUTH
     const viewerId = getUserId(authToken)
     if (!(await isUserBillingLeader(viewerId, orgId, dataLoader))) {
@@ -34,8 +35,8 @@ const createOrgPicturePutUrl = {
     const ext = validateAvatarUpload(contentType, contentLength)
 
     // RESOLUTION
-    const partialPath = `Organization/${orgId}/picture/${shortid.generate()}.${ext}`
-    const url = await getS3PutUrl(contentType, contentLength, partialPath)
+    const partialPath = `Organization/${orgId}/picture/${generateUID()}.${ext}`
+    const url = await getS3SignedPutUrl(contentType, contentLength, partialPath)
     return {url}
   }
 }

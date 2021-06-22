@@ -3,7 +3,7 @@ import styled from '@emotion/styled'
 import EmailPasswordAuthForm from './EmailPasswordAuthForm'
 import HorizontalSeparator from './HorizontalSeparator/HorizontalSeparator'
 import PlainButton from './PlainButton/PlainButton'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {
   CREATE_ACCOUNT_LABEL,
   CREATE_ACCOUNT_SLUG,
@@ -27,7 +27,7 @@ interface Props {
   invitationToken?: string
 }
 
-const color = PALETTE.LINK_BLUE
+const color = PALETTE.SKY_500
 
 const ForgotPasswordLink = styled(PlainButton)({
   color,
@@ -41,9 +41,9 @@ const ForgotPasswordLink = styled(PlainButton)({
 })
 
 const BrandedLink = styled(PlainButton)({
-  color: PALETTE.LINK_BLUE,
+  color: PALETTE.SKY_500,
   ':hover,:focus': {
-    color: PALETTE.LINK_BLUE,
+    color: PALETTE.SKY_500,
     textDecoration: 'underline'
   }
 })

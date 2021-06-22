@@ -3,12 +3,12 @@ import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
 import {createFragmentContainer} from 'react-relay'
 import useRouter from '~/hooks/useRouter'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import {ICON_SIZE} from '~/styles/typographyV2'
 import {AppBar, Breakpoint, Layout, NavSidebar} from '~/types/constEnums'
 import makeMinWidthMediaQuery from '~/utils/makeMinWidthMediaQuery'
 import {DashTopBar_viewer} from '~/__generated__/DashTopBar_viewer.graphql'
-import parabolLogo from '../styles/theme/images/brand/logo.svg'
+import parabolLogo from '../styles/theme/images/brand/lockup_color_mark_white_type.svg'
 import Icon from './Icon'
 import PlainButton from './PlainButton/PlainButton'
 import TopBarAvatar from './TopBarAvatar'
@@ -25,7 +25,7 @@ interface Props {
 }
 
 const Wrapper = styled('header')({
-  backgroundColor: PALETTE.PRIMARY_MAIN,
+  backgroundColor: PALETTE.GRAPE_700,
   display: 'flex',
   height: AppBar.HEIGHT,
   justifyContent: 'space-between',
@@ -43,7 +43,7 @@ const LeftNavToggle = styled(PlainButton)({
 
 const LeftNavHeader = styled('div')({
   alignItems: 'center',
-  color: PALETTE.TEXT_LIGHT,
+  color: PALETTE.SLATE_200,
   display: 'flex',
   flexShrink: 0,
   width: NavSidebar.WIDTH
@@ -56,7 +56,7 @@ const Img = styled('img')({
 
 const TopBarIcons = styled('div')({
   alignItems: 'center',
-  color: PALETTE.TEXT_LIGHT,
+  color: PALETTE.SLATE_200,
   display: 'flex',
   justifyContent: 'flex-end',
   maxWidth: 560,

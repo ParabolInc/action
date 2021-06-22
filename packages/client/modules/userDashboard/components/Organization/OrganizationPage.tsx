@@ -6,7 +6,6 @@ import {Route, RouteComponentProps, Switch, withRouter} from 'react-router'
 import {BILLING_PAGE, MEMBERS_PAGE} from '../../../../utils/constants'
 import LoadingComponent from '../../../../components/LoadingComponent/LoadingComponent'
 import {LoaderSize} from '../../../../types/constEnums'
-import {TierEnum} from '../../../../types/graphql'
 
 interface Props extends RouteComponentProps<{orgId: string}> {
   organization: OrganizationPage_organization
@@ -22,7 +21,7 @@ const OrgMembers = lazy(() =>
 const OrganizationPage = (props: Props) => {
   const {match, organization} = props
   const {isBillingLeader, tier} = organization
-  const onlyShowMembers = !isBillingLeader && tier !== TierEnum.personal
+  const onlyShowMembers = !isBillingLeader && tier !== 'personal'
   const {
     params: {orgId}
   } = match

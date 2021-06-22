@@ -9,7 +9,7 @@ import withAtmosphere, {WithAtmosphereProps} from '../../decorators/withAtmosphe
 import RemoveReflectionMutation from '../../mutations/RemoveReflectionMutation'
 import withMutationProps, {WithMutationProps} from '../../utils/relay/withMutationProps'
 import Icon from '../Icon'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import {ICON_SIZE} from '../../styles/typographyV2'
 
 interface Props extends WithMutationProps, WithAtmosphereProps {
@@ -43,7 +43,7 @@ const Background = styled('div')({
 })
 
 const StyledIcon = styled(Icon)({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   display: 'block',
   fontSize: ICON_SIZE.MD18,
   position: 'relative',

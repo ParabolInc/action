@@ -1,6 +1,5 @@
 import {commitMutation} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
-import {INewMeeting, INewMeetingStage} from '../types/graphql'
 import {RelayDateHack, SharedUpdater, StandardMutation} from '../types/relayMutations'
 import {SetStageTimerMutation as _SetStageTimerMutation} from '../__generated__/SetStageTimerMutation.graphql'
 import {SetStageTimerMutation_meeting} from '~/__generated__/SetStageTimerMutation_meeting.graphql'
@@ -51,6 +50,7 @@ export const setStageTimerMeetingUpdater: SharedUpdater<SetStageTimerMutation_me
   })
 }
 
+type Stage = NonNullable<SetStageTimerMutation_meeting['stage']>
 type TSetStageTimerMutation = RelayDateHack<
   _SetStageTimerMutation,
   {scheduledEndTime?: Date | null}
@@ -69,10 +69,10 @@ const SetStageTimerMutation: StandardMutation<TSetStageTimerMutation> = (
     },
     optimisticUpdater: (store) => {
       const {meetingId, scheduledEndTime, timeRemaining} = variables
-      const meeting = store.get<INewMeeting>(meetingId)
+      const meeting = store.get(meetingId)
       if (!meeting) return
-      const facilitatorStageId = meeting.getValue('facilitatorStageId')!
-      const stage = store.get<INewMeetingStage>(facilitatorStageId)
+      const facilitatorStageId = meeting.getValue('facilitatorStageId')! as string
+      const stage = store.get<Stage>(facilitatorStageId)
       if (!stage) return
       const endTime = scheduledEndTime ? scheduledEndTime.toJSON() : null
       const isAsync = scheduledEndTime ? !timeRemaining : null

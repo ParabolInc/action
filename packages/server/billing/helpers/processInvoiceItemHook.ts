@@ -40,7 +40,7 @@ const getSafeProrationDate = async (
 
 const processInvoiceItemHook = async (stripeSubscriptionId: string) => {
   const redisLock = new RedisLock(stripeSubscriptionId, 3000)
-  const lockTTL = await redisLock.lock()
+  const lockTTL = await redisLock.checkLock()
   if (lockTTL > 0) {
     // it's possible that the subscription is unlocked before this is up & another call jumps in line
     // but the work to be done is decided after the lock, not before, so order isn't important

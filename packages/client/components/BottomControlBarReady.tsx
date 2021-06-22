@@ -6,9 +6,9 @@ import useAtmosphere from '~/hooks/useAtmosphere'
 import useGotoNext from '~/hooks/useGotoNext'
 import {TransitionStatus} from '~/hooks/useTransition'
 import FlagReadyToAdvanceMutation from '~/mutations/FlagReadyToAdvanceMutation'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import {BezierCurve, Times} from '~/types/constEnums'
-import {NewMeetingPhaseTypeEnum} from '~/types/graphql'
+import {NewMeetingPhaseTypeEnum} from '../__generated__/BottomControlBarReady_meeting.graphql'
 import handleRightArrow from '~/utils/handleRightArrow'
 import {BottomControlBarReady_meeting} from '~/__generated__/BottomControlBarReady_meeting.graphql'
 import {MenuPosition} from '../hooks/useCoords'
@@ -19,6 +19,7 @@ import BottomNavIconLabel from './BottomNavIconLabel'
 import Icon from './Icon'
 
 interface Props {
+  isNext: boolean
   cancelConfirm: undefined | (() => void)
   isConfirming: boolean
   setConfirmingButton: (button: string) => void
@@ -31,10 +32,11 @@ interface Props {
 
 const CheckIcon = styled(Icon)<{progress: number; isNext: boolean; isViewerReady: boolean}>(
   ({isViewerReady, progress, isNext}) => ({
-    color: isNext ? PALETTE.EMPHASIS_WARM : isViewerReady ? PALETTE.TEXT_GREEN : PALETTE.TEXT_GRAY,
+    color: isNext ? PALETTE.ROSE_500 : isViewerReady ? PALETTE.JADE_400 : PALETTE.SLATE_600,
     fontSize: 24,
     fontWeight: 600,
     height: 24,
+    opacity: isNext ? 1 : isViewerReady ? 1 : 0.5,
     transformOrigin: '0 0',
     // 20px to 16 = 0.75
     transform: progress > 0 ? `scale(0.75)translate(4px, 4px)` : undefined,
@@ -42,34 +44,24 @@ const CheckIcon = styled(Icon)<{progress: number; isNext: boolean; isViewerReady
   })
 )
 
-const PHASE_REQUIRES_CONFIRM = new Set<string>([
-  NewMeetingPhaseTypeEnum.reflect,
-  NewMeetingPhaseTypeEnum.group,
-  NewMeetingPhaseTypeEnum.vote
-])
+const PHASE_REQUIRES_CONFIRM = new Set<NewMeetingPhaseTypeEnum>(['reflect', 'group', 'vote'])
 
 const BottomControlBarReady = (props: Props) => {
   const {
     cancelConfirm,
     isConfirming,
+    isNext,
     setConfirmingButton,
     handleGotoNext,
     meeting,
     onTransitionEnd,
     status
   } = props
-  const {
-    id: meetingId,
-    facilitatorUserId,
-    localPhase,
-    localStage,
-    meetingMembers,
-    reflectionGroups
-  } = meeting
+  const {id: meetingId, localPhase, localStage, meetingMembers, reflectionGroups} = meeting
   const stages = localPhase.stages || []
   const {id: stageId, isComplete, isViewerReady, phaseType} = localStage
   const {gotoNext, ref} = handleGotoNext
-  const activeCount = meetingMembers.filter((member) => member.isCheckedIn).length
+  const activeCount = meetingMembers.length
   const {openTooltip, tooltipPortal, originRef} = useTooltip<HTMLDivElement>(
     MenuPosition.UPPER_CENTER,
     {
@@ -78,8 +70,6 @@ const BottomControlBarReady = (props: Props) => {
     }
   )
   const atmosphere = useAtmosphere()
-  const {viewerId} = atmosphere
-  const isFacilitating = facilitatorUserId === viewerId
   const readyCount = localStage.readyCount || 0
   const progress = readyCount / Math.max(1, activeCount - 1)
   const isLastStageInPhase = stages[stages.length - 1]?.id === localStage?.id
@@ -90,7 +80,7 @@ const BottomControlBarReady = (props: Props) => {
     activeCount > 1
 
   const onClick = () => {
-    if (!isFacilitating) {
+    if (!isNext) {
       FlagReadyToAdvanceMutation(atmosphere, {isReady: !isViewerReady, meetingId, stageId})
     } else if (isComplete || !isConfirmRequired || isConfirming) {
       setConfirmingButton('')
@@ -101,16 +91,16 @@ const BottomControlBarReady = (props: Props) => {
       setTimeout(openTooltip)
     }
   }
-  const onKeyDown = isFacilitating
+  const onKeyDown = isNext
     ? handleRightArrow(() => {
-        gotoNext()
-      })
+      gotoNext()
+    })
     : undefined
-  const icon = isFacilitating ? 'arrow_forward' : 'check'
-  const label = isFacilitating ? 'Next' : 'Ready'
+  const icon = isNext ? 'arrow_forward' : 'check'
+  const label = isNext ? 'Next' : 'Ready'
   const getDisabled = () => {
-    if (!isFacilitating) return false
-    if (phaseType === NewMeetingPhaseTypeEnum.reflect) {
+    if (!isNext) return false
+    if (phaseType === 'reflect') {
       return reflectionGroups?.length === 0 ?? true
     }
     return false
@@ -128,9 +118,9 @@ const BottomControlBarReady = (props: Props) => {
         onKeyDown={onKeyDown}
         ref={ref}
       >
-        <BottomControlBarProgress isNext={isFacilitating} progress={progress} />
+        <BottomControlBarProgress isNext={isNext} progress={progress} />
         <BottomNavIconLabel label={label} ref={originRef}>
-          <CheckIcon isViewerReady={isViewerReady} isNext={isFacilitating} progress={progress}>
+          <CheckIcon isViewerReady={isViewerReady} isNext={isNext} progress={progress}>
             {icon}
           </CheckIcon>
         </BottomNavIconLabel>
@@ -159,7 +149,6 @@ export default createFragmentContainer(BottomControlBarReady, {
         }
       }
       id
-      facilitatorUserId
       localStage {
         ...BottomControlBarReadyStage @relay(mask: false)
       }
@@ -170,7 +159,6 @@ export default createFragmentContainer(BottomControlBarReady, {
       }
       meetingMembers {
         id
-        isCheckedIn
       }
       phases {
         stages {

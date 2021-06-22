@@ -1,5 +1,5 @@
-import shortid from 'shortid'
-import {SuggestedActionTypeEnum} from 'parabol-client/types/graphql'
+import {SuggestedActionTypeEnum} from '../../../client/types/constEnums'
+import generateUID from '../../generateUID'
 
 interface Input {
   id?: string
@@ -20,7 +20,7 @@ export default abstract class SuggestedAction {
 
   protected constructor(input: Input) {
     const {type, userId, id, createdAt, priority, removedAt} = input
-    this.id = id || shortid.generate()
+    this.id = id || generateUID()
     this.createdAt = createdAt || new Date()
     this.userId = userId
     this.type = type

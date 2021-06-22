@@ -3,6 +3,7 @@ import db from '../../../db'
 import {requireSU} from '../../../utils/authorization'
 import {GQLContext} from '../../graphql'
 import FlagOverLimitPayload from '../../types/FlagOverLimitPayload'
+import updateUser from '../../../postgres/queries/updateUser'
 
 const flagOverLimit = {
   type: FlagOverLimitPayload,
@@ -10,7 +11,8 @@ const flagOverLimit = {
   args: {
     copy: {
       type: GraphQLString,
-      description: 'The text body of the over limit message, null to remove the previous value'
+      description: 'The text body of the over limit message, null to remove the previous value',
+      defaultValue: ''
     },
     orgId: {
       type: new GraphQLNonNull(GraphQLID),
@@ -28,7 +30,10 @@ const flagOverLimit = {
 
     // RESOLUTION
     const userIds = organizationUsers.map(({userId}) => userId)
-    await db.writeMany('User', userIds, {overLimitCopy: copy || null})
+    await Promise.all([
+      updateUser({overLimitCopy: copy}, userIds),
+      db.writeMany('User', userIds, {overLimitCopy: copy || null})
+    ])
     return {userIds}
   }
 }

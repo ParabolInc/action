@@ -22,7 +22,7 @@ const TopBarHelpMenu = (props: Props) => {
     window.open(ExternalLinks.SUPPORT, '_blank', 'noreferrer')
   }
   return (
-    <Menu ariaLabel={'How many we help?'} {...menuProps}>
+    <Menu ariaLabel={'How may we help?'} {...menuProps}>
       <MenuItem
         label={
           <MenuItemWithIcon dataCy={`${dataCy}`} label={'Teamwork Resources'} icon={'bookmark'} />

@@ -13,8 +13,12 @@ graphql`
     user {
       ...SlackProviderRow_viewer
       teamMember(teamId: $teamId) {
-        slackNotifications {
-          channelId
+        integrations {
+          slack {
+            notifications {
+              channelId
+            }
+          }
         }
       }
     }
@@ -54,7 +58,11 @@ const SetSlackNotificationMutation = (
       const teamMemberId = toTeamMemberId(teamId, viewerId)
       const teamMember = store.get(teamMemberId)
       if (!teamMember) return
-      const existingNotifications = teamMember.getLinkedRecords('slackNotifications')
+      const integrations = teamMember.getLinkedRecord('integrations')
+      if (!integrations) return
+      const slack = integrations.getLinkedRecord('slack')
+      if (!slack) return
+      const existingNotifications = slack.getLinkedRecords('notifications')
       if (!existingNotifications) return
       slackNotificationEvents.forEach((event) => {
         const existingNotification = existingNotifications.find(

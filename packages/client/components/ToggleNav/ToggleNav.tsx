@@ -2,7 +2,7 @@ import React from 'react'
 import Icon from '../Icon'
 import {ICON_SIZE} from '../../styles/typographyV2'
 import styled from '@emotion/styled'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 
 //    TODO:
 //  • Add themes, not just mid/purple (TA)
@@ -24,14 +24,14 @@ const Nav = styled('div')({
 const Item = styled('div')<{isActive: boolean; isFirst: boolean; isLast: boolean}>(
   ({isActive, isFirst, isLast}) => ({
     alignItems: 'center',
-    backgroundColor: isActive ? PALETTE.CONTROL_MAIN : 'transparent',
-    border: `1px solid ${PALETTE.BORDER_MAIN}`,
+    backgroundColor: isActive ? PALETTE.GRAPE_700 : 'transparent',
+    border: `1px solid ${PALETTE.GRAPE_700}`,
     borderBottomLeftRadius: isFirst ? 2 : undefined,
     borderTopLeftRadius: isFirst ? 2 : undefined,
     borderBottomRightRadius: isLast ? 2 : undefined,
     borderTopRightRadius: isLast ? 2 : undefined,
     borderLeftWidth: isFirst ? 1 : 0,
-    color: isActive ? '#FFFFFF' : PALETTE.TEXT_PURPLE,
+    color: isActive ? '#FFFFFF' : PALETTE.GRAPE_700,
     cursor: isActive ? 'default' : 'pointer',
     display: 'flex',
     flex: 1,
@@ -42,8 +42,8 @@ const Item = styled('div')<{isActive: boolean; isFirst: boolean; isLast: boolean
     textAlign: 'center',
     textDecoration: 'none',
     ':hover,:focus': {
-      backgroundColor: isActive ? PALETTE.CONTROL_MAIN : PALETTE.BACKGROUND_TOGGLE_ACTIVE,
-      color: isActive ? '#FFFFFF' : PALETTE.TEXT_TOGGLE_ACTIVE,
+      backgroundColor: isActive ? PALETTE.GRAPE_700 : PALETTE.SLATE_300,
+      color: isActive ? '#FFFFFF' : PALETTE.GRAPE_800,
       textDecoration: 'none'
     }
   })

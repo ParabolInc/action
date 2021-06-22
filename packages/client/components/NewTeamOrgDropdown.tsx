@@ -7,7 +7,6 @@ import DropdownMenuLabel from './DropdownMenuLabel'
 import Menu from './Menu'
 import MenuItem from './MenuItem'
 import {MenuProps} from '../hooks/useMenu'
-import {TierEnum} from '../types/graphql'
 import TierTag from './Tag/TierTag'
 
 interface Props {
@@ -34,7 +33,7 @@ const NewTeamOrgDropdown = (props: Props) => {
             label={
               <DropdownMenuItemLabel>
                 <span>{name}</span>
-                {tier !== TierEnum.personal && <TierTag tier={tier as TierEnum} />}
+                {tier !== 'personal' && <TierTag tier={tier} />}
               </DropdownMenuItemLabel>
             }
             onClick={() => {

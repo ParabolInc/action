@@ -1,5 +1,4 @@
 import {OutgoingMessage} from '@mattkrick/graphql-trebuchet-client'
-import shortid from 'shortid'
 import PROD from '../PROD'
 import ConnectionContext from '../socketHelpers/ConnectionContext'
 import {getUserId} from '../utils/authorization'
@@ -38,9 +37,7 @@ const handleGraphQLTrebuchetRequest = async (
       return
     }
     try {
-      const jobId = socketId && opId ? `${socketId}:${opId}` : shortid.generate()
       const result = await getGraphQLExecutor().publish({
-        jobId,
         docId,
         query,
         variables,

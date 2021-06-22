@@ -24,7 +24,7 @@ export default {
     const viewerId = getUserId(authToken)
 
     // AUTH
-    // id is of format 'teamId::shortid'
+    // id is of format 'teamId::randomId'
     const [teamId] = agendaItemId.split('::')
     if (!isTeamMember(authToken, teamId)) {
       return standardError(new Error('Team not found'), {userId: viewerId})

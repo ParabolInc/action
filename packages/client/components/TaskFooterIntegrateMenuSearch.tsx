@@ -1,6 +1,6 @@
 import React, {useCallback, useRef} from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 
 interface Props {
   placeholder: string
@@ -9,7 +9,7 @@ interface Props {
 const Input = styled('input')({
   appearance: 'none',
   background: 'inherit',
-  border: `1px solid ${PALETTE.BORDER_LIGHT}`,
+  border: `1px solid ${PALETTE.SLATE_400}`,
   borderRadius: 2,
   display: 'block',
   fontSize: 14,
@@ -18,8 +18,8 @@ const Input = styled('input')({
   padding: '3px 0 3px 39px',
   width: '100%',
   '&:focus, &:active': {
-    border: `1px solid ${PALETTE.BORDER_BLUE}`,
-    boxShadow: `0 0 1px 1px ${PALETTE.BORDER_BLUE_LIGHT}`
+    border: `1px solid ${PALETTE.SKY_500}`,
+    boxShadow: `0 0 1px 1px ${PALETTE.SKY_300}`
   }
 })
 

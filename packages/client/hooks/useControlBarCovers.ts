@@ -1,5 +1,7 @@
 import {RefObject, useEffect} from 'react'
-import {BezierCurve, Breakpoint} from '~/types/constEnums'
+import {BezierCurve, Breakpoint, DiscussionThreadEnum, NavSidebar} from '~/types/constEnums'
+import {MeetingTypeEnum} from '../__generated__/SummarySheet_meeting.graphql'
+import useResizeObserver from './useResizeObserver'
 
 interface ControlBarCoverable {
   id: string
@@ -29,13 +31,21 @@ const ensureCovering = (
   const {style} = coverable.el
   style.height = height
   if (isDrag) {
-    style.transition = `height 100ms ${BezierCurve.DECELERATE}`
+    style.transition = `all 100ms ${BezierCurve.DECELERATE}`
   }
   coverable.isExpanded = willBeExpanded
 }
 
-export const useCoverable = (id: string, ref: RefObject<HTMLDivElement>, height: number) => {
-  useEffect(() => {
+export const useCoverable = (
+  id: string,
+  ref: RefObject<HTMLDivElement>,
+  height: number,
+  parentRef?: RefObject<HTMLDivElement>,
+  columnsRef?: RefObject<HTMLDivElement>,
+  meetingType?: MeetingTypeEnum
+) => {
+  const updateCoverables = () => {
+    if (meetingType === 'poker') return
     const el = ref.current
     if (!el) return
     if (window.innerWidth < Breakpoint.SINGLE_REFLECTION_COLUMN) return
@@ -56,11 +66,22 @@ export const useCoverable = (id: string, ref: RefObject<HTMLDivElement>, height:
       ensureCovering(coverable, covering.left, covering.right)
     }
     coverables[id] = coverable
+  }
+
+  useResizeObserver(updateCoverables, parentRef)
+  useResizeObserver(updateCoverables, columnsRef)
+
+  useEffect(() => {
+    updateCoverables()
     return () => {
       const oldCoverable = coverables[id]
-      ;(oldCoverable as any).el = null
+      if (oldCoverable) {
+        ;(oldCoverable as any).el = null
+      }
     }
   }, [])
+
+  if (meetingType === 'poker') return true
   return coverables[id]?.isExpanded ?? false
 }
 
@@ -70,12 +91,12 @@ export const ensureAllCovering = (leftBound: number, rightBound: number) => {
   })
 }
 
-export const cacheCoveringBBox = () => {
+export const cacheCoveringBBox = (isLeftSidebarOpen?: boolean, isRightDrawerOpen?: boolean) => {
   if (covering.el) {
     const coveringBBox = covering.el.getBoundingClientRect()
     const {left, right} = coveringBBox
-    covering.left = left
-    covering.right = right
+    covering.left = left - (isLeftSidebarOpen ? NavSidebar.WIDTH : 0)
+    covering.right = right + (isRightDrawerOpen ? DiscussionThreadEnum.WIDTH : 0)
   }
   return covering
 }

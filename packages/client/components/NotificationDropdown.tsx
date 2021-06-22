@@ -6,7 +6,6 @@ import useAtmosphere from '~/hooks/useAtmosphere'
 import useLoadMoreOnScrollBottom from '~/hooks/useLoadMoreOnScrollBottom'
 import useTimeout from '~/hooks/useTimeout'
 import SetNotificationStatusMutation from '~/mutations/SetNotificationStatusMutation'
-import {NotificationStatusEnum} from '~/types/graphql'
 import {NotificationDropdown_viewer} from '~/__generated__/NotificationDropdown_viewer.graphql'
 import {MenuProps} from '../hooks/useMenu'
 import useSegmentTrack from '../hooks/useSegmentTrack'
@@ -54,20 +53,12 @@ const NotificationDropdown = (props: Props) => {
       {edges.map(({node}) => {
         const {id: notificationId, status} = node
         const onViewFn = () => {
-          SetNotificationStatusMutation(
-            atmosphere,
-            {notificationId, status: NotificationStatusEnum.READ},
-            {}
-          )
+          SetNotificationStatusMutation(atmosphere, {notificationId, status: 'READ'}, {})
         }
         const onClickFn = () => {
-          SetNotificationStatusMutation(
-            atmosphere,
-            {notificationId, status: NotificationStatusEnum.CLICKED},
-            {}
-          )
+          SetNotificationStatusMutation(atmosphere, {notificationId, status: 'CLICKED'}, {})
         }
-        const onView = status === NotificationStatusEnum.UNREAD ? onViewFn : undefined
+        const onView = status === 'UNREAD' ? onViewFn : undefined
         return (
           <MenuItem
             key={node.id}

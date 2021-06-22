@@ -1,7 +1,7 @@
 import {GraphQLBoolean, GraphQLInterfaceType, GraphQLNonNull} from 'graphql'
 import AuthIdentityTypeEnum from './AuthIdentityTypeEnum'
 import AuthIdentityGoogle from './AuthIdentityGoogle'
-import {AuthIdentityTypeEnum as EAuthIdentityTypeEnum} from 'parabol-client/types/graphql'
+import {AuthIdentityTypeEnum as EAuthIdentityTypeEnum} from '../../../client/types/constEnums'
 import AuthIdentityLocal from './AuthIdentityLocal'
 
 export const authStrategyFields = () => ({

@@ -1,14 +1,14 @@
 import styled from '@emotion/styled'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import {TaskStatus} from '../../../../types/constEnums'
 
 const taskStatusColors = {
-  [TaskStatus.DONE]: PALETTE.STATUS_DONE,
-  [TaskStatus.ACTIVE]: PALETTE.STATUS_ACTIVE,
-  [TaskStatus.STUCK]: PALETTE.STATUS_STUCK,
-  [TaskStatus.FUTURE]: PALETTE.STATUS_FUTURE,
-  [TaskStatus.ARCHIVED]: PALETTE.STATUS_ARCHIVED,
-  [TaskStatus.PRIVATE]: PALETTE.STATUS_PRIVATE
+  [TaskStatus.DONE]: PALETTE.GRAPE_600,
+  [TaskStatus.ACTIVE]: PALETTE.JADE_400,
+  [TaskStatus.STUCK]: PALETTE.TOMATO_500,
+  [TaskStatus.FUTURE]: PALETTE.AQUA_400,
+  [TaskStatus.ARCHIVED]: PALETTE.SLATE_500,
+  [TaskStatus.PRIVATE]: PALETTE.GOLD_300
 }
 
 const OutcomeCardStatusIndicator = styled('div')<{status: string}>(({status}) => ({

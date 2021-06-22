@@ -1,6 +1,7 @@
+import generateUID from '../../generateUID'
 import GenericMeetingPhase from './GenericMeetingPhase'
-import shortid from 'shortid'
-import {MeetingTypeEnum} from 'parabol-client/types/graphql'
+
+export type MeetingTypeEnum = 'poker' | 'retrospective' | 'action'
 
 interface Input {
   teamId: string
@@ -13,16 +14,15 @@ interface Input {
 }
 
 const namePrefix = {
-  [MeetingTypeEnum.action]: 'Check-in',
-  [MeetingTypeEnum.retrospective]: 'Retro'
-}
-// export type MeetingTypeEnum = 'action' | 'retrospective'
+  action: 'Check-in',
+  retrospective: 'Retro'
+} as Record<MeetingTypeEnum, string>
 export default class Meeting {
-  id = shortid.generate()
+  id = generateUID()
   isLegacy?: boolean // true if old version of action meeting
   createdAt = new Date()
   updatedAt = new Date()
-  defaultFacilitatorUserId: string
+  createdBy: string
   endedAt: Date | undefined | null = undefined
   facilitatorStageId: string
   facilitatorUserId: string
@@ -45,7 +45,7 @@ export default class Meeting {
       phases,
       showConversionModal
     } = input
-    this.defaultFacilitatorUserId = facilitatorUserId
+    this.createdBy = facilitatorUserId
     this.facilitatorStageId = phases[0].stages[0].id
     this.facilitatorUserId = facilitatorUserId
     this.meetingCount = meetingCount

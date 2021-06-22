@@ -1,5 +1,5 @@
 import {GraphQLID, GraphQLNonNull} from 'graphql'
-import {AuthIdentityTypeEnum} from 'parabol-client/types/graphql'
+import {AuthIdentityTypeEnum} from '../../../client/types/constEnums'
 import getRethink from '../../database/rethinkDriver'
 import AuthIdentityLocal from '../../database/types/AuthIdentityLocal'
 import AuthToken from '../../database/types/AuthToken'
@@ -11,6 +11,7 @@ import encodeAuthToken from '../../utils/encodeAuthToken'
 import rateLimit from '../rateLimit'
 import VerifyEmailPayload from '../types/VerifyEmailPayload'
 import bootstrapNewUser from './helpers/bootstrapNewUser'
+import updateUser from '../../postgres/queries/updateUser'
 
 export default {
   type: GraphQLNonNull(VerifyEmailPayload),
@@ -51,16 +52,25 @@ export default {
       .run()) as User
 
     if (user) {
-      const {id: userId, identities, tms} = user
+      const {id: userId, identities, rol, tms} = user
       const localIdentity = identities.find(
         (identity) => identity.type === AuthIdentityTypeEnum.LOCAL
       ) as AuthIdentityLocal
-      context.authToken = new AuthToken({sub: userId, tms})
+      context.authToken = new AuthToken({sub: userId, tms, rol})
       const authToken = encodeAuthToken(context.authToken)
       if (!localIdentity.isEmailVerified) {
         // mutative
         localIdentity.isEmailVerified = true
-        await db.write('User', userId, {identities, updatedAt: now})
+        await Promise.all([
+          updateUser(
+            {
+              identities,
+              updatedAt: now
+            },
+            userId
+          ),
+          db.write('User', userId, {identities, updatedAt: now})
+        ])
       }
       return {authToken, userId}
     }

@@ -1,6 +1,6 @@
-import pluralizeHandler from './pluralizeHandler'
 import fromTeamMemberId from '../../utils/relay/fromTeamMemberId'
 import safeRemoveNodeFromArray from '../../utils/relay/safeRemoveNodeFromArray'
+import pluralizeHandler from './pluralizeHandler'
 
 const handleUpdateTeamMember = (updatedTeamMember, store) => {
   if (!updatedTeamMember) return
@@ -8,7 +8,7 @@ const handleUpdateTeamMember = (updatedTeamMember, store) => {
   const isNotRemoved = updatedTeamMember.getValue('isNotRemoved')
   const team = teamId && store.get(teamId)
   if (!team) return
-  const sorts = ['checkInOrder', 'preferredName']
+  const sorts = ['preferredName']
   if (isNotRemoved) {
     sorts.forEach((sortBy) => {
       const teamMembers = team.getLinkedRecords('teamMembers', {sortBy})

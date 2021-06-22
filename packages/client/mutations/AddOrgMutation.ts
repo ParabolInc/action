@@ -11,6 +11,7 @@ import {
 } from '../types/relayMutations'
 import {AddOrgMutation_organization} from '../__generated__/AddOrgMutation_organization.graphql'
 import {AddOrgMutation as TAddOrgMutation} from '../__generated__/AddOrgMutation.graphql'
+import getGraphQLError from '../utils/relay/getGraphQLError'
 
 graphql`
   fragment AddOrgMutation_organization on AddOrgPayload {
@@ -100,7 +101,8 @@ const AddOrgMutation: StandardMutation<TAddOrgMutation, HistoryLocalHandler> = (
         onCompleted(res, errors)
       }
       const {addOrg} = res
-      if (!errors) {
+      const error = getGraphQLError(res, errors)
+      if (!error) {
         const {authToken} = addOrg
         atmosphere.setAuthToken(authToken)
         popOrganizationCreatedToast(addOrg, {atmosphere})

@@ -7,6 +7,7 @@ const DURATION = 200
 
 interface StyleProps {
   isOpen: boolean
+  isRightDrawer?: boolean
 }
 const Placeholder = styled('div')<StyleProps>(({isOpen}) => ({
   minWidth: isOpen ? NavSidebar.WIDTH : 0,
@@ -17,22 +18,25 @@ const Placeholder = styled('div')<StyleProps>(({isOpen}) => ({
   zIndex: ZIndex.SIDE_SHEET
 }))
 
-const Fixed = styled('div')<StyleProps>(({isOpen}) => ({
+const Fixed = styled('div')<StyleProps>(({isOpen, isRightDrawer}) => ({
   position: 'fixed',
-  transform: `translateX(${isOpen ? 0 : -NavSidebar.WIDTH}px)`,
+  transform: isRightDrawer ? undefined : `translateX(${isOpen ? 0 : -NavSidebar.WIDTH}px)`,
   transition: `all ${DURATION}ms ${DECELERATE}`
 }))
 
 interface Props {
   children: ReactNode
   isOpen: boolean
+  isRightDrawer?: boolean
 }
 
 const StaticSidebar = (props: Props) => {
-  const {children, isOpen} = props
+  const {children, isOpen, isRightDrawer = false} = props
   return (
     <Placeholder isOpen={isOpen}>
-      <Fixed isOpen={isOpen}>{children}</Fixed>
+      <Fixed isOpen={isOpen} isRightDrawer={isRightDrawer}>
+        {children}
+      </Fixed>
     </Placeholder>
   )
 }

@@ -2,7 +2,7 @@ import styled from '@emotion/styled'
 import 'emoji-mart/css/emoji-mart.css'
 import NimblePicker from 'emoji-mart/dist-modern/components/picker/nimble-picker'
 import React from 'react'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import {MenuProps} from '../hooks/useMenu'
 import Menu from './Menu'
 import appleEmojis from 'emoji-mart/data/apple.json'
@@ -39,7 +39,7 @@ const ReactjiPicker = (props: Props) => {
       <NimblePicker
         set={'apple'}
         data={appleEmojis}
-        color={PALETTE.TEXT_BLUE}
+        color={PALETTE.SKY_500}
         darkMode={false}
         emoji={''}
         native

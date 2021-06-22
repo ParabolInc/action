@@ -1,24 +1,13 @@
-import {GraphQLID, GraphQLList, GraphQLNonNull} from 'graphql'
-import {GQLContext} from '../graphql'
-import fetchAllIntegrations from './helpers/fetchAllIntegrations'
-import SuggestedIntegration from '../types/SuggestedIntegration'
+import {GraphQLList, GraphQLNonNull} from 'graphql'
 import {getUserId} from '../../utils/authorization'
-import {ISuggestedIntegrationsOnUserArguments, IUser} from 'parabol-client/types/graphql'
+import {GQLContext} from '../graphql'
+import SuggestedIntegration from '../types/SuggestedIntegration'
+import fetchAllIntegrations from './helpers/fetchAllIntegrations'
 
 export default {
   description: 'All the integrations that the user could possibly use',
   type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(SuggestedIntegration))),
-  args: {
-    teamId: {
-      type: new GraphQLNonNull(GraphQLID),
-      description: 'a teamId to use as a filter for the access tokens'
-    }
-  },
-  resolve: async (
-    {id: userId}: IUser,
-    {teamId}: ISuggestedIntegrationsOnUserArguments,
-    {authToken, dataLoader}: GQLContext
-  ) => {
+  resolve: async ({teamId, userId}, _args, {authToken, dataLoader}: GQLContext) => {
     const viewerId = getUserId(authToken)
 
     // AUTH

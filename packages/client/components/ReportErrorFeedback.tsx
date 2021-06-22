@@ -1,6 +1,6 @@
 import styled from '@emotion/styled'
 import React, {useState} from 'react'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import DialogContainer from './DialogContainer'
 import DialogContent from './DialogContent'
 import DialogTitle from './DialogTitle'
@@ -44,7 +44,7 @@ const ButtonGroup = styled('div')({
 })
 
 const Description = styled('div')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   fontSize: 14,
   lineHeight: 1.5,
   paddingLeft: 24,

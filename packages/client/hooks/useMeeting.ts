@@ -13,10 +13,9 @@ import useGotoNextHotkey from './useGotoNextHotkey'
 import useGotoPrevHotkey from './useGotoPrevHotkey'
 import useGotoStageId from './useGotoStageId'
 import useHandleMenuClick from './useHandleMenuClick'
+import useMediaRoom from './useMediaRoom'
 import useMeetingLocalState from './useMeetingLocalState'
 import useMobileSidebarDefaultClosed from './useMobileSidebarDefaultClosed'
-import useResumeFacilitation from './useResumeFacilitation'
-import useSwarm from './useSwarm'
 import useToggleSidebar from './useToggleSidebar'
 
 const useMeeting = (meetingRef: any) => {
@@ -27,9 +26,9 @@ const useMeeting = (meetingRef: any) => {
         ...useGotoNext_meeting
         ...useGotoPrev_meeting
         ...useMeetingLocalState_meeting
-        ...useResumeFacilitation_meeting
         ...useAutoCheckIn_meeting
         id
+        meetingType
         name
         showSidebar
         team {
@@ -40,13 +39,12 @@ const useMeeting = (meetingRef: any) => {
     `,
     meetingRef
   )
-  const {id: meetingId, name: meetingName, team} = meeting
+  const {id: meetingId, meetingType, name: meetingName, team} = meeting
   const {id: teamId, name: teamName} = team
   const gotoStageId = useGotoStageId(meeting)
   const handleGotoNext = useGotoNext(meeting, gotoStageId)
   const safeRoute = useMeetingLocalState(meeting)
-  useResumeFacilitation(meeting)
-  useEndMeetingHotkey(meetingId)
+  useEndMeetingHotkey(meetingId, meetingType)
   useGotoNextHotkey(handleGotoNext.gotoNext)
   useGotoPrevHotkey(meeting, gotoStageId)
   // save a few cycles
@@ -56,7 +54,7 @@ const useMeeting = (meetingRef: any) => {
   const toggleSidebar = useToggleSidebar(meetingId)
   const handleMenuClick = useHandleMenuClick(teamId, isDesktop)
   useMobileSidebarDefaultClosed(isDesktop, meetingId)
-  const {streams, swarm} = useSwarm(teamId)
+  const {room, peers, consumers, producers, mediaRoom} = useMediaRoom(meetingId, teamId)
   useAutoCheckIn(meeting)
   return {
     demoPortal,
@@ -64,8 +62,11 @@ const useMeeting = (meetingRef: any) => {
     gotoStageId,
     safeRoute,
     toggleSidebar,
-    streams,
-    swarm,
+    room,
+    peers,
+    consumers,
+    producers,
+    mediaRoom,
     isDesktop,
     handleMenuClick
   }

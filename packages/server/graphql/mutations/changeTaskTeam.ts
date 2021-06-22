@@ -1,8 +1,8 @@
 import {GraphQLID, GraphQLNonNull} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import shortid from 'shortid'
 import removeEntityKeepText from 'parabol-client/utils/draftjs/removeEntityKeepText'
 import getRethink from '../../database/rethinkDriver'
+import generateUID from '../../generateUID'
 import {getUserId, isTeamMember} from '../../utils/authorization'
 import publish from '../../utils/publish'
 import standardError from '../../utils/standardError'
@@ -86,9 +86,7 @@ export default {
           // prepopulated cards will not have a history
           return r.branch(
             taskHistoryRecord.ne(null),
-            r
-              .table('TaskHistory')
-              .insert(taskHistoryRecord.merge(updates, {id: shortid.generate()})),
+            r.table('TaskHistory').insert(taskHistoryRecord.merge(updates, {id: generateUID()})),
             null
           )
         })

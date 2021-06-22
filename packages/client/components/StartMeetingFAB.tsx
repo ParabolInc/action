@@ -1,7 +1,7 @@
 import styled from '@emotion/styled'
 import React, {useEffect, useRef, useState} from 'react'
 import useRouter from '~/hooks/useRouter'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import getTeamIdFromPathname from '~/utils/getTeamIdFromPathname'
 import {BezierCurve, ZIndex} from '../types/constEnums'
 import FloatingActionButton from './FloatingActionButton'
@@ -17,7 +17,7 @@ const Block = styled('div')({
 
 const Button = styled(FloatingActionButton)({
   color: '#fff',
-  backgroundImage: PALETTE.GRADIENT_WARM,
+  backgroundImage: PALETTE.GRADIENT_TOMATO_600_ROSE_500,
   height: 56,
   padding: 0,
   overflow: 'hidden',
@@ -40,10 +40,10 @@ const MeetingLabel = styled('div')<{isExpanded: boolean}>(({isExpanded}) => ({
   width: isExpanded ? 158 : 0
 }))
 
-interface Props {}
+interface Props { }
 
 const StartMeetingFAB = (props: Props) => {
-  const {} = props
+  const { } = props
   const teamId = getTeamIdFromPathname()
   const {history} = useRouter()
   const [isBig, setIsBig] = useState(true)

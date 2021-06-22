@@ -15,7 +15,7 @@ const upsertNotifications = async (
   viewerId: string,
   teamId: string,
   teamChannelId: string,
-  botChannelId: string
+  channelId: string
 ) => {
   const r = await getRethink()
   const existingNotifications = await r
@@ -37,7 +37,7 @@ const upsertNotifications = async (
     return new SlackNotification({
       event,
       // the existing notification channel could be a bad one (legacy reasons, bad means not public or not @Parabol)
-      channelId: teamEvents.includes(event) ? teamChannelId : botChannelId,
+      channelId: teamEvents.includes(event) ? teamChannelId : channelId,
       teamId,
       userId: viewerId,
       id: (existingNotification && existingNotification.id) || undefined
@@ -64,19 +64,19 @@ const upsertAuth = async (
     .nth(0)
     .default(null)
     .run()) as SlackAuth | null
+
   const slackAuth = new SlackAuth({
     id: (existingAuth && existingAuth.id) || undefined,
     createdAt: (existingAuth && existingAuth.createdAt) || undefined,
-    accessToken: slackRes.access_token,
     defaultTeamChannelId: teamChannelId,
     teamId,
     userId: viewerId,
-    slackTeamId: slackRes.team_id,
-    slackTeamName: slackRes.team_name,
-    slackUserId: slackRes.user_id,
+    slackTeamId: slackRes.team.id,
+    slackTeamName: slackRes.team.name,
+    slackUserId: slackRes.authed_user.id,
     slackUserName,
-    botUserId: slackRes.bot.bot_user_id,
-    botAccessToken: slackRes.bot.bot_access_token
+    botUserId: slackRes.bot_user_id,
+    botAccessToken: slackRes.access_token
   })
   await r
     .table('SlackAuth')
@@ -113,26 +113,22 @@ export default {
     // RESOLUTION
     const manager = await SlackServerManager.init(code)
     const {response} = manager
-    const slackUserId = response.user_id
+    const slackUserId = response.authed_user.id
     const defaultChannelId = response.incoming_webhook.channel_id
-    const [convoRes, userInfoRes, botChannelRes] = await Promise.all([
-      manager.getConversationInfo(defaultChannelId),
-      manager.getUserInfo(slackUserId),
-      manager.openIM(slackUserId)
+    const [joinConvoRes, userInfoRes] = await Promise.all([
+      manager.joinConversation(defaultChannelId),
+      manager.getUserInfo(slackUserId)
     ])
     if (!userInfoRes.ok) {
       return standardError(new Error(userInfoRes.error), {userId: viewerId})
     }
-    if (!botChannelRes.ok) {
-      return standardError(new Error(botChannelRes.error), {userId: viewerId})
-    }
-    const {channel} = botChannelRes
-    const {id: botChannelId} = channel
+
     // The default channel could be anything: public, private, im, mpim. Only allow public channels or the @Parabol channel
-    const teamChannelId = convoRes.ok ? defaultChannelId : botChannelId
+    // Using the slackUserId sends a DM to the user from @Parabol
+    const teamChannelId = joinConvoRes.ok ? joinConvoRes.channel.id : slackUserId
 
     const [, slackAuthId] = await Promise.all([
-      upsertNotifications(viewerId, teamId, teamChannelId, botChannelId),
+      upsertNotifications(viewerId, teamId, teamChannelId, defaultChannelId),
       upsertAuth(viewerId, teamId, teamChannelId, userInfoRes.user.profile.display_name, response)
     ])
     segmentIo.track({

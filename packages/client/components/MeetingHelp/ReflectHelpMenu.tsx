@@ -1,8 +1,6 @@
 import React, {forwardRef} from 'react'
 import useSegmentTrack from '../../hooks/useSegmentTrack'
 import {ExternalLinks} from '../../types/constEnums'
-import {NewMeetingPhaseTypeEnum} from '../../types/graphql'
-import {REFLECT} from '../../utils/constants'
 import {phaseLabelLookup} from '../../utils/meetings/lookups'
 import HelpMenuContent from './HelpMenuContent'
 import HelpMenuCopy from './HelpMenuCopy'
@@ -13,10 +11,10 @@ interface Props {}
 
 const ReflectHelpMenu = forwardRef((_props: Props, ref: any) => {
   const {closePortal} = ref
-  useSegmentTrack('HelpMenuOpen', {phase: NewMeetingPhaseTypeEnum.reflect})
+  useSegmentTrack('Help Menu Open', {phase: 'reflect'})
   return (
     <HelpMenuContent closePortal={closePortal}>
-      <HelpMenuHeader>{phaseLabelLookup[REFLECT]}</HelpMenuHeader>
+      <HelpMenuHeader>{phaseLabelLookup.reflect}</HelpMenuHeader>
       <HelpMenuCopy>The goal of this phase is to gather honest input from the team.</HelpMenuCopy>
       <HelpMenuCopy>
         As a group, reflect on how work’s going for a specific project or timeframe.

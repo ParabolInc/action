@@ -1,9 +1,11 @@
 import graphql from 'babel-plugin-relay/macro'
 import {commitMutation} from 'react-relay'
-import {IRetroReflectionGroup, IRetrospectiveMeetingMember} from '../types/graphql'
 import {BaseLocalHandlers, StandardMutation} from '../types/relayMutations'
 import toTeamMemberId from '../utils/relay/toTeamMemberId'
-import {VoteForReflectionGroupMutation as TVoteForReflectionGroupMutation} from '../__generated__/VoteForReflectionGroupMutation.graphql'
+import {
+  VoteForReflectionGroupMutation as TVoteForReflectionGroupMutation,
+  VoteForReflectionGroupMutationResponse
+} from '../__generated__/VoteForReflectionGroupMutation.graphql'
 
 graphql`
   fragment VoteForReflectionGroupMutation_meeting on VoteForReflectionGroupPayload {
@@ -41,6 +43,13 @@ interface Handlers extends BaseLocalHandlers {
   meetingId: string
 }
 
+type RetrospectiveMeetingMember = NonNullable<
+  NonNullable<VoteForReflectionGroupMutationResponse['voteForReflectionGroup']>['meetingMember']
+>
+type RetroReflectionGroup = NonNullable<
+  NonNullable<VoteForReflectionGroupMutationResponse['voteForReflectionGroup']>['reflectionGroup']
+>
+
 const VoteForReflectionGroupMutation: StandardMutation<
   TVoteForReflectionGroupMutation,
   Handlers
@@ -53,11 +62,11 @@ const VoteForReflectionGroupMutation: StandardMutation<
     optimisticUpdater: (store) => {
       const {viewerId} = atmosphere
       const {reflectionGroupId, isUnvote} = variables
-      const reflectionGroupProxy = store.get<IRetroReflectionGroup>(reflectionGroupId)
+      const reflectionGroupProxy = store.get<RetroReflectionGroup>(reflectionGroupId)
       if (!reflectionGroupProxy) return
       const increment = isUnvote ? -1 : 1
       const meetingMemberId = toTeamMemberId(meetingId, viewerId)
-      const meetingMemberProxy = store.get<IRetrospectiveMeetingMember>(meetingMemberId)
+      const meetingMemberProxy = store.get<RetrospectiveMeetingMember>(meetingMemberId)
       if (!meetingMemberProxy) return
       const viewerVoteCount = reflectionGroupProxy.getValue('viewerVoteCount') || 0
       const votesRemaining = meetingMemberProxy.getValue('votesRemaining') || 0

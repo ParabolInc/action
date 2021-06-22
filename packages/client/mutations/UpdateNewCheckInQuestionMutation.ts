@@ -1,9 +1,11 @@
 import {commitMutation} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
-import {ICheckInPhase, INewMeeting} from '../types/graphql'
 import {RecordProxy} from 'relay-runtime'
 import {SimpleMutation} from '../types/relayMutations'
-import {UpdateNewCheckInQuestionMutation as TUpdateNewCheckInQuestionMutation} from '../__generated__/UpdateNewCheckInQuestionMutation.graphql'
+import {
+  UpdateNewCheckInQuestionMutation as TUpdateNewCheckInQuestionMutation,
+  UpdateNewCheckInQuestionMutationResponse
+} from '../__generated__/UpdateNewCheckInQuestionMutation.graphql'
 graphql`
   fragment UpdateNewCheckInQuestionMutation_meeting on UpdateNewCheckInQuestionPayload {
     meeting {
@@ -27,6 +29,10 @@ const mutation = graphql`
   }
 `
 
+type CheckInPhase = NonNullable<
+  NonNullable<UpdateNewCheckInQuestionMutationResponse['updateNewCheckInQuestion']>['meeting']
+>['phases'][0]
+
 const UpdateNewCheckInQuestionMutation: SimpleMutation<TUpdateNewCheckInQuestionMutation> = (
   atmosphere,
   variables
@@ -37,12 +43,13 @@ const UpdateNewCheckInQuestionMutation: SimpleMutation<TUpdateNewCheckInQuestion
     optimisticUpdater: (store) => {
       const {meetingId, checkInQuestion} = variables
       if (!checkInQuestion) return
-      const meeting = store.get<INewMeeting>(meetingId)
+      const meeting = store.get(meetingId)
       if (!meeting) return
       const phases = meeting.getLinkedRecords('phases')
+      if (!phases) return
       const checkInPhase = phases.find(
         (phase) => phase.getValue('__typename') === 'CheckInPhase'
-      ) as RecordProxy<ICheckInPhase>
+      ) as RecordProxy<CheckInPhase>
       checkInPhase.setValue(checkInQuestion, 'checkInQuestion')
     }
   })

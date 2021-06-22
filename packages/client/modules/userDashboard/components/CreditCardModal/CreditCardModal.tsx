@@ -8,7 +8,7 @@ import styled from '@emotion/styled'
 import CreditCardReassurance from './CreditCardReassurance'
 import Icon from '../../../../components/Icon'
 import {ICON_SIZE} from '../../../../styles/typographyV2'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import {ExternalLinks} from '../../../../types/constEnums'
 import PayLaterMutation from '../../../../mutations/PayLaterMutation'
 import useAtmosphere from '../../../../hooks/useAtmosphere'
@@ -20,7 +20,7 @@ const Container = styled(DialogContainer)({
 })
 
 const Info = styled(Icon)({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: ICON_SIZE.MD18,
   paddingLeft: 8
 })
@@ -44,9 +44,9 @@ const CreditCardModal = (props: Props) => {
     actionType === 'update'
       ? closePortal
       : () => {
-          onUpgrade?.()
-          setStatus('success')
-        }
+        onUpgrade?.()
+        setStatus('success')
+      }
   const onLater = (e: React.FormEvent) => {
     e.preventDefault()
     setStatus('later')

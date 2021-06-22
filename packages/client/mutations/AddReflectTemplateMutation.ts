@@ -1,34 +1,26 @@
 import graphql from 'babel-plugin-relay/macro'
 import {commitMutation} from 'react-relay'
-import {Disposable} from 'relay-runtime'
-import Atmosphere from '../Atmosphere'
-import {IAddReflectTemplateOnMutationArguments} from '../types/graphql'
-import {CompletedHandler, ErrorHandler, SharedUpdater} from '../types/relayMutations'
+import {SharedUpdater, StandardMutation} from '../types/relayMutations'
 import createProxyRecord from '../utils/relay/createProxyRecord'
-import getCachedRecord from '../utils/relay/getCachedRecord'
-import {AddReflectTemplateMutation as IAddReflectTemplateMutation} from '../__generated__/AddReflectTemplateMutation.graphql'
+import {setActiveTemplateInRelayStore} from '../utils/relay/setActiveTemplate'
+import {AddReflectTemplateMutation as TAddReflectTemplateMutation} from '../__generated__/AddReflectTemplateMutation.graphql'
 import {AddReflectTemplateMutation_team} from '../__generated__/AddReflectTemplateMutation_team.graphql'
 import handleAddReflectTemplate from './handlers/handleAddReflectTemplate'
 
 graphql`
   fragment AddReflectTemplateMutation_team on AddReflectTemplatePayload {
     reflectTemplate {
+      ...TemplateSharing_template
+      ...ReflectTemplateDetailsTemplate
       id
-      name
       teamId
-      prompts {
-        description
-        groupColor
-        question
-        sortOrder
-      }
     }
   }
 `
 
 const mutation = graphql`
-  mutation AddReflectTemplateMutation($teamId: ID!) {
-    addReflectTemplate(teamId: $teamId) {
+  mutation AddReflectTemplateMutation($teamId: ID!, $parentTemplateId: ID) {
+    addReflectTemplate(teamId: $teamId, parentTemplateId: $parentTemplateId) {
       ...AddReflectTemplateMutation_team @relay(mask: false)
     }
   }
@@ -42,27 +34,18 @@ export const addReflectTemplateTeamUpdater: SharedUpdater<AddReflectTemplateMuta
   if (!template) return
   const templateId = template.getValue('id')
   handleAddReflectTemplate(template, store)
-  const filterFn = (obj) => {
-    return (
-      obj?.__typename === 'RetrospectiveMeetingSettings' &&
-      obj?.reflectTemplates?.__refs?.includes(templateId)
-    )
-  }
-  const settingsRecord = getCachedRecord(store, filterFn)
-  if (!settingsRecord || Array.isArray(settingsRecord)) return
-  const settings = store.get(settingsRecord.__id)
-  if (!settings) return
-  settings.setValue(templateId, 'activeTemplateId')
+  const teamId = template.getValue('teamId')
+  const team = store.get(teamId)
+  if (!team) return
+  setActiveTemplateInRelayStore(store, teamId, templateId, 'retrospective')
 }
 
-const AddReflectTemplateMutation = (
-  atmosphere: Atmosphere,
-  variables: IAddReflectTemplateOnMutationArguments,
-  _context: {},
-  onError: ErrorHandler,
-  onCompleted: CompletedHandler
-): Disposable => {
-  return commitMutation<IAddReflectTemplateMutation>(atmosphere, {
+const AddReflectTemplateMutation: StandardMutation<TAddReflectTemplateMutation> = (
+  atmosphere,
+  variables,
+  {onError, onCompleted}
+) => {
+  return commitMutation<TAddReflectTemplateMutation>(atmosphere, {
     mutation,
     variables,
     onCompleted,
@@ -73,25 +56,34 @@ const AddReflectTemplateMutation = (
       addReflectTemplateTeamUpdater(payload, {atmosphere, store})
     },
     optimisticUpdater: (store) => {
-      const {teamId} = variables
+      const {parentTemplateId, teamId} = variables
       const nowISO = new Date().toJSON()
+      const team = store.get(teamId)!
+      const parentTemplate = parentTemplateId ? store.get(parentTemplateId) : null
+      const name = parentTemplate ? parentTemplate.getValue('name') + ' Copy' : '*New Template'
 
       const proxyTemplate = createProxyRecord(store, 'ReflectTemplate', {
-        name: '*New Template',
+        name,
         createdAt: nowISO,
         teamId
       })
+      proxyTemplate.setLinkedRecord(team, 'team')
       const templateId = proxyTemplate.getValue('id')
 
-      const prompt = createProxyRecord(store, 'ReflectTemplatePrompt', {
-        description: '',
-        question: 'New prompt',
-        createdAt: nowISO,
-        teamId,
-        sortOrder: 0,
-        templateId
-      })
-      proxyTemplate.setLinkedRecords([prompt], 'prompts')
+      if (parentTemplate) {
+        const currentPrompts = parentTemplate.getLinkedRecords('prompts')!
+        proxyTemplate.setLinkedRecords(currentPrompts, 'prompts')
+      } else {
+        const prompt = createProxyRecord(store, 'ReflectTemplatePrompt', {
+          description: '',
+          question: 'New prompt',
+          createdAt: nowISO,
+          teamId,
+          sortOrder: 0,
+          templateId
+        })
+        proxyTemplate.setLinkedRecords([prompt], 'prompts')
+      }
       handleAddReflectTemplate(proxyTemplate, store)
     }
   })

@@ -1,10 +1,9 @@
 import {commitMutation} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
-import {Disposable} from 'relay-runtime'
-import Atmosphere from '../Atmosphere'
 import handleMoveTemplatePrompt from './handlers/handleMoveTemplatePrompt'
-import {IMoveReflectTemplatePromptOnMutationArguments} from '../types/graphql'
+import {MoveReflectTemplatePromptMutation as TMoveReflectTemplatePromptMutation} from '~/__generated__/MoveReflectTemplatePromptMutation.graphql'
 import getInProxy from '../utils/relay/getInProxy'
+import {StandardMutation} from '../types/relayMutations'
 
 interface Context {
   templateId: string
@@ -36,12 +35,11 @@ export const moveReflectTemplatePromptTeamUpdater = (payload, {store}) => {
   handleMoveTemplatePrompt(store, templateId)
 }
 
-const MoveReflectTemplatePromptMutation = (
-  atmosphere: Atmosphere,
-  variables: IMoveReflectTemplatePromptOnMutationArguments,
-  context: Context
-): Disposable => {
-  return commitMutation(atmosphere, {
+const MoveReflectTemplatePromptMutation: StandardMutation<
+  TMoveReflectTemplatePromptMutation,
+  Context
+> = (atmosphere, variables, context) => {
+  return commitMutation<TMoveReflectTemplatePromptMutation>(atmosphere, {
     mutation,
     variables,
     updater: (store) => {

@@ -5,7 +5,12 @@ import {getUserId} from '../../utils/authorization'
 import publish from '../../utils/publish'
 import {GQLContext} from '../graphql'
 import DeleteCommentPayload from '../types/DeleteCommentPayload'
-import {IDeleteCommentOnMutationArguments} from 'parabol-client/types/graphql'
+import toTeamMemberId from 'parabol-client/utils/relay/toTeamMemberId'
+
+type DeleteCommentMutationVariables = {
+  commentId: string
+  meetingId: string
+}
 
 const deleteComment = {
   type: GraphQLNonNull(DeleteCommentPayload),
@@ -14,10 +19,13 @@ const deleteComment = {
     commentId: {
       type: GraphQLNonNull(GraphQLID)
     },
+    meetingId: {
+      type: new GraphQLNonNull(GraphQLID)
+    }
   },
   resolve: async (
     _source,
-    {commentId}: IDeleteCommentOnMutationArguments,
+    {commentId, meetingId}: DeleteCommentMutationVariables,
     {authToken, dataLoader, socketId: mutatorId}: GQLContext
   ) => {
     const r = await getRethink()
@@ -34,15 +42,15 @@ const deleteComment = {
     if (!comment || !comment.isActive) {
       return {error: {message: 'Comment does not exist'}}
     }
-    const {createdBy, threadId, threadSource} = comment
+    const meetingMemberId = toTeamMemberId(meetingId, viewerId)
+    const viewerMeetingMember = await dataLoader.get('meetingMembers').load(meetingMemberId)
+    if (!viewerMeetingMember) {
+      return {error: {message: `Not a member of the meeting`}}
+    }
+    const {createdBy} = comment
     if (createdBy !== viewerId) {
       return {error: {message: 'Can only delete your own comment'}}
     }
-
-    const thread = await dataLoader
-      .get('threadSources')
-      .load({sourceId: threadId, type: threadSource})
-    const {meetingId} = thread
 
     await r
       .table('Comment')
@@ -52,7 +60,9 @@ const deleteComment = {
 
     const data = {commentId}
 
-    publish(SubscriptionChannel.MEETING, meetingId, 'DeleteCommentSuccess', data, subOptions)
+    if (meetingId) {
+      publish(SubscriptionChannel.MEETING, meetingId, 'DeleteCommentSuccess', data, subOptions)
+    }
     return data
   }
 }

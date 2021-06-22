@@ -8,11 +8,11 @@ import {OutcomeCard_task} from '~/__generated__/OutcomeCard_task.graphql'
 import TaskEditor from '../../../../components/TaskEditor/TaskEditor'
 import TaskIntegrationLink from '../../../../components/TaskIntegrationLink'
 import TaskWatermark from '../../../../components/TaskWatermark'
-import {UseTaskChild} from '../../../../hooks/useTaskChildFocus'
+import useTaskChildFocus, {UseTaskChild} from '../../../../hooks/useTaskChildFocus'
 import {cardFocusShadow, cardHoverShadow, cardShadow, Elevation} from '../../../../styles/elevation'
 import cardRootStyles from '../../../../styles/helpers/cardRootStyles'
 import {Card} from '../../../../types/constEnums'
-import {AreaEnum, TaskServiceEnum, TaskStatusEnum} from '../../../../types/graphql'
+import {AreaEnum, TaskServiceEnum, TaskStatusEnum} from '~/__generated__/UpdateTaskMutation.graphql'
 import isTaskArchived from '../../../../utils/isTaskArchived'
 import isTaskPrivate from '../../../../utils/isTaskPrivate'
 import isTempId from '../../../../utils/relay/isTempId'
@@ -48,12 +48,15 @@ const StatusIndicatorBlock = styled('div')({
   display: 'flex'
 })
 
+const TaskEditorWrapper = styled('div')()
+
 interface Props {
   area: AreaEnum
   isTaskFocused: boolean
   isTaskHovered: boolean
   editorRef: RefObject<HTMLTextAreaElement>
   editorState: EditorState
+  handleCardUpdate: () => void
   isAgenda: boolean
   isDraggingOver: TaskStatusEnum | undefined
   task: OutcomeCard_task
@@ -69,6 +72,7 @@ const OutcomeCard = memo((props: Props) => {
     isTaskHovered,
     editorRef,
     editorState,
+    handleCardUpdate,
     isAgenda,
     isDraggingOver,
     task,
@@ -78,9 +82,9 @@ const OutcomeCard = memo((props: Props) => {
   } = props
   const isPrivate = isTaskPrivate(task.tags)
   const isArchived = isTaskArchived(task.tags)
-  const {status, team} = task
+  const {integration, status, taskId, team} = task
+  const {addTaskChild, removeTaskChild} = useTaskChildFocus(taskId)
   const {teamId} = team
-  const {integration, taskId} = task
   const service = integration ? (integration.service as TaskServiceEnum) : undefined
   const statusTitle = `Card status: ${taskStatusLabels[status]}`
   const privateTitle = ', marked as #private'
@@ -88,6 +92,7 @@ const OutcomeCard = memo((props: Props) => {
   const statusIndicatorTitle = `${statusTitle}${isPrivate ? privateTitle : ''}${
     isArchived ? archivedTitle : ''
   }`
+
   return (
     <RootCard
       isTaskHovered={isTaskHovered}
@@ -96,22 +101,35 @@ const OutcomeCard = memo((props: Props) => {
     >
       <TaskWatermark service={service} />
       <ContentBlock>
-        <EditingStatus isTaskHovered={isTaskHovered} task={task} useTaskChild={useTaskChild}>
+        <EditingStatus
+          isTaskHovered={isTaskHovered}
+          isArchived={isArchived}
+          task={task}
+          useTaskChild={useTaskChild}
+        >
           <StatusIndicatorBlock data-cy={`${dataCy}-status`} title={statusIndicatorTitle}>
             <OutcomeCardStatusIndicator status={isDraggingOver || status} />
             {isPrivate && <OutcomeCardStatusIndicator status='private' />}
             {isArchived && <OutcomeCardStatusIndicator status='archived' />}
           </StatusIndicatorBlock>
         </EditingStatus>
-        <TaskEditor
-          dataCy={`${dataCy}`}
-          editorRef={editorRef}
-          editorState={editorState}
-          readOnly={Boolean(isTempId(taskId) || isArchived || isDraggingOver || service)}
-          setEditorState={setEditorState}
-          teamId={teamId}
-          useTaskChild={useTaskChild}
-        />
+        <TaskEditorWrapper
+          onBlur={() => {
+            removeTaskChild('root')
+            setTimeout(handleCardUpdate)
+          }}
+          onFocus={() => addTaskChild('root')}
+        >
+          <TaskEditor
+            dataCy={`${dataCy}`}
+            editorRef={editorRef}
+            editorState={editorState}
+            readOnly={Boolean(isTempId(taskId) || isArchived || isDraggingOver || service)}
+            setEditorState={setEditorState}
+            teamId={teamId}
+            useTaskChild={useTaskChild}
+          />
+        </TaskEditorWrapper>
         <TaskIntegrationLink dataCy={`${dataCy}`} integration={integration || null} />
         <TaskFooter
           dataCy={`${dataCy}`}

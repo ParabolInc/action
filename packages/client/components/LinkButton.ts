@@ -1,26 +1,26 @@
 import styled from '@emotion/styled'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import BaseButton, {BaseButtonProps} from './BaseButton'
 
 const paletteColors = {
-  blue: PALETTE.TEXT_BLUE,
-  dark: PALETTE.TEXT_MAIN,
-  gray: PALETTE.TEXT_LIGHT,
-  midGray: PALETTE.TEXT_GRAY,
-  red: PALETTE.TEXT_RED,
-  warm: PALETTE.TEXT_ORANGE,
+  blue: PALETTE.SKY_500,
+  dark: PALETTE.SLATE_700,
+  gray: PALETTE.SLATE_200,
+  midGray: PALETTE.SLATE_600,
+  red: PALETTE.TOMATO_600,
+  warm: PALETTE.GOLD_500,
   white: '#FFFFFF'
 }
 
-// mix palete color with 15% black
+// mix palete color with ~15% black
 const hoverColors = {
-  blue: PALETTE.TEXT_BLUE_DARK,
-  dark: PALETTE.TEXT_MAIN_DARK,
-  gray: PALETTE.TEXT_LIGHT_DARK,
-  midGray: PALETTE.TEXT_GRAY_DARK,
-  red: PALETTE.TEXT_RED_DARK,
-  warm: PALETTE.TEXT_ORANGE_DARK,
-  white: '#D9D9D9'
+  blue: PALETTE.SKY_600,
+  dark: PALETTE.SLATE_800,
+  gray: PALETTE.SLATE_400,
+  midGray: PALETTE.SLATE_700,
+  red: PALETTE.TOMATO_800,
+  warm: PALETTE.GOLD_700,
+  white: PALETTE.SLATE_300
 }
 
 export interface LinkButtonProps extends BaseButtonProps {

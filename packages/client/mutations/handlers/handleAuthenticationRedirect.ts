@@ -11,7 +11,7 @@ const handleAuthenticationRedirect: OnNextHandler<
   AcceptTeamInvitationMutationReply,
   OnNextMeetingId
 > = (acceptTeamInvitation, {meetingId: locallyRequestedMeetingId, history, atmosphere}) => {
-  SendClientSegmentEventMutation(atmosphere, 'UserLogin')
+  SendClientSegmentEventMutation(atmosphere, 'User Login')
   const {meetingId: invitedMeetingId, team} = acceptTeamInvitation
   const redirectTo = getValidRedirectParam()
   if (redirectTo) {

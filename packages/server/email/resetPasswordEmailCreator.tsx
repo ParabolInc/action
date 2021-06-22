@@ -1,19 +1,19 @@
-import {PALETTE} from 'parabol-client/styles/paletteV2'
+import {PALETTE} from 'parabol-client/styles/paletteV3'
 import React from 'react'
 import ReactDOMServer from 'react-dom/server'
-import makeAppLink from '../utils/makeAppLink'
-import ResetPasswordEmail from './components/ResetPasswordEmail'
+import ResetPasswordEmail from '../../client/modules/email/components/ResetPasswordEmail'
 import emailTemplate from './emailTemplate'
-
+import makeAppURL from '../../client/utils/makeAppURL'
+import appOrigin from '../appOrigin'
 interface Props {
   resetPasswordToken: string
 }
 
 const resetPasswordEmailCreator = (props: Props) => {
   const {resetPasswordToken} = props
-  const resetURL = makeAppLink(`reset-password/${resetPasswordToken}`)
+  const resetURL = makeAppURL(appOrigin, `reset-password/${resetPasswordToken}`)
   const bodyContent = ReactDOMServer.renderToStaticMarkup(
-    <ResetPasswordEmail resetURL={resetURL} />
+    <ResetPasswordEmail appOrigin={appOrigin} resetURL={resetURL} />
   )
 
   const subject = `Request to Reset Your Password`
@@ -21,7 +21,7 @@ const resetPasswordEmailCreator = (props: Props) => {
     bodyContent,
     title: subject,
     previewText: subject,
-    bgColor: PALETTE.BACKGROUND_MAIN
+    bgColor: PALETTE.SLATE_200
   })
 
   return {

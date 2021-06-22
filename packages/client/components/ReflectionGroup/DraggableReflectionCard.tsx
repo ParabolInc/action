@@ -3,7 +3,6 @@ import graphql from 'babel-plugin-relay/macro'
 import React, {useState} from 'react'
 import {createFragmentContainer} from 'react-relay'
 import useDraggableReflectionCard from '../../hooks/useDraggableReflectionCard'
-import {NewMeetingPhaseTypeEnum} from '../../types/graphql'
 import {DraggableReflectionCard_meeting} from '../../__generated__/DraggableReflectionCard_meeting.graphql'
 import {DraggableReflectionCard_reflection} from '../../__generated__/DraggableReflectionCard_reflection.graphql'
 import {DraggableReflectionCard_staticReflections} from '../../__generated__/DraggableReflectionCard_staticReflections.graphql'
@@ -14,6 +13,7 @@ export interface DropZoneBBox {
   height: number
   top: number
   bottom: number
+  width: number
 }
 
 const makeDragState = () => ({
@@ -88,7 +88,7 @@ const DraggableReflectionCard = (props: Props) => {
     staticReflectionCount,
     swipeColumn
   )
-  const isDragPhase = phaseType === NewMeetingPhaseTypeEnum.group && !isComplete
+  const isDragPhase = phaseType === 'group' && !isComplete
   const canDrag = isDraggable && isDragPhase && !isEditing && !isDropping
   // slow state updates can mean we miss an onMouseDown event, so use isDragPhase instead of canDrag
   const handleDrag = isDragPhase ? onMouseDown : undefined
@@ -123,7 +123,7 @@ export default createFragmentContainer(DraggableReflectionCard, {
       id
       isEditing
       reflectionGroupId
-      retroPhaseItemId
+      promptId
       isViewerDragging
       isViewerCreator
       isDropping

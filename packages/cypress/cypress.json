@@ -9,5 +9,16 @@
   "projectId": "3wn18n",
   "chromeWebSecurity": false,
   "viewportWidth": 1280,
-  "viewportHeight": 720
+  "viewportHeight": 720,
+  "reporter": "junit",
+  "reporterOptions": {
+    "mochaFile": "results/test-result-[hash].xml"
+  },
+  "ignoreTestFiles": [
+    "archivedTasks*",
+    "userTaskView*",
+    "me*",
+    "poker*",
+    "*"
+  ]
 }

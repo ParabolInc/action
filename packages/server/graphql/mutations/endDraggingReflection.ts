@@ -8,11 +8,8 @@ import addReflectionToGroup from './helpers/updateReflectionLocation/addReflecti
 import removeReflectionFromGroup from './helpers/updateReflectionLocation/removeReflectionFromGroup'
 import standardError from '../../utils/standardError'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import {
-  DragReflectionDropTargetTypeEnum as EDragReflectionDropTargetTypeEnum,
-  NewMeetingPhaseTypeEnum
-} from 'parabol-client/types/graphql'
 
+type TDragReflectionDropTargetTypeEnum = 'REFLECTION_GRID' | 'REFLECTION_GROUP'
 export default {
   description: 'Broadcast that the viewer stopped dragging a reflection',
   type: EndDraggingReflectionPayload,
@@ -35,7 +32,21 @@ export default {
       type: GraphQLID
     }
   },
-  async resolve(_source, {reflectionId, dropTargetType, dropTargetId, dragId}, context) {
+  async resolve(
+    _source,
+    {
+      reflectionId,
+      dropTargetType,
+      dropTargetId,
+      dragId
+    }: {
+      reflectionId: string
+      dropTargetType: TDragReflectionDropTargetTypeEnum
+      dropTargetId: string
+      dragId: string
+    },
+    context
+  ) {
     const {authToken, dataLoader, socketId: mutatorId} = context
     const operationId = dataLoader.share()
     const subOptions = {operationId, mutatorId}
@@ -54,23 +65,20 @@ export default {
       return standardError(new Error('Team not found'), {userId: viewerId})
     }
     if (endedAt) return standardError(new Error('Meeting already ended'), {userId: viewerId})
-    if (isPhaseComplete(NewMeetingPhaseTypeEnum.group, phases)) {
+    if (isPhaseComplete('group', phases)) {
       return standardError(new Error('Meeting phase already completed'), {userId: viewerId})
     }
 
     // RESOLUTION
     let newReflectionGroupId
-    if (dropTargetType === EDragReflectionDropTargetTypeEnum.REFLECTION_GRID) {
+    if (dropTargetType === 'REFLECTION_GRID') {
       // ungroup
       try {
         newReflectionGroupId = await removeReflectionFromGroup(reflectionId, context)
       } catch (e) {
         return standardError(e, {userId: viewerId})
       }
-    } else if (
-      dropTargetType === EDragReflectionDropTargetTypeEnum.REFLECTION_GROUP &&
-      dropTargetId
-    ) {
+    } else if (dropTargetType === 'REFLECTION_GROUP' && dropTargetId) {
       // group
       try {
         newReflectionGroupId = await addReflectionToGroup(reflectionId, dropTargetId, context)

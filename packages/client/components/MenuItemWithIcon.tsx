@@ -1,6 +1,6 @@
 import styled from '@emotion/styled'
 import React from 'react'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import {ICON_SIZE} from '~/styles/typographyV2'
 import Icon from './Icon'
 
@@ -13,13 +13,13 @@ const Wrapper = styled('div')({
 })
 
 const ItemIcon = styled(Icon)({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: ICON_SIZE.MD24,
   padding: 8
 })
 
 const Label = styled('div')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   fontSize: 14,
   lineHeight: '32px'
 })

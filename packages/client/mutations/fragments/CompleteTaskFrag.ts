@@ -3,6 +3,7 @@ graphql`
   fragment CompleteTaskFrag on Task {
     id
     content
+    plaintextContent
     createdAt
     createdBy
     createdByUser {

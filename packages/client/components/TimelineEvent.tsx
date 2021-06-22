@@ -1,8 +1,9 @@
-import React, {lazy} from 'react'
-import {createFragmentContainer} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
-import DelayUnmount from './DelayUnmount'
+import React, {lazy, Suspense} from 'react'
+import {createFragmentContainer} from 'react-relay'
 import {TimelineEvent_timelineEvent} from '../__generated__/TimelineEvent_timelineEvent.graphql'
+import DelayUnmount from './DelayUnmount'
+import TimelineEventMock from './TimelineEventMock'
 
 interface Props {
   timelineEvent: TimelineEvent_timelineEvent
@@ -20,6 +21,11 @@ const lookup = {
       /* webpackChunkName: 'TimelineEventCompletedRetroMeeting' */ './TimelineEventCompletedRetroMeeting'
     )
   ),
+  TimelineEventPokerComplete: lazy(() =>
+    import(
+      /* webpackChunkName: 'TimelineEventPokerComplete' */ './TimelineEventPokerComplete'
+    )
+  ),
   TimelineEventCompletedActionMeeting: lazy(() =>
     import(
       /* webpackChunkName: 'TimelineEventCompletedActionMeeting' */ './TimelineEventCompletedActionMeeting'
@@ -35,7 +41,9 @@ function TimelineEvent(props: Props) {
   }
   return (
     <DelayUnmount unmountAfter={500}>
-      {AsyncComponent ? <AsyncComponent timelineEvent={timelineEvent} /> : null}
+      <Suspense fallback={<TimelineEventMock />}>
+        {AsyncComponent ? <AsyncComponent timelineEvent={timelineEvent} /> : null}
+      </Suspense>
     </DelayUnmount>
   )
 }
@@ -47,6 +55,7 @@ export default createFragmentContainer(TimelineEvent, {
       ...TimelineEventTeamCreated_timelineEvent
       ...TimelineEventCompletedRetroMeeting_timelineEvent
       ...TimelineEventCompletedActionMeeting_timelineEvent
+      ...TimelineEventPokerComplete_timelineEvent
       __typename
     }
   `

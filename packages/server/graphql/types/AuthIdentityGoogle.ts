@@ -15,7 +15,7 @@ import AuthIdentity, {authStrategyFields} from './AuthIdentity'
 //     locale: profile.locale
 // }
 
-const AuthIdentityGoogle = new GraphQLObjectType<any, GQLContext, any>({
+const AuthIdentityGoogle = new GraphQLObjectType<any, GQLContext>({
   name: 'AuthIdentityGoogle',
   interfaces: () => [AuthIdentity],
   description: 'An authentication strategy using Google',

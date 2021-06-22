@@ -1,5 +1,5 @@
-import shortid from 'shortid'
 import {InvoiceItemType} from 'parabol-client/types/constEnums'
+import generateUID from '../../generateUID'
 
 interface Input {
   id?: string
@@ -51,7 +51,7 @@ export default class InvoiceItemHook {
       type,
       userId
     } = input
-    this.id = id || shortid.generate()
+    this.id = id || generateUID()
     this.createdAt = createdAt || new Date()
     this.invoiceItemId = invoiceItemId
     this.previousInvoiceItemId = previousInvoiceItemId

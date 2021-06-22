@@ -2,7 +2,7 @@ import React, {Component} from 'react'
 import styled from '@emotion/styled'
 import {keyframes} from '@emotion/core'
 import {DECELERATE, fadeIn} from '../../styles/animation'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import {Elevation} from '../../styles/elevation'
 import plural from '../../utils/plural'
 import TinyLabel from '../TinyLabel'
@@ -62,7 +62,7 @@ const ActiveChitMask = styled('div')({
 
 const ActiveChit = styled('div')<{idx: number}>(({idx}) => ({
   animation: `${shiftColor(idx).toString()} 2000ms linear infinite`,
-  background: `linear-gradient(90deg, ${PALETTE.PRIMARY_LIGHT} 0%, ${PALETTE.BACKGROUND_ORANGE} 33%, ${PALETTE.BACKGROUND_TEAL} 66%, ${PALETTE.PRIMARY_LIGHT} 100%)`,
+  background: `linear-gradient(90deg, ${PALETTE.GRAPE_500} 0%, ${PALETTE.TOMATO_500} 33%, ${PALETTE.AQUA_400} 66%, ${PALETTE.GRAPE_500} 100%)`,
   height: CHIT_HEIGHT,
   width: PROGRESS_WIDTH
 }))

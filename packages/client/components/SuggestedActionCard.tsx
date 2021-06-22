@@ -6,7 +6,7 @@ import DismissSuggestedActionMutation from '../mutations/DismissSuggestedActionM
 import {buttonShadow, cardShadow} from '../styles/elevation'
 import withAtmosphere, {WithAtmosphereProps} from '../decorators/withAtmosphere/withAtmosphere'
 import {DECELERATE, fadeIn} from '../styles/animation'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {ICON_SIZE} from '../styles/typographyV2'
 import withMutationProps, {WithMutationProps} from '../utils/relay/withMutationProps'
 import SuggestedActionBackground from './SuggestedActionBackground'
@@ -34,7 +34,7 @@ const Surface = styled('div')({
 const CancelIcon = styled(Icon)({
   background: `rgba(255,255,255,0.8)`,
   borderRadius: '100%',
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   position: 'absolute',
   right: 8,
   top: 8,
@@ -45,8 +45,8 @@ const CancelIcon = styled(Icon)({
 })
 
 const FloatingSealIcon = styled(Icon)({
-  color: PALETTE.PRIMARY_MAIN,
-  background: PALETTE.BACKGROUND_MAIN_DARKENED,
+  color: PALETTE.GRAPE_700,
+  background: PALETTE.SLATE_300,
   borderRadius: '100%',
   boxShadow: buttonShadow,
   padding: 8,

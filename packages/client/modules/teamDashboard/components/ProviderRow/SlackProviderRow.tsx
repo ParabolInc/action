@@ -14,7 +14,7 @@ import RowInfo from '../../../../components/Row/RowInfo'
 import RowInfoCopy from '../../../../components/Row/RowInfoCopy'
 import {MenuPosition} from '../../../../hooks/useCoords'
 import useMenu from '../../../../hooks/useMenu'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import {ICON_SIZE} from '../../../../styles/typographyV2'
 import {Breakpoint, Layout, Providers} from '../../../../types/constEnums'
 import useMutationProps, {MenuMutationProps} from '../../../../hooks/useMutationProps'
@@ -24,8 +24,8 @@ import SlackNotificationList from './SlackNotificationList'
 import useBreakpoint from '../../../../hooks/useBreakpoint'
 
 const StyledButton = styled(FlatButton)({
-  borderColor: PALETTE.BORDER_LIGHT,
-  color: PALETTE.TEXT_MAIN,
+  borderColor: PALETTE.SLATE_400,
+  color: PALETTE.SLATE_700,
   fontSize: 14,
   fontWeight: 600,
   minWidth: 36,
@@ -40,7 +40,7 @@ interface Props {
 }
 
 const MenuButton = styled(FlatButton)({
-  color: PALETTE.PRIMARY_MAIN,
+  color: PALETTE.GRAPE_700,
   fontSize: ICON_SIZE.MD18,
   height: 24,
   userSelect: 'none',
@@ -63,7 +63,7 @@ const ListAndMenu = styled('div')({
 const SlackLogin = styled('div')({})
 
 const ProviderName = styled('div')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   fontSize: 16,
   fontWeight: 600,
   lineHeight: '24px',
@@ -90,8 +90,9 @@ const SlackProviderRow = (props: Props) => {
   const {submitting, submitMutation, onError, onCompleted} = useMutationProps()
   const mutationProps = {submitting, submitMutation, onError, onCompleted} as MenuMutationProps
   const {teamMember} = viewer
-  const {slackAuth} = teamMember!
-  const accessToken = (slackAuth && slackAuth.accessToken) || undefined
+  const {integrations} = teamMember!
+  const {slack} = integrations
+  const botAccessToken = slack?.botAccessToken ?? undefined
   const openOAuth = () => {
     SlackClientManager.openOAuth(atmosphere, teamId, mutationProps)
   }
@@ -105,16 +106,16 @@ const SlackProviderRow = (props: Props) => {
           <ProviderName>{Providers.SLACK_NAME}</ProviderName>
           <RowInfoCopy>{Providers.SLACK_DESC}</RowInfoCopy>
         </RowInfo>
-        {!accessToken && (
+        {!botAccessToken && (
           <ProviderActions>
             <StyledButton onClick={openOAuth} palette='warm' waiting={submitting}>
               {isDesktop ? 'Connect' : <Icon>add</Icon>}
             </StyledButton>
           </ProviderActions>
         )}
-        {accessToken && (
+        {botAccessToken && (
           <ListAndMenu>
-            <SlackLogin title={slackAuth!.slackTeamName || 'Slack'}>
+            <SlackLogin title={slack!.slackTeamName || 'Slack'}>
               <SlackSVG />
             </SlackLogin>
             <MenuButton onClick={togglePortal} ref={originRef}>
@@ -130,7 +131,7 @@ const SlackProviderRow = (props: Props) => {
           </ListAndMenu>
         )}
       </CardTop>
-      {accessToken && <SlackNotificationList teamId={teamId} viewer={viewer} />}
+      {botAccessToken && <SlackNotificationList teamId={teamId} viewer={viewer} />}
     </ExtraProviderCard>
   )
 }
@@ -139,10 +140,12 @@ graphql`
   fragment SlackProviderRowViewer on User {
     ...SlackNotificationList_viewer
     teamMember(teamId: $teamId) {
-      slackAuth {
-        accessToken
-        slackTeamName
-        slackUserName
+      integrations {
+        slack {
+          botAccessToken
+          slackTeamName
+          slackUserName
+        }
       }
     }
   }

@@ -5,10 +5,10 @@ import Icon from './Icon'
 import useMenu from '../hooks/useMenu'
 import makeFieldColorPalette from '../styles/helpers/makeFieldColorPalette'
 import ui from '../styles/ui'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 
 const DropdownIcon = styled(Icon)({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   marginLeft: 8
 })
 

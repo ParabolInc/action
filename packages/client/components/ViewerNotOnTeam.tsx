@@ -13,7 +13,6 @@ import InvitationDialogCopy from './InvitationDialogCopy'
 import DialogTitle from './DialogTitle'
 import TeamInvitationWrapper from './TeamInvitationWrapper'
 import useRouter from '../hooks/useRouter'
-import getValidRedirectParam from '../utils/getValidRedirectParam'
 import PushInvitationMutation from '../mutations/PushInvitationMutation'
 import useDocumentTitle from '../hooks/useDocumentTitle'
 
@@ -24,13 +23,13 @@ interface Props {
 const ViewerNotOnTeam = (props: Props) => {
   const {viewer} = props
   const {
+    meeting,
+    team,
     teamInvitation: {teamInvitation, meetingId, teamId}
   } = viewer
   const atmosphere = useAtmosphere()
-  const {authObj} = atmosphere
   const {history} = useRouter()
   useDocumentTitle(`Invitation Required`, 'Invitation Required')
-  const isOnTeam = authObj?.tms?.includes?.(teamId!) ?? false
 
   useEffect(
     () => {
@@ -41,14 +40,10 @@ const ViewerNotOnTeam = (props: Props) => {
           {invitationToken: teamInvitation.token},
           {history, meetingId}
         )
-      } else if (isOnTeam) {
-        // if already on the team, goto team dash
-        const redirectTo = getValidRedirectParam()
-        const nextRoute = redirectTo || `/team/${teamId}`
-        history.replace(nextRoute)
-      } else if (teamId) {
-        PushInvitationMutation(atmosphere, {meetingId, teamId})
-      }
+        return
+      } else if (meeting) history.replace(`/meet/${meetingId}`)
+      else if (team) history.replace(`/team/${teamId}`)
+      else if (teamId) PushInvitationMutation(atmosphere, {meetingId, teamId})
       return undefined
     },
     [
@@ -56,7 +51,7 @@ const ViewerNotOnTeam = (props: Props) => {
     ]
   )
 
-  if (teamInvitation || isOnTeam) {
+  if (teamInvitation || team) {
     return null
   }
   return (
@@ -82,6 +77,12 @@ const ViewerNotOnTeam = (props: Props) => {
 export default createFragmentContainer(ViewerNotOnTeam, {
   viewer: graphql`
     fragment ViewerNotOnTeam_viewer on User {
+      meeting(meetingId: $meetingId) {
+        meetingType
+      }
+      team(teamId: $teamId) {
+        name
+      }
       teamInvitation(teamId: $teamId, meetingId: $meetingId) {
         teamInvitation {
           token

@@ -3,20 +3,21 @@ import graphql from 'babel-plugin-relay/macro'
 import React, {useRef} from 'react'
 import {createFragmentContainer} from 'react-relay'
 import useAtmosphere from '~/hooks/useAtmosphere'
+import useBreakpoint from '~/hooks/useBreakpoint'
 import {useCovering} from '~/hooks/useControlBarCovers'
 import useDraggableFixture from '~/hooks/useDraggableFixture'
 import useGotoNext from '~/hooks/useGotoNext'
 import useGotoStageId from '~/hooks/useGotoStageId'
 import useInitialRender from '~/hooks/useInitialRender'
+import useLeft from '~/hooks/useLeft'
 import useTransition, {TransitionStatus} from '~/hooks/useTransition'
-import {PALETTE} from '~/styles/paletteV2'
-import {Breakpoint, ZIndex} from '~/types/constEnums'
-import {MeetingTypeEnum, NewMeetingPhaseTypeEnum} from '~/types/graphql'
+import {PALETTE} from '~/styles/paletteV3'
+import {BezierCurve, Breakpoint, ElementWidth, ZIndex} from '~/types/constEnums'
+import {NewMeetingPhaseTypeEnum} from '../__generated__/MeetingControlBar_meeting.graphql'
 import makeMinWidthMediaQuery from '~/utils/makeMinWidthMediaQuery'
 import findStageAfterId from '~/utils/meetings/findStageAfterId'
 import {MeetingControlBar_meeting} from '~/__generated__/MeetingControlBar_meeting.graphql'
 import useClickConfirmation from '../hooks/useClickConfirmation'
-import useSnackbarPad from '../hooks/useSnackbarPad'
 import {bottomBarShadow, desktopBarShadow} from '../styles/elevation'
 import BottomControlBarReady from './BottomControlBarReady'
 import BottomControlBarRejoin from './BottomControlBarRejoin'
@@ -24,39 +25,38 @@ import BottomControlBarTips from './BottomControlBarTips'
 import EndMeetingButton from './EndMeetingButton'
 import StageTimerControl from './StageTimerControl'
 
-const Wrapper = styled('div')({
+const Wrapper = styled('div')<{left: number}>(({left}) => ({
   alignItems: 'center',
   backgroundColor: '#FFFFFF',
   bottom: 0,
   boxShadow: bottomBarShadow,
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   display: 'flex',
   flexWrap: 'nowrap',
   fontSize: 14,
   height: 56,
   justifyContent: 'space-between',
-  left: 0,
-  margin: '0 auto',
+  left,
   minHeight: 56,
-  padding: 8,
+  padding: ElementWidth.CONTROL_BAR_PADDING,
   position: 'fixed',
-  right: 0,
+  transition: `all 200ms ${BezierCurve.DECELERATE}`,
   width: '100%',
   zIndex: ZIndex.BOTTOM_BAR,
   [makeMinWidthMediaQuery(Breakpoint.SINGLE_REFLECTION_COLUMN)]: {
     borderRadius: 4,
     bottom: 8,
     boxShadow: desktopBarShadow,
-    width: 'fit-content'
+    width: 'auto'
   }
-})
+}))
 
 const DEFAULT_TIME_LIMIT = {
-  [NewMeetingPhaseTypeEnum.reflect]: 5,
-  [NewMeetingPhaseTypeEnum.group]: 5,
-  [NewMeetingPhaseTypeEnum.vote]: 3,
-  [NewMeetingPhaseTypeEnum.discuss]: 5
-}
+  reflect: 5,
+  group: 5,
+  vote: 3,
+  discuss: 5
+} as Record<NewMeetingPhaseTypeEnum, number>
 
 interface Props {
   handleGotoNext: ReturnType<typeof useGotoNext>
@@ -64,7 +64,6 @@ interface Props {
   gotoStageId: ReturnType<typeof useGotoStageId>
   meeting: MeetingControlBar_meeting
 }
-
 const MeetingControlBar = (props: Props) => {
   const {handleGotoNext, isDemoStageComplete, meeting, gotoStageId} = props
   const atmosphere = useAtmosphere()
@@ -77,19 +76,22 @@ const MeetingControlBar = (props: Props) => {
     id: meetingId,
     localStage,
     phases,
-    meetingType
+    meetingType,
+    showSidebar,
+    isRightDrawerOpen = false
   } = meeting
   const isFacilitating = facilitatorUserId === viewerId && !endedAt
   const {phaseType} = localPhase
   const {id: localStageId, isComplete} = localStage
-  const isCheckIn = phaseType === NewMeetingPhaseTypeEnum.checkin
-  const isRetro = meetingType === MeetingTypeEnum.retrospective
+  const isCheckIn = phaseType === 'checkin'
+  const isRetro = meetingType === 'retrospective'
+  const isPoker = meetingType === 'poker'
   const getPossibleButtons = () => {
     const buttons = ['tips']
-    if (!isFacilitating && !isCheckIn && !isComplete) buttons.push('ready')
+    if (!isFacilitating && !isCheckIn && !isComplete && !isPoker) buttons.push('ready')
     if (!isFacilitating && localStageId !== facilitatorStageId) buttons.push('rejoin')
     if (isFacilitating && isRetro && !isCheckIn && !isComplete) buttons.push('timer')
-    if (isFacilitating && findStageAfterId(phases, localStageId)) buttons.push('next')
+    if ((isFacilitating || isPoker) && findStageAfterId(phases, localStageId)) buttons.push('next')
     if (isFacilitating) buttons.push('end')
     return buttons.map((key) => ({key}))
   }
@@ -97,15 +99,20 @@ const MeetingControlBar = (props: Props) => {
   const [confirmingButton, setConfirmingButton] = useClickConfirmation()
   const cancelConfirm = confirmingButton ? () => setConfirmingButton('') : undefined
   const tranChildren = useTransition(buttons)
-  const {onMouseDown, onClickCapture} = useDraggableFixture()
+  const isDesktop = useBreakpoint(Breakpoint.SINGLE_REFLECTION_COLUMN)
+  const controlBarWidth =
+    buttons.length * ElementWidth.CONTROL_BAR_BUTTON + ElementWidth.CONTROL_BAR_PADDING * 2
+  const left = useLeft(controlBarWidth, isRightDrawerOpen, showSidebar)
+  const controlBarLeft = isDesktop ? left : 0
+  const {onMouseDown, onClickCapture} = useDraggableFixture(showSidebar, isRightDrawerOpen)
   const ref = useRef<HTMLDivElement>(null)
-  useSnackbarPad(ref)
   useCovering(ref)
   const isInit = useInitialRender()
   if (endedAt) return null
   return (
     <Wrapper
       ref={ref}
+      left={controlBarLeft}
       onMouseDown={onMouseDown}
       onClickCapture={onClickCapture}
       onTouchStart={onMouseDown}
@@ -133,8 +140,11 @@ const MeetingControlBar = (props: Props) => {
               return (
                 <BottomControlBarReady
                   {...tranProps}
-                  cancelConfirm={confirmingButton === 'next' ? undefined : cancelConfirm}
-                  isConfirming={confirmingButton === 'next'}
+                  isNext={isPoker ? true : isFacilitating}
+                  cancelConfirm={
+                    isPoker ? undefined : confirmingButton === 'next' ? undefined : cancelConfirm
+                  }
+                  isConfirming={isPoker ? false : confirmingButton === 'next'}
                   setConfirmingButton={setConfirmingButton}
                   isDemoStageComplete={isDemoStageComplete}
                   meeting={meeting}
@@ -165,6 +175,7 @@ const MeetingControlBar = (props: Props) => {
                   isConfirming={confirmingButton === 'end'}
                   setConfirmingButton={setConfirmingButton}
                   meetingId={meetingId}
+                  meetingType={meetingType}
                   isEnded={!!endedAt}
                 />
               )
@@ -188,6 +199,10 @@ export default createFragmentContainer(MeetingControlBar, {
       facilitatorStageId
       facilitatorUserId
       meetingType
+      showSidebar
+      ... on PokerMeeting {
+        isRightDrawerOpen
+      }
       localStage {
         id
         isComplete

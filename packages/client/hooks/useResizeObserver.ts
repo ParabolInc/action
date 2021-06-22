@@ -1,4 +1,4 @@
-import {useEffect} from 'react'
+import {useEffect, RefObject} from 'react'
 import ResizeObserverPolyfill from 'resize-observer-polyfill'
 import useEventCallback from './useEventCallback'
 
@@ -10,16 +10,19 @@ declare global {
 
 const ResizeObserver = window.ResizeObserver || (ResizeObserverPolyfill as {new (): ResizeObserver})
 
-const useResizeObserver = (el: HTMLElement | null, cb: ResizeObserverCallback) => {
+const useResizeObserver = (
+  cb: ResizeObserverCallback,
+  ref?: RefObject<HTMLDivElement | HTMLElement>
+) => {
   const eventCb = useEventCallback(cb)
   useEffect(() => {
-    if (!el) return
+    if (!ref || !ref.current) return
     const resizeObserver = new ResizeObserver(eventCb)
-    resizeObserver.observe(el)
+    resizeObserver.observe(ref.current)
     return () => {
       resizeObserver.disconnect()
     }
-  }, [el, eventCb])
+  }, [ref, eventCb])
 }
 
 export default useResizeObserver

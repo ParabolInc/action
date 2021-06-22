@@ -1,6 +1,6 @@
 import React, {Children, cloneElement, Component, ReactElement, ReactNode} from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import getBBox from '../RetroReflectPhase/getBBox'
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
 const INKBAR_HEIGHT = 2
 
 const InkBar = styled('div')({
-  background: PALETTE.PRIMARY_DARK,
+  background: PALETTE.GRAPE_700,
   bottom: 0,
   height: INKBAR_HEIGHT,
   left: 0,

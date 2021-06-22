@@ -2,7 +2,7 @@ import SecondaryButton from '../../../../components/SecondaryButton'
 import Panel from '../../../../components/Panel/Panel'
 import React from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import Icon from '../../../../components/Icon'
 import {ICON_SIZE} from '../../../../styles/typographyV2'
 import {Breakpoint, Layout} from '../../../../types/constEnums'
@@ -14,14 +14,14 @@ import lazyPreload from '../../../../utils/lazyPreload'
 
 const CreditCardInfo = styled('div')({
   alignItems: 'center',
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   display: 'flex',
   fontSize: 14,
   lineHeight: '20px'
 })
 
 const CreditCardIcon = styled(Icon)({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: ICON_SIZE.MD24,
   marginRight: 16
 })
@@ -41,7 +41,7 @@ const CreditCardExpiresLabel = styled('span')({
 })
 
 const InfoAndUpdate = styled('div')({
-  borderTop: `1px solid ${PALETTE.BORDER_LIGHTER}`,
+  borderTop: `1px solid ${PALETTE.SLATE_300}`,
   padding: Layout.ROW_GUTTER,
   alignItems: 'center',
   display: 'flex',

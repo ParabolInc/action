@@ -1,5 +1,5 @@
 import getRethink from '../database/rethinkDriver'
-import {TierEnum} from 'parabol-client/types/graphql'
+import getTeamsByOrgId from '../postgres/queries/getTeamsByOrgId'
 
 // Only does something if the organization is empty & not paid
 // safeArchiveTeam & downgradeToPersonal should be called before calling this
@@ -7,18 +7,15 @@ import {TierEnum} from 'parabol-client/types/graphql'
 const safeArchiveEmptyPersonalOrganization = async (orgId: string) => {
   const r = await getRethink()
   const now = new Date()
-  const teamCountRemainingOnOldOrg = (await r
-    .table('Team')
-    .getAll(orgId, {index: 'orgId'})
-    .count()
-    .run()) as number
+  const orgTeams = await getTeamsByOrgId(orgId)
+  const teamCountRemainingOnOldOrg = orgTeams.length
 
   if (teamCountRemainingOnOldOrg > 0) return
   const org = await r
     .table('Organization')
     .get(orgId)
     .run()
-  if (org.tier !== TierEnum.personal) return
+  if (org.tier !== 'personal') return
 
   await r
     .table('OrganizationUser')

@@ -4,7 +4,7 @@ import React from 'react'
 import {createFragmentContainer} from 'react-relay'
 import Icon from '~/components/Icon'
 import useRouter from '~/hooks/useRouter'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import getTeamIdFromPathname from '~/utils/getTeamIdFromPathname'
 import plural from '~/utils/plural'
 import {SelectMeetingDropdown_meetings} from '~/__generated__/SelectMeetingDropdown_meetings.graphql'
@@ -19,7 +19,7 @@ interface Props {
 }
 
 const HeaderLabel = styled('div')({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: 12,
   fontWeight: 600,
   lineHeight: '16px',
@@ -39,7 +39,7 @@ const NoMeetings = styled('div')({
 })
 
 const StyledIcon = styled(Icon)({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   marginRight: 16
 })
 

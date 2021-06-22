@@ -2,7 +2,7 @@ import {GraphQLID, GraphQLObjectType} from 'graphql'
 import {GQLContext} from '../graphql'
 import TeamInvitation from './TeamInvitation'
 
-const TeamInvitationPayload = new GraphQLObjectType<any, GQLContext, any>({
+const TeamInvitationPayload = new GraphQLObjectType<any, GQLContext>({
   name: 'TeamInvitationPayload',
   description: 'The response to a teamInvitation query',
   fields: () => ({

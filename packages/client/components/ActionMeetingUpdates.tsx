@@ -3,7 +3,6 @@ import graphql from 'babel-plugin-relay/macro'
 import React, {useMemo} from 'react'
 import {createFragmentContainer} from 'react-relay'
 import useAtmosphere from '../hooks/useAtmosphere'
-import {AreaEnum} from '../types/graphql'
 import isTaskPrivate from '../utils/isTaskPrivate'
 import toTeamMemberId from '../utils/relay/toTeamMemberId'
 import {ActionMeetingUpdates_meeting} from '../__generated__/ActionMeetingUpdates_meeting.graphql'
@@ -15,6 +14,7 @@ import MeetingPhaseWrapper from './MeetingPhaseWrapper'
 import MeetingTopBar from './MeetingTopBar'
 import PhaseWrapper from './PhaseWrapper'
 import TaskColumns from './TaskColumns/TaskColumns'
+import PhaseCompleteTag from './Tag/PhaseCompleteTag'
 
 const StyledColumnsWrapper = styled(MeetingPhaseWrapper)({
   position: 'relative'
@@ -40,7 +40,7 @@ const ActionMeetingUpdates = (props: Props) => {
   const {avatarGroup, toggleSidebar, meeting} = props
   const atmosphere = useAtmosphere()
   const {viewerId} = atmosphere
-  const {id: meetingId, endedAt, localStage, showSidebar, team} = meeting
+  const {id: meetingId, endedAt, localStage, showSidebar, team, localPhase} = meeting
   const {id: teamId, tasks} = team
   const {teamMember} = localStage!
   const {userId} = teamMember!
@@ -49,6 +49,9 @@ const ActionMeetingUpdates = (props: Props) => {
       .map(({node}) => node)
       .filter((task) => task.userId === userId && !isTaskPrivate(task.tags))
   }, [tasks, userId])
+  const {stages} = localPhase
+  const isPhaseComplete = stages.every((stage) => stage.isComplete)
+
   return (
     <MeetingContent>
       <MeetingHeaderAndPhase hideBottomBar={!!endedAt}>
@@ -60,10 +63,11 @@ const ActionMeetingUpdates = (props: Props) => {
           <ActionMeetingUpdatesPrompt meeting={meeting} />
         </MeetingTopBar>
         <PhaseWrapper>
+          <PhaseCompleteTag isComplete={isPhaseComplete} />
           <StyledColumnsWrapper>
             <InnerColumnsWrapper>
               <TaskColumns
-                area={AreaEnum.meeting}
+                area='meeting'
                 isMyMeetingSection={userId === viewerId}
                 meetingId={meetingId}
                 myTeamMemberId={toTeamMemberId(teamId, viewerId)}
@@ -93,12 +97,19 @@ export default createFragmentContainer(ActionMeetingUpdates, {
       id
       endedAt
       showSidebar
+      localPhase {
+        stages {
+          isComplete
+        }
+      }
       localStage {
         ...ActionMeetingUpdatesStage @relay(mask: false)
       }
       phases {
         stages {
           ...ActionMeetingUpdatesStage @relay(mask: false)
+          # required so localPhase has access to isComplete
+          isComplete
         }
       }
       team {

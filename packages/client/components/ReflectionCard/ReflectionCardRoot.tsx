@@ -1,5 +1,5 @@
 import styled from '@emotion/styled'
-import {DECELERATE} from '../../styles/animation'
+import {DECELERATE} from '~/styles/animation'
 import {Elevation} from '../../styles/elevation'
 import {Card, ElementWidth} from '../../types/constEnums'
 

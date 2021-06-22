@@ -15,7 +15,7 @@ import resolveReactjis from '../resolvers/resolveReactjis'
 import GoogleAnalyzedEntity from './GoogleAnalyzedEntity'
 import GraphQLISO8601Type from './GraphQLISO8601Type'
 import Reactable, {reactableFields} from './Reactable'
-import RetroPhaseItem from './RetroPhaseItem'
+import ReflectPrompt from './ReflectPrompt'
 import RetroReflectionGroup from './RetroReflectionGroup'
 import RetrospectiveMeeting from './RetrospectiveMeeting'
 import Team from './Team'
@@ -84,25 +84,25 @@ const RetroReflection = new GraphQLObjectType<Reflection, GQLContext>({
         return dataLoader.get('newMeetings').load(meetingId)
       }
     },
-    phaseItem: {
-      type: new GraphQLNonNull(RetroPhaseItem),
-      resolve: ({retroPhaseItemId}, _args, {dataLoader}) => {
-        return dataLoader.get('customPhaseItems').load(retroPhaseItemId)
-      }
-    },
     plaintextContent: {
       description: 'The plaintext version of content',
       type: new GraphQLNonNull(GraphQLString)
+    },
+    promptId: {
+      type: new GraphQLNonNull(GraphQLID),
+      description:
+        'The foreign key to link a reflection to its prompt. Immutable. For sorting, use prompt on the group.'
+    },
+    prompt: {
+      type: new GraphQLNonNull(ReflectPrompt),
+      resolve: ({promptId}, _args, {dataLoader}) => {
+        return dataLoader.get('reflectPrompts').load(promptId)
+      }
     },
     reactjis: {
       type: GraphQLNonNull(GraphQLList(GraphQLNonNull(require('./Reactji').default))),
       description: 'All the reactjis for the given reflection',
       resolve: resolveReactjis
-    },
-    retroPhaseItemId: {
-      type: new GraphQLNonNull(GraphQLID),
-      description:
-        'The foreign key to link a reflection to its phaseItem. Immutable. For sorting, use phase item on the group.'
     },
     reflectionGroupId: {
       type: new GraphQLNonNull(GraphQLID),

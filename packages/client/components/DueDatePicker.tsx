@@ -8,7 +8,7 @@ import {createFragmentContainer} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
 import {DueDatePicker_task} from '../__generated__/DueDatePicker_task.graphql'
 import styled from '@emotion/styled'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import useAtmosphere from '../hooks/useAtmosphere'
 import useMutationProps from '../hooks/useMutationProps'
 import {UseTaskChild} from '../hooks/useTaskChildFocus'
@@ -32,7 +32,7 @@ const PickerTitle = styled('div')({
 
 const Hint = styled('div')({
   fontSize: 11,
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   textAlign: 'center'
 })
 
@@ -48,7 +48,7 @@ const DueDatePicker = (props: Props) => {
     const dueDate = selected ? null : day
     UpdateTaskDueDateMutation(atmosphere, {taskId, dueDate}, onCompleted, onError)
     menuProps.closePortal()
-    ;(document as any).activeElement?.blur()
+      ; (document as any).activeElement?.blur()
   }
 
   const selectedDate = dueDate ? new Date(dueDate) : undefined

@@ -2,22 +2,22 @@
  * Creates a reflection for the retrospective meeting.
  *
  */
-import {commitMutation} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
+import {commitMutation} from 'react-relay'
+import {CreateReflectionMutation_meeting} from '~/__generated__/CreateReflectionMutation_meeting.graphql'
 import {SharedUpdater, StandardMutation} from '../types/relayMutations'
-import handleAddReflectionGroups from './handlers/handleAddReflectionGroups'
 import makeEmptyStr from '../utils/draftjs/makeEmptyStr'
 import clientTempId from '../utils/relay/clientTempId'
 import createProxyRecord from '../utils/relay/createProxyRecord'
 import {CreateReflectionMutation as TCreateReflectionMutation} from '../__generated__/CreateReflectionMutation.graphql'
-import {CreateReflectionMutation_meeting} from '~/__generated__/CreateReflectionMutation_meeting.graphql'
+import handleAddReflectionGroups from './handlers/handleAddReflectionGroups'
 
 graphql`
   fragment CreateReflectionMutation_meeting on CreateReflectionPayload {
     reflectionGroup {
       meetingId
       sortOrder
-      retroPhaseItemId
+      promptId
       ...ReflectionGroupHeader_reflectionGroup @relay(mask: false)
       ...ReflectionGroupVoting_reflectionGroup @relay(mask: false)
       ...ReflectionGroup_reflectionGroup @relay(mask: false)
@@ -83,7 +83,7 @@ const CreateReflectionMutation: StandardMutation<TCreateReflectionMutation> = (
         isEditing: true,
         isViewerCreator: true,
         meetingId,
-        retroPhaseItemId: input.retroPhaseItemId,
+        promptId: input.promptId,
         sortOrder: 0,
         updatedAt: nowISO
       }
@@ -92,19 +92,18 @@ const CreateReflectionMutation: StandardMutation<TCreateReflectionMutation> = (
         createdAt: nowISO,
         isActive: true,
         meetingId,
-        retroPhaseItemId: input.retroPhaseItemId,
+        promptId: input.promptId,
         sortOrder: input.sortOrder,
         updatedAt: nowISO
       }
       const meeting = store.get(meetingId)!
       const reflectionNode = createProxyRecord(store, 'RetroReflection', optimisticReflection)
-      const phaseItem = store.get(input.retroPhaseItemId)!
+      const prompt = store.get(input.promptId!)!
       reflectionNode.setLinkedRecord(meeting, 'meeting')
-      reflectionNode.setLinkedRecord(phaseItem, 'phaseItem')
+      reflectionNode.setLinkedRecord(prompt, 'prompt')
       const reflectionGroupNode = createProxyRecord(store, 'RetroReflectionGroup', optimisticGroup)
       reflectionGroupNode.setLinkedRecords([reflectionNode], 'reflections')
       reflectionGroupNode.setLinkedRecord(meeting, 'meeting')
-      handleAddReflectionGroups(reflectionGroupNode, store)
     }
   })
 }

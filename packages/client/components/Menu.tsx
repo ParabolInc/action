@@ -30,7 +30,7 @@ interface Props {
   ariaLabel: string
   children: ReactNode
   className?: string
-  closePortal: () => void
+  closePortal?: () => void
   defaultActiveIdx?: number
   keepParentFocus?: boolean
   resetActiveOnChanges?: any[]
@@ -45,30 +45,30 @@ const Menu = forwardRef((props: Props, ref: any) => {
     children,
     className,
     closePortal,
-    defaultActiveIdx,
+    defaultActiveIdx = null,
     isDropdown,
     keepParentFocus,
     resetActiveOnChanges,
     portalStatus,
     tabReturns
   } = props
-  const [activeIdx, setActiveIdx] = useState<number>(defaultActiveIdx || 0)
+  const [activeIdx, setActiveIdx] = useState<number | null>(defaultActiveIdx)
   const menuRef = useRef<HTMLDivElement>(null)
   const itemHandles = useRef<{onClick: (e?: React.MouseEvent | React.KeyboardEvent) => void}[]>([])
-
+  const initialDefaultActiveIdxRef = useRef(activeIdx)
+  useEffect(() => {
+    // support an active index that is async fetched
+    if (defaultActiveIdx && !initialDefaultActiveIdxRef.current) {
+      setActiveIdx(defaultActiveIdx)
+    }
+  }, [defaultActiveIdx])
   useImperativeHandle(ref, () => ({
     handleKeyDown
   }))
 
   useEffect(
     () => {
-      if (defaultActiveIdx === undefined) {
-        const firstMenuItemIdx = itemHandles.current.findIndex(isMenuItem)
-        setActiveIdx(Math.max(0, firstMenuItemIdx))
-        if (!keepParentFocus) {
-          menuRef.current && menuRef.current.focus()
-        }
-      }
+      if (!keepParentFocus) menuRef.current && menuRef.current.focus()
     },
     resetActiveOnChanges ||
       [
@@ -87,46 +87,37 @@ const Menu = forwardRef((props: Props, ref: any) => {
   )
 
   const setSafeIdx = useCallback(
-    (idx: number) => {
+    (idx: number | null) => {
       const childArr = itemHandles.current
-      let nextIdx
-      if (activeIdx < idx) {
-        for (let ii = idx; ii < childArr.length; ii++) {
-          const nextChild = childArr[ii]
-          if (isMenuItem(nextChild)) {
-            nextIdx = ii
+      const menuItemIdxs = [] as number[]
+      childArr.forEach((item, index) => {
+        if (isMenuItem(item)) {
+          menuItemIdxs.push(index)
+        }
+      })
+
+      const firstIndex = menuItemIdxs[0]
+      const lastIndex = menuItemIdxs[menuItemIdxs.length - 1]
+
+      if (idx === null) setActiveIdx(firstIndex)
+      else if (menuItemIdxs.includes(idx)) setActiveIdx(idx)
+      else if (idx < firstIndex) setActiveIdx(lastIndex)
+      else if (idx > lastIndex) setActiveIdx(firstIndex)
+      else if (activeIdx && idx > activeIdx) {
+        for (let ii = idx; ii <= lastIndex; ii++) {
+          if (menuItemIdxs.includes(ii)) {
+            setActiveIdx(ii)
             break
           }
         }
-      } else if (activeIdx > idx) {
-        for (let ii = idx; ii >= 0; ii--) {
-          const nextChild = childArr[ii]
-          if (isMenuItem(nextChild)) {
-            nextIdx = ii
+      } else {
+        for (let ii = idx; ii >= firstIndex; ii--) {
+          if (menuItemIdxs.includes(ii)) {
+            setActiveIdx(ii)
             break
-          } else {
-            const {current} = menuRef
-            if (!current) return
-            const el = current.parentElement || current
-            // if we're at the top & there's a header, put the header into view
-            if (el.scrollTo) {
-              el.scrollTo(0, 0)
-            } else {
-              el.scrollTop = 0
-            }
           }
         }
       }
-      if (
-        nextIdx === null ||
-        nextIdx === undefined ||
-        nextIdx === activeIdx ||
-        nextIdx < 0 ||
-        nextIdx >= childArr.length
-      ) {
-        return
-      }
-      setActiveIdx(nextIdx)
     },
     [activeIdx]
   )
@@ -166,17 +157,19 @@ const Menu = forwardRef((props: Props, ref: any) => {
     (e: React.KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
         e.preventDefault()
-        setSafeIdx(activeIdx + 1)
+        setSafeIdx(activeIdx === null ? null : activeIdx + 1)
       } else if (e.key === 'ArrowUp') {
         e.preventDefault()
-        setSafeIdx(activeIdx - 1)
+        setSafeIdx(activeIdx === null ? null : activeIdx - 1)
       } else if (e.key === 'Enter' || (tabReturns && e.key === 'Tab')) {
         e.preventDefault()
-        const itemHandle = itemHandles.current[activeIdx]
-        itemHandle?.onClick?.(e)
+        if (activeIdx !== null) {
+          const itemHandle = itemHandles.current[activeIdx]
+          itemHandle?.onClick?.(e)
+        }
       } else if (e.key === 'Tab') {
         e.preventDefault()
-        closePortal()
+        closePortal?.()
       }
       return e.defaultPrevented
     },

@@ -1,14 +1,15 @@
-import {TaskIntegrationLink_integration} from '../__generated__/TaskIntegrationLink_integration.graphql'
-import React from 'react'
 import styled from '@emotion/styled'
-import {createFragmentContainer} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
-import {PALETTE} from '../styles/paletteV2'
+import React, {ReactNode} from 'react'
+import {createFragmentContainer} from 'react-relay'
+import {PALETTE} from '../styles/paletteV3'
 import {Card} from '../types/constEnums'
-import {TaskServiceEnum} from '../types/graphql'
+import {TaskIntegrationLinkIntegrationJira} from '../__generated__/TaskIntegrationLinkIntegrationJira.graphql'
+import {TaskIntegrationLink_integration} from '../__generated__/TaskIntegrationLink_integration.graphql'
+import JiraIssueLink from './JiraIssueLink'
 
 const StyledLink = styled('a')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   display: 'block',
   fontSize: Card.FONT_SIZE,
   lineHeight: '1.25rem',
@@ -22,30 +23,33 @@ const StyledLink = styled('a')({
 interface Props {
   integration: TaskIntegrationLink_integration | null
   dataCy: string
+  className?: string
+  children?: ReactNode
+  showJiraLabelPrefix?: boolean
 }
 
 const TaskIntegrationLink = (props: Props) => {
-  const {integration, dataCy} = props
+  const {integration, dataCy, className, children, showJiraLabelPrefix} = props
   if (!integration) return null
   const {service} = integration
-  if (service === TaskServiceEnum.jira) {
-    const {issueKey, projectKey, cloudName} = integration
-    const href =
-      cloudName === 'jira-demo'
-        ? 'https://www.parabol.co/features/integrations'
-        : `https://${cloudName}.atlassian.net/browse/${issueKey}`
+  if (service === 'jira') {
+    const {
+      issueKey,
+      projectKey,
+      cloudName
+    } = (integration as unknown) as TaskIntegrationLinkIntegrationJira
     return (
-      <StyledLink
-        data-cy={`${dataCy}-jira-issue-link`}
-        href={href}
-        rel='noopener noreferrer'
-        target='_blank'
-        title={`Jira Issue #${issueKey} on ${projectKey}`}
-      >
-        {`Issue #${issueKey}`}
-      </StyledLink>
+      <JiraIssueLink
+        dataCy={`${dataCy}-jira-issue-link`}
+        issueKey={issueKey}
+        projectKey={projectKey}
+        cloudName={cloudName}
+        className={className}
+        children={children}
+        showLabelPrefix={showJiraLabelPrefix}
+      />
     )
-  } else if (service === TaskServiceEnum.github) {
+  } else if (service === 'github') {
     const {nameWithOwner, issueNumber} = integration
     const href =
       nameWithOwner === 'ParabolInc/ParabolDemo'
@@ -57,8 +61,10 @@ const TaskIntegrationLink = (props: Props) => {
         rel='noopener noreferrer'
         target='_blank'
         title={`GitHub Issue #${issueNumber} on ${nameWithOwner}`}
+        className={className}
       >
         {`Issue #${issueNumber}`}
+        {children}
       </StyledLink>
     )
   }

@@ -21,12 +21,11 @@ export default class ResponseStream implements AsyncIterableIterator<ExecutionRe
     const sourceIter = await this.sourceStream.next()
     if (sourceIter.done) return sourceIter
     const {mutatorId, operationId: dataLoaderId, rootValue} = sourceIter.value
-    const {connectionContext, query, variables, docId, opId} = this.req
+    const {connectionContext, query, variables, docId} = this.req
     const {id: socketId, authToken, ip} = connectionContext
     if (mutatorId === socketId) return this.next()
     try {
       const result = await getGraphQLExecutor().publish({
-        jobId: `${socketId}:${opId}`,
         docId,
         authToken,
         dataLoaderId,
@@ -48,7 +47,7 @@ export default class ResponseStream implements AsyncIterableIterator<ExecutionRe
   }
   return() {
     this.sourceStream.return()
-    return Promise.resolve({done: true as true, value: undefined})
+    return Promise.resolve({done: true as const, value: undefined})
   }
   throw(error) {
     this.sourceStream.throw(error)

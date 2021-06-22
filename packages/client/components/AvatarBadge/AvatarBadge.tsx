@@ -1,5 +1,5 @@
 import React from 'react'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import srOnly from '../../styles/helpers/srOnly'
 import styled from '@emotion/styled'
 
@@ -13,7 +13,7 @@ const Badge = styled('div')({
 })
 
 const BadgeDot = styled('div')<{isConnected: boolean}>(({isConnected}) => ({
-  backgroundColor: isConnected ? PALETTE.TEXT_GREEN : PALETTE.TEXT_GRAY,
+  backgroundColor: isConnected ? PALETTE.JADE_400 : PALETTE.SLATE_600,
   border: '1px solid rgba(255, 255, 255, .65)',
   borderRadius: size,
   height: size,

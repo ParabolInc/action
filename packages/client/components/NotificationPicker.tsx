@@ -2,33 +2,29 @@ import graphql from 'babel-plugin-relay/macro'
 import React, {Suspense} from 'react'
 import {createFragmentContainer} from 'react-relay'
 import {ValueOf} from '~/types/generics'
-import {NotificationEnum} from '~/types/graphql'
-import lazyPreload from '~/utils/lazyPreload'
-import {NotificationPicker_notification} from '~/__generated__/NotificationPicker_notification.graphql'
+import lazyPreload, {LazyExoticPreload} from '~/utils/lazyPreload'
+import {
+  NotificationEnum,
+  NotificationPicker_notification
+} from '~/__generated__/NotificationPicker_notification.graphql'
 
 const typePicker = {
-  [NotificationEnum.KICKED_OUT]: lazyPreload(() =>
-    import(/* webpackChunkName: 'KickedOut' */ './KickedOut')
-  ),
-  [NotificationEnum.PAYMENT_REJECTED]: lazyPreload(() =>
+  KICKED_OUT: lazyPreload(() => import(/* webpackChunkName: 'KickedOut' */ './KickedOut')),
+  PAYMENT_REJECTED: lazyPreload(() =>
     import(/* webpackChunkName: 'PaymentRejected' */ './PaymentRejected')
   ),
-  [NotificationEnum.TASK_INVOLVES]: lazyPreload(() =>
-    import(/* webpackChunkName: 'TaskInvolves' */ './TaskInvolves')
-  ),
-  [NotificationEnum.PROMOTE_TO_BILLING_LEADER]: lazyPreload(() =>
+  TASK_INVOLVES: lazyPreload(() => import(/* webpackChunkName: 'TaskInvolves' */ './TaskInvolves')),
+  PROMOTE_TO_BILLING_LEADER: lazyPreload(() =>
     import(/* webpackChunkName: 'PromoteToBillingLeader' */ './PromoteToBillingLeader')
   ),
-  [NotificationEnum.TEAM_ARCHIVED]: lazyPreload(() =>
-    import(/* webpackChunkName: 'TeamArchived' */ './TeamArchived')
-  ),
-  [NotificationEnum.TEAM_INVITATION]: lazyPreload(() =>
+  TEAM_ARCHIVED: lazyPreload(() => import(/* webpackChunkName: 'TeamArchived' */ './TeamArchived')),
+  TEAM_INVITATION: lazyPreload(() =>
     import(/* webpackChunkName: 'TeamInvitation' */ './TeamInvitationNotification')
   ),
-  [NotificationEnum.MEETING_STAGE_TIME_LIMIT_END]: lazyPreload(() =>
+  MEETING_STAGE_TIME_LIMIT_END: lazyPreload(() =>
     import(/* webpackChunkName: 'MeetingStageTimeLimitEnd' */ './MeetingStageTimeLimitEnd')
   )
-}
+} as Record<NotificationEnum, LazyExoticPreload<any>>
 
 interface Props {
   notification: NotificationPicker_notification

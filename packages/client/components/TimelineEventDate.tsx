@@ -1,11 +1,11 @@
 import ms from 'ms'
 import React, {Component} from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import relativeDate from '../utils/date/relativeDate'
 
 const StyledSpan = styled('span')({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: 11,
   lineHeight: '16px'
 })

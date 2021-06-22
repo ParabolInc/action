@@ -2,8 +2,9 @@ import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
 import {createFragmentContainer} from 'react-relay'
 import {NewMeetingSettings_selectedTeam} from '~/__generated__/NewMeetingSettings_selectedTeam.graphql'
-import {MeetingTypeEnum} from '../types/graphql'
+import {MeetingTypeEnum} from '~/__generated__/NewMeeting_viewer.graphql'
 import NewMeetingSettingsAction from './NewMeetingSettingsAction'
+import NewMeetingSettingsPoker from './NewMeetingSettingsPoker'
 import NewMeetingSettingsRetrospective from './NewMeetingSettingsRetrospective'
 
 interface Props {
@@ -12,8 +13,9 @@ interface Props {
 }
 
 const settingsLookup = {
-  [MeetingTypeEnum.action]: NewMeetingSettingsAction,
-  [MeetingTypeEnum.retrospective]: NewMeetingSettingsRetrospective
+  action: NewMeetingSettingsAction,
+  retrospective: NewMeetingSettingsRetrospective,
+  poker: NewMeetingSettingsPoker
 }
 
 const NewMeetingSettings = (props: Props) => {
@@ -27,6 +29,7 @@ export default createFragmentContainer(NewMeetingSettings, {
     fragment NewMeetingSettings_selectedTeam on Team {
       ...NewMeetingSettingsRetrospective_team
       ...NewMeetingSettingsAction_team
+      ...NewMeetingSettingsPoker_team
       id
     }
   `

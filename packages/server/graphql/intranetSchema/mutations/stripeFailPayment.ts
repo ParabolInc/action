@@ -1,6 +1,5 @@
 import {GraphQLID, GraphQLNonNull} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import {InvoiceStatusEnum, OrgUserRole} from 'parabol-client/types/graphql'
 import fetchAllLines from '../../../billing/helpers/fetchAllLines'
 import terminateSubscription from '../../../billing/helpers/terminateSubscription'
 import getRethink from '../../../database/rethinkDriver'
@@ -68,14 +67,13 @@ export default {
     const billingLeaderUserIds = (await r
       .table('OrganizationUser')
       .getAll(orgId, {index: 'orgId'})
-      .filter({removedAt: null, role: OrgUserRole.BILLING_LEADER})('userId')
+      .filter({removedAt: null, role: 'BILLING_LEADER'})('userId')
       .run()) as string[]
     const {last4, brand} = creditCard!
     // amount_due includes the old account_balance, so we can (kinda) atomically set this
     // we take out the charge for future services since we are ending service immediately
     await manager.updateAccountBalance(customerId, amountDue - nextPeriodAmount)
 
-    // const notificationId = shortid.generate()
     const notifications = billingLeaderUserIds.map(
       (userId) => new NotificationPaymentRejected({orgId, last4, brand, userId})
     )
@@ -84,7 +82,7 @@ export default {
       update: r
         .table('Invoice')
         .get(invoiceId)
-        .update({status: InvoiceStatusEnum.FAILED}),
+        .update({status: 'FAILED'}),
       insert: r.table('Notification').insert(notifications)
     }).run()
 

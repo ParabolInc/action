@@ -3,6 +3,7 @@ import {TransitionGroup} from 'react-transition-group'
 import AnimatedFade from '../../components/AnimatedFade'
 import ErrorComponent from '../../components/ErrorComponent/ErrorComponent'
 import LoadingComponent from '../../components/LoadingComponent/LoadingComponent'
+import * as Sentry from '@sentry/browser'
 
 interface Options {
   Loader?: ReactNode
@@ -29,8 +30,9 @@ const renderQuery = (ReadyComponent: ComponentType<any>, options: Options = {}) 
   let child
   let key
   if (error) {
+    const eventId = Sentry.captureException(error)
     key = 'Error'
-    child = <Error error={error} eventId={''} />
+    child = <Error error={error} eventId={eventId} />
   } else if (props) {
     key = 'Ready'
     child = <ReadyComponent {...(options.props || {})} viewer={props.viewer} retry={retry} />

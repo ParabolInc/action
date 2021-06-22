@@ -12,8 +12,7 @@ import useAtmosphere from '../../../../hooks/useAtmosphere'
 import {MenuProps} from '../../../../hooks/useMenu'
 import UpdateTaskMutation from '../../../../mutations/UpdateTaskMutation'
 import avatarUser from '../../../../styles/theme/images/avatar-user.svg'
-import {AreaEnum} from '../../../../types/graphql'
-
+import {AreaEnum} from '~/__generated__/UpdateTaskMutation.graphql'
 interface Props {
   area: AreaEnum
   menuProps: MenuProps
@@ -25,21 +24,28 @@ const TaskFooterUserAssigneeMenu = (props: Props) => {
   const {area, menuProps, task, viewer} = props
   const {userId, id: taskId} = task
   const {team} = viewer
-  const {teamMembers} = team || {teamMembers: []}
+  const atmosphere = useAtmosphere()
+  const teamMembers = team?.teamMembers || []
+  const taskUserIdx = useMemo(() => teamMembers.findIndex(({userId}) => userId) + 1, [
+    userId,
+    teamMembers
+  ])
   const assignees = useMemo(
     () => teamMembers.filter((teamMember) => teamMember.userId !== userId),
     [userId, teamMembers]
   )
-  const atmosphere = useAtmosphere()
-  if (!team) return null
   const handleTaskUpdate = (newAssignee) => () => {
-    if (userId !== newAssignee.userId) {
-      UpdateTaskMutation(atmosphere, {updatedTask: {id: taskId, userId: newAssignee.userId}, area})
-    }
+    const newUserId = newAssignee.userId === userId ? null : newAssignee.userId
+    UpdateTaskMutation(atmosphere, {updatedTask: {id: taskId, userId: newUserId}, area}, {})
   }
 
+  if (!team) return null
   return (
-    <Menu ariaLabel={'Assign this task to a teammate'} {...menuProps}>
+    <Menu
+      ariaLabel={'Assign this task to a teammate'}
+      defaultActiveIdx={userId ? taskUserIdx : undefined}
+      {...menuProps}
+    >
       <DropdownMenuLabel>Assign to:</DropdownMenuLabel>
       {assignees.map((assignee) => {
         return (
@@ -62,6 +68,7 @@ const TaskFooterUserAssigneeMenu = (props: Props) => {
 export default createFragmentContainer(TaskFooterUserAssigneeMenu, {
   viewer: graphql`
     fragment TaskFooterUserAssigneeMenu_viewer on User {
+      id
       team(teamId: $teamId) {
         teamId: id
         teamMembers(sortBy: "preferredName") {

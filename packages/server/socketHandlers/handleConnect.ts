@@ -37,7 +37,7 @@ mutation ConnectSocket {
 
 const handleConnect = async (connectionContext: ConnectionContext) => {
   const {authToken, ip, id: socketId} = connectionContext
-  const result = await publishInternalGQL({type: 'connect', authToken, ip, query, socketId})
+  const result = await publishInternalGQL({authToken, ip, query, socketId})
   if (!result) return null
   const {data} = result
   const tms = data?.connectSocket?.tms

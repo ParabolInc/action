@@ -1,4 +1,3 @@
-import {TaskServiceEnum} from 'parabol-client/types/graphql'
 import TaskIntegration from '../../graphql/types/TaskIntegration'
 
 interface Input {
@@ -11,7 +10,7 @@ export default class TaskIntegrationGitHub extends TaskIntegration {
   issueNumber: string
   constructor(input: Input) {
     const {nameWithOwner, issueNumber} = input
-    super({service: TaskServiceEnum.github})
+    super({service: 'github'})
     this.nameWithOwner = nameWithOwner
     this.issueNumber = issueNumber
   }

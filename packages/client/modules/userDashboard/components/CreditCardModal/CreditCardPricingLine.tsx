@@ -2,7 +2,7 @@ import React from 'react'
 import styled from '@emotion/styled'
 import {Pricing} from '../../../../types/constEnums'
 import {CreditCardModalActionType} from './CreditCardModal'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import plural from '../../../../utils/plural'
 
 interface Props {
@@ -11,8 +11,8 @@ interface Props {
 }
 
 const Line = styled('div')({
-  background: PALETTE.BACKGROUND_MAIN_LIGHTENED,
-  border: `1px solid ${PALETTE.BORDER_GRAY}`,
+  background: PALETTE.SLATE_100,
+  border: `1px solid ${PALETTE.SLATE_400}`,
   borderRadius: 4,
   display: 'flex',
   fontSize: 13,
@@ -31,8 +31,8 @@ const UserBlock = styled('div')({
 
 const UnitPriceBlock = styled('div')({
   alignItems: 'center',
-  borderLeft: `1px solid ${PALETTE.BORDER_GRAY}`,
-  borderRight: `1px solid ${PALETTE.BORDER_GRAY}`,
+  borderLeft: `1px solid ${PALETTE.SLATE_400}`,
+  borderRight: `1px solid ${PALETTE.SLATE_400}`,
   display: 'flex',
   justifyContent: 'center',
   padding: 9

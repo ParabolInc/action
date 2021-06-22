@@ -1,29 +1,22 @@
-import {SuggestedIntegrationJiraMenuItem_suggestedIntegration} from '../__generated__/SuggestedIntegrationJiraMenuItem_suggestedIntegration.graphql'
+import graphql from 'babel-plugin-relay/macro'
 import React, {forwardRef} from 'react'
 import {createFragmentContainer} from 'react-relay'
-import graphql from 'babel-plugin-relay/macro'
+import {SuggestedIntegrationJiraMenuItem_suggestedIntegration} from '../__generated__/SuggestedIntegrationJiraMenuItem_suggestedIntegration.graphql'
 import JiraSVG from './JiraSVG'
 import MenuItem from './MenuItem'
 import MenuItemLabel from './MenuItemLabel'
 import SuggestedIntegrationMenuItemAvatar from './SuggestedIntegrationMenuItemAvatar'
 import TypeAheadLabel from './TypeAheadLabel'
-import useAtmosphere from '../hooks/useAtmosphere'
-import CreateJiraIssueMutation from '../mutations/CreateJiraIssueMutation'
-import {WithMutationProps} from '../utils/relay/withMutationProps'
 
 interface Props {
   suggestedIntegration: SuggestedIntegrationJiraMenuItem_suggestedIntegration
-  taskId: string
-  submitMutation: WithMutationProps['submitMutation']
-  onError: WithMutationProps['onError']
-  onCompleted: WithMutationProps['onCompleted']
+  onClick: () => void
   query: string
 }
 
 const SuggestedIntegrationJiraMenuItem = forwardRef((props: Props, ref: any) => {
-  const {suggestedIntegration, taskId, submitMutation, onError, onCompleted, query} = props
-  const {cloudId, projectKey, projectName} = suggestedIntegration
-  const atmosphere = useAtmosphere()
+  const {suggestedIntegration, onClick, query} = props
+  const {projectName} = suggestedIntegration
   return (
     <MenuItem
       ref={ref}
@@ -35,11 +28,7 @@ const SuggestedIntegrationJiraMenuItem = forwardRef((props: Props, ref: any) => 
           <TypeAheadLabel query={query} label={projectName} />
         </MenuItemLabel>
       }
-      onClick={() => {
-        const variables = {cloudId, projectKey, taskId}
-        submitMutation()
-        CreateJiraIssueMutation(atmosphere, variables, {onError, onCompleted})
-      }}
+      onClick={onClick}
     />
   )
 })
@@ -47,8 +36,6 @@ const SuggestedIntegrationJiraMenuItem = forwardRef((props: Props, ref: any) => 
 export default createFragmentContainer(SuggestedIntegrationJiraMenuItem, {
   suggestedIntegration: graphql`
     fragment SuggestedIntegrationJiraMenuItem_suggestedIntegration on SuggestedIntegrationJira {
-      cloudId
-      projectKey
       projectName
     }
   `

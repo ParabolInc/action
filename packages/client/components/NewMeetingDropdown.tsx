@@ -4,10 +4,12 @@ import DropdownToggleV2 from './DropdownToggleV2'
 import MenuToggleV2Text from './MenuToggleV2Text'
 import styled from '@emotion/styled'
 import {NewMeeting} from '../types/constEnums'
+import {PALETTE} from '~/styles/paletteV3'
 
 interface Props {
   className?: string
   icon: string
+  dropdownIcon?: string
   label: string
   disabled?: boolean
   onClick: ReturnType<typeof useMenu>['togglePortal']
@@ -15,14 +17,19 @@ interface Props {
 }
 
 const Dropdown = styled(DropdownToggleV2)({
-  width: NewMeeting.CONTROLS_WIDTH
+  backgroundColor: '#fff',
+  width: NewMeeting.CONTROLS_WIDTH,
+  ':hover': {
+    backgroundColor: PALETTE.SLATE_100
+  }
 })
 
 const NewMeetingDropdown = forwardRef((props: Props, ref: any) => {
-  const {className, icon, label, disabled, onClick, onMouseEnter} = props
+  const {className, icon, dropdownIcon, label, disabled, onClick, onMouseEnter} = props
   return (
     <Dropdown
       className={className}
+      icon={dropdownIcon}
       onMouseEnter={onMouseEnter}
       onClick={onClick}
       disabled={disabled}

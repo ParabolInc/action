@@ -2,7 +2,7 @@ import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
 import {createFragmentContainer} from 'react-relay'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import {NavSidebar} from '../../types/constEnums'
 import {DashSidebar_viewer} from '../../__generated__/DashSidebar_viewer.graphql'
 import DashNavList from '../DashNavList/DashNavList'
@@ -17,7 +17,7 @@ interface Props {
 
 const DashSidebarStyles = styled('div')({
   backgroundColor: '#fff',
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   display: 'flex',
   flexDirection: 'column',
   height: '100vh',
@@ -54,7 +54,7 @@ const NavItemsWrap = styled('div')({
 })
 
 const DashHR = styled('div')({
-  borderBottom: `solid ${PALETTE.BACKGROUND_TOGGLE_ACTIVE} 1px`,
+  borderBottom: `solid ${PALETTE.SLATE_300} 1px`,
   marginLeft: -8,
   width: 'calc(100% + 8px)'
 })

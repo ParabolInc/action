@@ -1,5 +1,6 @@
 import {DataLoaderWorker} from '../../graphql'
 import getRethink from '../../../database/rethinkDriver'
+import errorFilter from '../../errorFilter'
 
 const hideConversionModal = async (orgId: string, dataLoader: DataLoaderWorker) => {
   const organization = await dataLoader.get('organizations').load(orgId)
@@ -16,7 +17,9 @@ const hideConversionModal = async (orgId: string, dataLoader: DataLoaderWorker) 
     organization.showConversionModal = false
     const teams = await dataLoader.get('teamsByOrgId').load(orgId)
     const teamIds = teams.map(({id}) => id)
-    const activeMeetingsByTeamId = await dataLoader.get('activeMeetingsByTeamId').loadMany(teamIds)
+    const activeMeetingsByTeamId = (
+      await dataLoader.get('activeMeetingsByTeamId').loadMany(teamIds)
+    ).filter(errorFilter)
     if (activeMeetingsByTeamId.length > 0) {
       const activeMeetings = activeMeetingsByTeamId.flat()
       activeMeetings.forEach((meeting) => {

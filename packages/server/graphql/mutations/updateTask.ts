@@ -1,25 +1,37 @@
 import {GraphQLNonNull} from 'graphql'
 import ms from 'ms'
+import {SubscriptionChannel} from 'parabol-client/types/constEnums'
+import extractTextFromDraftString from 'parabol-client/utils/draftjs/extractTextFromDraftString'
+import normalizeRawDraftJS from 'parabol-client/validation/normalizeRawDraftJS'
 import getRethink from '../../database/rethinkDriver'
-import publishChangeNotifications from './helpers/publishChangeNotifications'
+import Task, {AreaEnum as TAreaEnum, TaskStatusEnum} from '../../database/types/Task'
+import TeamMember from '../../database/types/TeamMember'
+import generateUID from '../../generateUID'
+import {getUserId, isTeamMember} from '../../utils/authorization'
+import publish from '../../utils/publish'
+import standardError from '../../utils/standardError'
+import {GQLContext} from '../graphql'
 import AreaEnum from '../types/AreaEnum'
 import UpdateTaskInput from '../types/UpdateTaskInput'
 import UpdateTaskPayload from '../types/UpdateTaskPayload'
-import {getUserId, isTeamMember} from '../../utils/authorization'
-import publish from '../../utils/publish'
-import shortid from 'shortid'
-import standardError from '../../utils/standardError'
-import {IUpdateTaskOnMutationArguments} from 'parabol-client/types/graphql'
-import {GQLContext} from '../graphql'
 import {validateTaskUserId} from './createTask'
-import Task from '../../database/types/Task'
-import normalizeRawDraftJS from 'parabol-client/validation/normalizeRawDraftJS'
-import {ITeamMember} from 'parabol-client/types/graphql'
 import getUsersToIgnore from './helpers/getUsersToIgnore'
-import {SubscriptionChannel} from 'parabol-client/types/constEnums'
+import publishChangeNotifications from './helpers/publishChangeNotifications'
 
 const DEBOUNCE_TIME = ms('5m')
 
+type UpdateTaskInput = {
+  id: string
+  content?: string | null
+  sortOrder?: number | null
+  status?: TaskStatusEnum | null
+  teamId?: string | null
+  userId?: string | null
+}
+type UpdateTaskMutationVariables = {
+  updatedTask: UpdateTaskInput
+  area?: TAreaEnum | null
+}
 export default {
   type: UpdateTaskPayload,
   description: 'Update a task with a change in content, ownership, or status',
@@ -35,7 +47,7 @@ export default {
   },
   async resolve(
     _source,
-    {updatedTask}: IUpdateTaskOnMutationArguments,
+    {updatedTask}: UpdateTaskMutationVariables,
     {authToken, dataLoader, socketId: mutatorId}: GQLContext
   ) {
     const r = await getRethink()
@@ -62,7 +74,7 @@ export default {
       return {error: {message: 'Task not found'}}
     }
     const {teamId, userId} = task
-    const nextUserId = inputUserId || userId
+    const nextUserId = inputUserId === undefined ? userId : inputUserId
     const nextTeamId = inputTeamId || teamId
     if (!isTeamMember(authToken, teamId) || !isTeamMember(authToken, nextTeamId)) {
       return standardError(new Error('Team not found'), {userId: viewerId})
@@ -73,7 +85,6 @@ export default {
         return standardError(new Error('Invalid user ID'), {userId: viewerId})
       }
     }
-
     // RESOLUTION
     const isSortOrderUpdate =
       updatedTask.sortOrder !== undefined && Object.keys(updatedTask).length === 2
@@ -84,6 +95,7 @@ export default {
       status: status || task.status,
       sortOrder: sortOrder || task.sortOrder,
       content: content ? validContent : task.content,
+      plaintextContent: content ? extractTextFromDraftString(validContent) : task.plaintextContent,
       updatedAt: isSortOrderUpdate ? task.updatedAt : now
     })
 
@@ -114,7 +126,7 @@ export default {
               .table('TaskHistory')
               .get(lastDoc('id'))
               .update(mergeDoc),
-            r.table('TaskHistory').insert(lastDoc.merge(mergeDoc, {id: shortid.generate()}))
+            r.table('TaskHistory').insert(lastDoc.merge(mergeDoc, {id: generateUID()}))
           )
         })
     }
@@ -131,10 +143,10 @@ export default {
         .filter({
           isNotRemoved: true
         })
-        .coerceTo('array') as unknown) as ITeamMember[]
+        .coerceTo('array') as unknown) as TeamMember[]
     }).run()
     // TODO: get users in the same location
-    const usersToIgnore = await getUsersToIgnore(viewerId, teamId, dataLoader)
+    const usersToIgnore = await getUsersToIgnore(viewerId, teamId)
     if (!newTask) return standardError(new Error('Already updated task'), {userId: viewerId})
 
     // send task updated messages

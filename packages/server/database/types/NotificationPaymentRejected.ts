@@ -1,5 +1,4 @@
 import Notification from './Notification'
-import {NotificationEnum} from 'parabol-client/types/graphql'
 
 interface Input {
   orgId: string
@@ -15,7 +14,7 @@ export default class NotificationPaymentRejected extends Notification {
 
   constructor(input: Input) {
     const {orgId, last4, brand, userId} = input
-    super({userId, type: NotificationEnum.PAYMENT_REJECTED})
+    super({userId, type: 'PAYMENT_REJECTED'})
     this.orgId = orgId
     this.last4 = last4
     this.brand = brand

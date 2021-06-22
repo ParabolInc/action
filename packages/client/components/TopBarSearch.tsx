@@ -6,7 +6,7 @@ import {matchPath, RouteProps} from 'react-router'
 import {commitLocalUpdate} from 'relay-runtime'
 import useAtmosphere from '~/hooks/useAtmosphere'
 import useRouter from '~/hooks/useRouter'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import {TopBarSearch_viewer} from '~/__generated__/TopBarSearch_viewer.graphql'
 import Atmosphere from '../Atmosphere'
 import Icon from './Icon'
@@ -41,7 +41,7 @@ const Wrapper = styled('div')<{location: any}>(({location}) => ({
 const SearchInput = styled('input')({
   appearance: 'none',
   border: '1px solid transparent',
-  color: PALETTE.TEXT_LIGHT,
+  color: PALETTE.SLATE_200,
   fontSize: 20,
   lineHeight: '24px',
   margin: 0,

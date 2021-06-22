@@ -1,8 +1,10 @@
 import graphql from 'babel-plugin-relay/macro'
 import {commitMutation} from 'react-relay'
 import {SimpleMutation} from '../types/relayMutations'
-import {FlagReadyToAdvanceMutation as TFlagReadyToAdvanceMutation} from '../__generated__/FlagReadyToAdvanceMutation.graphql'
-import {INewMeetingStage} from '~/types/graphql'
+import {
+  FlagReadyToAdvanceMutation as TFlagReadyToAdvanceMutation,
+  FlagReadyToAdvanceMutationResponse
+} from '../__generated__/FlagReadyToAdvanceMutation.graphql'
 
 graphql`
   fragment FlagReadyToAdvanceMutation_meeting on FlagReadyToAdvanceSuccess {
@@ -26,6 +28,10 @@ const mutation = graphql`
   }
 `
 
+type Stage = NonNullable<
+  NonNullable<FlagReadyToAdvanceMutationResponse['flagReadyToAdvance']>['stage']
+>
+
 const FlagReadyToAdvanceMutation: SimpleMutation<TFlagReadyToAdvanceMutation> = (
   atmosphere,
   variables
@@ -35,7 +41,7 @@ const FlagReadyToAdvanceMutation: SimpleMutation<TFlagReadyToAdvanceMutation> = 
     variables,
     optimisticUpdater: (store) => {
       const {stageId, isReady} = variables
-      const stage = store.get<INewMeetingStage>(stageId)
+      const stage = store.get<Stage>(stageId)
       if (!stage) return
       const currentCount = stage.getValue('readyCount')
       const diff = isReady ? 1 : -1

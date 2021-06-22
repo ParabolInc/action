@@ -2,7 +2,7 @@ import StripeClientManager from '../../../../utils/StripeClientManager'
 import React, {useEffect, useState} from 'react'
 import CreditCardIcon from '../../../../components/CreditCardIcon'
 import styled from '@emotion/styled'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import Icon from '../../../../components/Icon'
 import {ICON_SIZE} from '../../../../styles/typographyV2'
 import {UseFormField} from '../../../../hooks/useForm'
@@ -24,14 +24,14 @@ interface Props {
 
 const Line = styled('div')({
   alignItems: 'center',
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   display: 'flex',
   padding: '8px 24px'
 })
 
 const Error = styled('div')<{isError: boolean}>(({isError}) => ({
   alignItems: 'center',
-  color: isError ? PALETTE.ERROR_MAIN : PALETTE.TEXT_GRAY,
+  color: isError ? PALETTE.TOMATO_500 : PALETTE.SLATE_600,
   display: 'flex',
   flex: 1,
   lineHeight: '24px',

@@ -1,11 +1,12 @@
-import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
 import React, {forwardRef, RefObject} from 'react'
 import {createFragmentContainer} from 'react-relay'
-import useScrollThreadList from '~/hooks/useScrollThreadList'
 import {DiscussionThreadList_meeting} from '~/__generated__/DiscussionThreadList_meeting.graphql'
 import {DiscussionThreadList_threadables} from '~/__generated__/DiscussionThreadList_threadables.graphql'
-import {PALETTE} from '../styles/paletteV2'
+import useScrollThreadList from '~/hooks/useScrollThreadList'
+import styled from '@emotion/styled'
+import {PALETTE} from '../styles/paletteV3'
+import CommentingStatusText from './CommentingStatusText'
 import DiscussionThreadListEmptyState from './DiscussionThreadListEmptyState'
 import LabelHeading from './LabelHeading/LabelHeading'
 import ThreadedItem from './ThreadedItem'
@@ -14,9 +15,9 @@ const EmptyWrapper = styled('div')({
   alignItems: 'center',
   display: 'flex',
   flexDirection: 'column',
-  height: '100%',
   justifyContent: 'center',
-  paddingTop: 8
+  height: '100%',
+  padding: '8px 0'
 })
 
 const Wrapper = styled('div')({
@@ -33,31 +34,47 @@ const PusherDowner = styled('div')({
 })
 
 const Header = styled(LabelHeading)({
-  borderBottom: `1px solid ${PALETTE.BORDER_LIGHTER}`,
+  borderBottom: `1px solid ${PALETTE.SLATE_300}`,
   margin: '0 0 8px',
   padding: '6px 12px 12px',
   textTransform: 'none',
   width: '100%'
 })
 
+const CommentingStatusBlock = styled('div')({
+  height: 36,
+  width: '100%'
+})
+
 interface Props {
   editorRef: RefObject<HTMLTextAreaElement>
   meeting: DiscussionThreadList_meeting
+  preferredNames: string[] | null
   threadSourceId: string
   threadables: DiscussionThreadList_threadables
   dataCy: string
 }
 
 const DiscussionThreadList = forwardRef((props: Props, ref: any) => {
-  const {editorRef, meeting, threadSourceId, threadables, dataCy} = props
+  const {editorRef, meeting, threadSourceId, threadables, dataCy, preferredNames} = props
+  const {endedAt, meetingType} = meeting
   const isEmpty = threadables.length === 0
-  useScrollThreadList(threadables, editorRef, ref)
-  const HeaderBlock = () => <Header>{'Discussion & Takeaway Tasks'}</Header>
+  useScrollThreadList(threadables, editorRef, ref, preferredNames)
+  const HeaderBlock = () => {
+    if (meetingType === 'poker') return null
+    return <Header>{'Discussion & Takeaway Tasks'}</Header>
+  }
   if (isEmpty) {
     return (
       <EmptyWrapper>
         <HeaderBlock />
-        <DiscussionThreadListEmptyState />
+        <DiscussionThreadListEmptyState
+          hasTasks={meetingType !== 'poker'}
+          isEndedMeeting={!!endedAt}
+        />
+        <CommentingStatusBlock>
+          <CommentingStatusText preferredNames={preferredNames} />
+        </CommentingStatusBlock>
       </EmptyWrapper>
     )
   }
@@ -77,6 +94,7 @@ const DiscussionThreadList = forwardRef((props: Props, ref: any) => {
           />
         )
       })}
+      <CommentingStatusText preferredNames={preferredNames} />
     </Wrapper>
   )
 })
@@ -85,8 +103,11 @@ export default createFragmentContainer(DiscussionThreadList, {
   meeting: graphql`
     fragment DiscussionThreadList_meeting on NewMeeting {
       ...ThreadedItem_meeting
+      endedAt
+      meetingType
     }
   `,
+
   threadables: graphql`
     fragment DiscussionThreadList_threadables on Threadable @relay(plural: true) {
       ...ThreadedItem_threadable

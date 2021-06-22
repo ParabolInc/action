@@ -16,6 +16,7 @@ node_modules/
 package-lock.json
 packages/cypress/screenshots/
 packages/cypress/videos/
+packages/cypress/results/
 packages/server/segmentFns/debug.js
 queryMap.json
 rethinkdb_data/
@@ -23,6 +24,7 @@ rethinkdb_dump_*
 schema.graphql
 scratch/
 scripts/toolbox/*
+self-hosted/
 stats.json
 storybook-static/
 test-report.xml

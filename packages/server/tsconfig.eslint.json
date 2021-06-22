@@ -1,9 +1,15 @@
 {
   "extends": "./tsconfig.json",
   "include": [
+    "database/types/*",
     "database/migrations/*",
+    "postgres/migrations/*",
+    "postgres/migrations/postDeploy/*",
+    "postgres/pgmPostDeployConfig.js",
+    "graphql/queries",
     "email/**/*",
     "segmentFns/*",
-    "utils/*"
+    "utils/*",
+    "server.dev.ts"
   ]
 }

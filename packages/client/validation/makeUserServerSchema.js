@@ -1,13 +1,9 @@
-import {urlRegex} from './regex'
+import { optionalUrl } from 'parabol-client/validation/templates'
 import legitify from './legitify'
 
 export default function makeUserServerSchema() {
   return legitify({
-    picture: (value) =>
-      value
-        .trim()
-        .matches(urlRegex, 'that picture url doesn’t look quite right')
-        .max(2000, 'please use a shorter url'),
+    picture: optionalUrl,
     preferredName: (value) =>
       value
         .trim()

@@ -11,7 +11,7 @@
 ## Issue - Bug
 
 [Describe the bug here, remove this section if issue is a feature enhancement request]
-
+- **How serious is the bug?** P0 - P4
 - **OS:** macOS / Linux / Windows / ?
 - **Browser:** Chrome / Safari / Lynx / ? + version
 - **Node version:** `node --version`
@@ -24,6 +24,9 @@ Users can:
    - Do this
    - Do that
    - Cannot do that
+Triage is performed to find the root cause of the bug, timeboxed to ~1 hour. 
+
+Estimate: 1 hour to triage. More if root cause is already identified.
 
 ## Issue - Enhancement
 

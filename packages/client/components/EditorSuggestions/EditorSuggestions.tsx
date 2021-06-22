@@ -1,7 +1,7 @@
 import React, {useLayoutEffect} from 'react'
 import MentionTag from '../MentionTag/MentionTag'
 import MentionUser from '../MentionUser/MentionUser'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import styled from '@emotion/styled'
 import useMenu from '../../hooks/useMenu'
 import {BBox} from '../../types/animations'
@@ -20,7 +20,7 @@ const suggestionTypes = {
 export type TaskSuggestionType = keyof typeof suggestionTypes
 
 const MentionMenu = styled('div')({
-  color: PALETTE.TEXT_MAIN
+  color: PALETTE.SLATE_700
 })
 
 interface Props {

@@ -23,11 +23,11 @@ const query = graphql`
 
 const DemoMeetingRoot = () => {
   const atmosphere = useAtmosphere()
-  useSubscription(DemoMeetingRoot.name, NotificationSubscription)
-  useSubscription(DemoMeetingRoot.name, OrganizationSubscription)
-  useSubscription(DemoMeetingRoot.name, TaskSubscription)
-  useSubscription(DemoMeetingRoot.name, TeamSubscription)
-  useSubscription(DemoMeetingRoot.name, MeetingSubscription, {meetingId: RetroDemo.MEETING_ID})
+  useSubscription('DemoMeetingRoot', NotificationSubscription)
+  useSubscription('DemoMeetingRoot', OrganizationSubscription)
+  useSubscription('DemoMeetingRoot', TaskSubscription)
+  useSubscription('DemoMeetingRoot', TeamSubscription)
+  useSubscription('DemoMeetingRoot', MeetingSubscription, {meetingId: RetroDemo.MEETING_ID})
   return (
     <QueryRenderer
       environment={atmosphere}

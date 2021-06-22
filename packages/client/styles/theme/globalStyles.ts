@@ -1,9 +1,9 @@
 import {makePlaceholderStylesString} from '../helpers/makePlaceholderStyles'
 import fontLoader from './fontLoader'
 import {FONT_FAMILY} from '../typographyV2'
-import {PALETTE} from '../paletteV2'
+import {PALETTE} from '../paletteV3'
 
-const placeholderStyles = makePlaceholderStylesString(PALETTE.TEXT_GRAY)
+const placeholderStyles = makePlaceholderStylesString(PALETTE.SLATE_600)
 
 const fontFaceDefinitions = fontLoader
   .map(
@@ -26,7 +26,7 @@ const fontFaceDefinitions = fontLoader
 // 2) prevent a horizontal scrollbar from causing a vertical scrollbar due to the 100vh
 const root = `
   #root {
-    background: ${PALETTE.BACKGROUND_MAIN};
+    background: ${PALETTE.SLATE_200};
     margin: 0;
     height: 100vh;
     padding: 0;
@@ -36,14 +36,14 @@ const root = `
 const draftStyles = `
   .draft-blockquote {
     font-style: italic;
-    border-left: 2px ${PALETTE.BORDER_MAIN_40} solid;
+    border-left: 2px ${PALETTE.SLATE_500} solid;
     margin 8px 0;
     padding 0 8px;
   }
 
   .draft-codeblock {
-    background-color: ${PALETTE.BACKGROUND_MAIN};
-    border-left: 2px ${PALETTE.BORDER_MAIN_40} solid;
+    background-color: ${PALETTE.SLATE_200};
+    border-left: 2px ${PALETTE.SLATE_500} solid;
     border-radius: 1px;
     font-family: ${FONT_FAMILY.MONOSPACE};
     font-size: 13px;
@@ -67,7 +67,7 @@ export default `
   }
 
   body {
-    color: ${PALETTE.TEXT_MAIN};
+    color: ${PALETTE.SLATE_700};
     font-family: ${FONT_FAMILY.SANS_SERIF};
     -moz-osx-font-smoothing: grayscale;
     -webkit-font-smoothing: antialiased;
@@ -81,12 +81,12 @@ export default `
   ${root}
 
   a {
-    color: ${PALETTE.TEXT_MAIN};
+    color: ${PALETTE.SLATE_700};
     text-decoration: none;
   }
 
   a:hover; a:focus {
-    color: ${PALETTE.TEXT_PURPLE};
+    color: ${PALETTE.GRAPE_700};
     text-decoration: none;
   }
 

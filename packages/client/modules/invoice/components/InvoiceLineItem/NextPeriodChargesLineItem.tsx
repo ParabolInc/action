@@ -2,7 +2,7 @@ import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
 import {createFragmentContainer} from 'react-relay'
 import {NextPeriodChargesLineItem_item} from '~/__generated__/NextPeriodChargesLineItem_item.graphql'
-import {TierEnum} from '../../../../types/graphql'
+import {TierEnum} from '~/__generated__/StandardHub_viewer.graphql'
 import plural from '../../../../utils/plural'
 import invoiceLineFormat from '../../helpers/invoiceLineFormat'
 import InvoiceLineItemContent from './InvoiceLineItemContent'
@@ -16,7 +16,7 @@ const NextPeriodChargesLineItem = (props: Props) => {
   const {item, tier} = props
   const {unitPrice, quantity} = item
   const amount = invoiceLineFormat(item.amount)
-  if (tier === TierEnum.enterprise) {
+  if (tier === 'enterprise') {
     return (
       <InvoiceLineItemContent description={`${quantity} Enterprise Licenses`} amount={amount} />
     )

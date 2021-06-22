@@ -1,4 +1,3 @@
-const webpack = require('webpack')
 const path = require('path')
 const nodeExternals = require('webpack-node-externals')
 const transformRules = require('./utils/transformRules')
@@ -8,37 +7,38 @@ const PROJECT_ROOT = getProjectRoot()
 const CLIENT_ROOT = path.join(PROJECT_ROOT, 'packages', 'client')
 const SERVER_ROOT = path.join(PROJECT_ROOT, 'packages', 'server')
 const GQL_ROOT = path.join(PROJECT_ROOT, 'packages', 'gql-executor')
+const SFU_ROOT = path.join(PROJECT_ROOT, 'packages', 'sfu')
 const DOTENV = path.join(PROJECT_ROOT, 'scripts', 'webpack', 'utils', 'dotenv.js')
 // const CircularDependencyPlugin = require('circular-dependency-plugin')
 
 module.exports = {
   stats: 'minimal',
-  watch: true,
   devtool: 'eval-source-map',
   mode: 'development',
+  // cache: {
+  //   type: 'filesystem',
+  //   buildDependencies: {
+  //     config: [__filename]
+  //   }
+  // },
   node: {
     __dirname: false
   },
   entry: {
-    web: [
-      'webpack/hot/poll?1000',
-      DOTENV,
-      path.join(SERVER_ROOT, 'server.dev.ts')
-    ],
-    gqlExecutor: [DOTENV, path.join(GQL_ROOT, 'gqlExecutor.ts')]
+    web: [DOTENV, path.join(SERVER_ROOT, 'server.ts')],
+    gqlExecutor: [DOTENV, path.join(GQL_ROOT, 'gqlExecutor.ts')],
+    sfu: [DOTENV, path.join(SFU_ROOT, 'server.ts')]
   },
   output: {
     filename: '[name].js',
     path: path.join(PROJECT_ROOT, 'dev'),
     libraryTarget: 'commonjs',
-    hotUpdateChunkFilename: 'hot/[id].[hash].hot-update.js',
-    hotUpdateMainFilename: 'hot/[hash].hot-update.json'
   },
   resolve: {
     alias: {
       '~': path.join(CLIENT_ROOT),
       'parabol-server': SERVER_ROOT,
-      'parabol-client': CLIENT_ROOT,
+      'parabol-client': CLIENT_ROOT
     },
     extensions: ['.js', '.json', '.ts', '.tsx'],
     unsafeCache: true,
@@ -51,11 +51,8 @@ module.exports = {
   target: 'node',
   externals: [
     nodeExternals({
-      whitelist: ['webpack/hot/poll?1000', /parabol-client/, /parabol-server/]
+      allowlist: [/parabol-client/, /parabol-server/]
     })
-  ],
-  plugins: [
-    new webpack.HotModuleReplacementPlugin()
   ],
   module: {
     rules: [

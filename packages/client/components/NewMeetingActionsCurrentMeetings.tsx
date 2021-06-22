@@ -6,18 +6,17 @@ import useBreakpoint from '~/hooks/useBreakpoint'
 import {MenuPosition} from '~/hooks/useCoords'
 import useMenu from '~/hooks/useMenu'
 import {Elevation} from '~/styles/elevation'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import {Breakpoint} from '~/types/constEnums'
 import plural from '~/utils/plural'
 import {NewMeetingActionsCurrentMeetings_team} from '~/__generated__/NewMeetingActionsCurrentMeetings_team.graphql'
-import {MeetingTypeEnum} from '../types/graphql'
 import FlatButton from './FlatButton'
 import Icon from './Icon'
 import SelectMeetingDropdown from './SelectMeetingDropdown'
 import useSnacksForNewMeetings from '~/hooks/useSnacksForNewMeetings'
 
 const CurrentButton = styled(FlatButton)<{hasMeetings: boolean}>(({hasMeetings}) => ({
-  color: PALETTE.BACKGROUND_PINK,
+  color: PALETTE.ROSE_500,
   fontSize: 14,
   fontWeight: 600,
   padding: '4px 16px',
@@ -34,7 +33,6 @@ const ForumIcon = styled(Icon)({
 })
 
 interface Props {
-  meetingType: MeetingTypeEnum
   team: NewMeetingActionsCurrentMeetings_team
 }
 
@@ -46,9 +44,7 @@ const NewMeetingActionsCurrentMeetings = (props: Props) => {
     {isDropdown: true}
   )
   const {activeMeetings} = team
-
   useSnacksForNewMeetings(activeMeetings)
-
   const meetingCount = activeMeetings.length
   const label = `${meetingCount} Active ${plural(meetingCount, 'Meeting')}`
   if (meetingCount === 0 && !isDesktop) return null
@@ -74,18 +70,8 @@ export default createFragmentContainer(NewMeetingActionsCurrentMeetings, {
       id
       activeMeetings {
         ...SelectMeetingDropdown_meetings
-        meetingType
+        ...useSnacksForNewMeetings_meetings
         id
-        createdAt
-        facilitator {
-          id
-          preferredName
-        }
-        meetingType
-        name
-        team {
-          name
-        }
       }
     }
   `

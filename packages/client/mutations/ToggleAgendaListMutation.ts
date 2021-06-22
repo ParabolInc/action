@@ -2,7 +2,6 @@ import {commitMutation} from 'react-relay'
 import toTeamMemberId from '../utils/relay/toTeamMemberId'
 import graphql from 'babel-plugin-relay/macro'
 import {ToggleAgendaListMutation as TToggleAgendaListMutation} from '../__generated__/ToggleAgendaListMutation.graphql'
-import {ITeamMember} from '~/types/graphql'
 
 const mutation = graphql`
   mutation ToggleAgendaListMutation($teamId: ID!) {
@@ -26,7 +25,7 @@ const ToggleAgendaListMutation = (atmosphere, teamId, onError, onCompleted) => {
     },
     optimisticUpdater: (store) => {
       const teamMemberId = toTeamMemberId(teamId, viewerId)
-      const teamMember = store.get<ITeamMember>(teamMemberId)!
+      const teamMember = store.get(teamMemberId)!
       const currentValue = teamMember.getValue('hideAgenda') || false
       teamMember.setValue(!currentValue, 'hideAgenda')
     },

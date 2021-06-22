@@ -3,7 +3,7 @@ import React, {useState} from 'react'
 import adam from '~/styles/theme/images/adam.jpeg'
 import cliff from '~/styles/theme/images/cliff.jpeg'
 import ian from '~/styles/theme/images/ian.png'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 
 const quotes = [
   {
@@ -89,7 +89,7 @@ const Name = styled('div')({
 })
 
 const Title = styled('div')({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: 13
 })
 

@@ -3,7 +3,7 @@ import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
 import {createFragmentContainer} from 'react-relay'
 import makeMinWidthMediaQuery from '~/utils/makeMinWidthMediaQuery'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import {AppBar, Breakpoint, NavSidebar} from '../../types/constEnums'
 import {DashSidebar_viewer} from '../../__generated__/DashSidebar_viewer.graphql'
 import DashNavList from '../DashNavList/DashNavList'
@@ -42,7 +42,7 @@ const NavMain = styled('div')({
 })
 
 const DashHR = styled('div')({
-  borderBottom: `solid ${PALETTE.BACKGROUND_TOGGLE_ACTIVE} 1px`,
+  borderBottom: `solid ${PALETTE.SLATE_300} 1px`,
   width: '100%'
 })
 

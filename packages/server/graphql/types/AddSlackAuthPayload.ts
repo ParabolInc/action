@@ -1,6 +1,6 @@
 import {GraphQLObjectType} from 'graphql'
 import StandardMutationError from './StandardMutationError'
-import SlackAuth from './SlackAuth'
+import SlackIntegration from './SlackIntegration'
 import User from './User'
 import {GQLContext} from '../graphql'
 
@@ -10,8 +10,8 @@ const AddSlackAuthPayload = new GraphQLObjectType<any, GQLContext>({
     error: {
       type: StandardMutationError
     },
-    slackAuth: {
-      type: SlackAuth,
+    slackIntegration: {
+      type: SlackIntegration,
       description: 'The newly created auth',
       resolve: async ({slackAuthId}, _args, {dataLoader}: GQLContext) => {
         return dataLoader.get('slackAuths').load(slackAuthId)

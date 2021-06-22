@@ -1,7 +1,7 @@
 import React, {forwardRef, ReactNode, Ref} from 'react'
 import styled from '@emotion/styled'
 import PlainButton from '../PlainButton/PlainButton'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 
 interface Props {
   className?: string
@@ -13,7 +13,7 @@ interface Props {
 const TabStyle = styled(PlainButton)<{isActive: boolean; isClickable: boolean}>(
   ({isActive, isClickable}) => ({
     alignItems: 'center',
-    color: isActive ? PALETTE.PRIMARY_MAIN : PALETTE.TEXT_GRAY,
+    color: isActive ? PALETTE.GRAPE_700 : PALETTE.SLATE_600,
     cursor: isClickable ? 'pointer' : 'default',
     display: 'flex',
     fontSize: 14,

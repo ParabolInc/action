@@ -1,5 +1,5 @@
 import React from 'react'
-import parabolMark from '../../../../styles/theme/images/brand/mark-primary.svg'
+import parabolMark from '../../../../styles/theme/images/brand/mark-color.svg'
 import styled from '@emotion/styled'
 import {ContactInfo} from '../../../../types/constEnums'
 

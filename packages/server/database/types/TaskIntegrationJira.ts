@@ -1,4 +1,3 @@
-import {TaskServiceEnum} from 'parabol-client/types/graphql'
 import TaskIntegration from '../../graphql/types/TaskIntegration'
 
 interface Input {
@@ -17,7 +16,7 @@ export default class TaskIntegrationJira extends TaskIntegration {
   cloudName: string
   constructor(input: Input) {
     const {projectKey, projectName, cloudId, cloudName, issueKey} = input
-    super({service: TaskServiceEnum.jira})
+    super({service: 'jira'})
     this.projectKey = projectKey
     this.projectName = projectName
     this.cloudId = cloudId

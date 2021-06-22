@@ -1,7 +1,7 @@
 import styled from '@emotion/styled'
 import React from 'react'
 import {MeetingSettingsThreshold} from '~/types/constEnums'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {ICON_SIZE} from '../styles/typographyV2'
 import Icon from './Icon'
 import PlainButton from './PlainButton/PlainButton'
@@ -32,7 +32,7 @@ const StyledIcon = styled(Icon)({
 })
 
 const Value = styled('span')({
-  color: PALETTE.TEXT_MAIN_DARK,
+  color: PALETTE.SLATE_800,
   display: 'flex',
   width: 34,
   justifyContent: 'center'

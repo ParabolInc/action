@@ -7,13 +7,13 @@ import useAtmosphere from '../hooks/useAtmosphere'
 import {MenuPosition} from '../hooks/useCoords'
 import useMenu from '../hooks/useMenu'
 import {PortalStatus} from '../hooks/usePortal'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import isDemoRoute from '../utils/isDemoRoute'
 import lazyPreload from '../utils/lazyPreload'
 import Icon from './Icon'
 
 const FacilitatorBlock = styled('div')({
-  borderBottom: `1px solid ${PALETTE.BORDER_LIGHTER}`,
+  borderBottom: `1px solid ${PALETTE.SLATE_300}`,
   fontWeight: 700,
   marginBottom: 8,
   padding: '0 8px 8px'
@@ -30,26 +30,26 @@ const FacilitatorToggle = styled('div')<{isActive: boolean; isReadOnly: boolean}
     padding: '2px 4px',
     // StyledIcon when toggle isActive or not
     '& > i': {
-      backgroundColor: isActive ? PALETTE.BACKGROUND_MAIN : undefined,
-      color: isActive ? PALETTE.TEXT_MAIN : PALETTE.TEXT_GRAY
+      backgroundColor: isActive ? PALETTE.SLATE_200 : undefined,
+      color: isActive ? PALETTE.SLATE_700 : PALETTE.SLATE_600
     },
     // StyledIcon when toggle hovered
     '&:hover > i': {
-      backgroundColor: PALETTE.BACKGROUND_MAIN,
-      color: PALETTE.TEXT_MAIN
+      backgroundColor: PALETTE.SLATE_200,
+      color: PALETTE.SLATE_700
     }
   })
 )
 
 const Label = styled('div')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   fontSize: 14,
   fontWeight: 600,
   lineHeight: '20px'
 })
 
 const Subtext = styled('div')({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: 11,
   fontWeight: 400,
   lineHeight: '16px'
@@ -68,7 +68,7 @@ const StyledIcon = styled(Icon)({
 
 const AvatarBlock = styled('div')<{isConnected: boolean | null}>(({isConnected}) => ({
   border: '2px solid',
-  borderColor: isConnected ? PALETTE.TEXT_GREEN : PALETTE.TEXT_GRAY,
+  borderColor: isConnected ? PALETTE.JADE_400 : PALETTE.SLATE_600,
   borderRadius: 30,
   flexShrink: 0,
   height: 30,
@@ -99,7 +99,8 @@ const Facilitator = (props: Props) => {
   const {meeting} = props
   const {endedAt, facilitatorUserId, facilitator} = meeting
   const {user, picture, preferredName} = facilitator
-  const {isConnected} = user
+  // https://sentry.io/share/issue/efef01c3e7934ab981ed5c80ef2d64c8/
+  const isConnected = user?.isConnected ?? false
   const {togglePortal, menuProps, menuPortal, originRef, portalStatus} = useMenu<HTMLDivElement>(
     MenuPosition.UPPER_RIGHT,
     {

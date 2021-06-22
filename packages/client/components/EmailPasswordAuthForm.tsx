@@ -15,7 +15,7 @@ import StyledTip from './StyledTip'
 import AcceptTeamInvitationMutation from '../mutations/AcceptTeamInvitationMutation'
 import getTokenFromSSO from '../utils/getTokenFromSSO'
 import PlainButton from './PlainButton/PlainButton'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import getSSODomainFromEmail from '../utils/getSSODomainFromEmail'
 import Atmosphere from '../Atmosphere'
 import useMutationProps from '../hooks/useMutationProps'
@@ -55,7 +55,7 @@ const HelpMessage = styled(StyledTip)({
 })
 
 const UseSSO = styled(PlainButton)({
-  color: PALETTE.LINK_BLUE,
+  color: PALETTE.SKY_500,
   display: 'flex',
   fontSize: 14,
   justifyContent: 'center',
@@ -211,9 +211,8 @@ const EmailPasswordAuthForm = forwardRef((props: Props, ref: any) => {
           {isSignin ? SIGNIN_LABEL : CREATE_ACCOUNT_BUTTON_LABEL}
         </Button>
       </Form>
-      <UseSSO onClick={toggleSSO}>{`Sign ${isSignin ? 'in' : 'up'} ${
-        isSSO ? 'without' : 'with'
-      } SSO`}</UseSSO>
+      <UseSSO onClick={toggleSSO}>{`Sign ${isSignin ? 'in' : 'up'} ${isSSO ? 'without' : 'with'
+        } SSO`}</UseSSO>
     </>
   )
 })

@@ -1,13 +1,13 @@
 import styled from '@emotion/styled'
 import React from 'react'
 import PlainButton from '~/components/PlainButton/PlainButton'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import {NavSidebar} from '~/types/constEnums'
 import parabolLogo from 'static/images/brand/mark-color.svg'
 
 const Parabol = styled(PlainButton)({
   alignItems: 'center',
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   display: 'flex',
   fontSize: NavSidebar.FONT_SIZE,
   fontWeight: 600,

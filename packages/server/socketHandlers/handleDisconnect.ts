@@ -27,7 +27,7 @@ const handleDisconnect = (connectionContext: ConnectionContext, options: Options
   clearInterval(cancelKeepAlive!)
   relayUnsubscribeAll(connectionContext)
   closeWRTC(socket as any)
-  publishInternalGQL({type: 'disconnect', authToken, ip, query, socketId})
+  publishInternalGQL({authToken, ip, query, socketId})
   if (connectionContext.id.startsWith('sse')) {
     sseClients.delete(connectionContext.id)
   }

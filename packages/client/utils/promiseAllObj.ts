@@ -1,4 +1,4 @@
-export default async (promiseObj: {[val: string]: Promise<any>}) => {
+const promiseAllObj = async (promiseObj: {[val: string]: Promise<any>}) => {
   const keys = Object.keys(promiseObj)
   const promises = Object.values(promiseObj)
   const values = await Promise.all(promises)
@@ -7,3 +7,5 @@ export default async (promiseObj: {[val: string]: Promise<any>}) => {
     return newObj
   }, {})
 }
+
+export default promiseAllObj

@@ -9,7 +9,7 @@ import {GQLContext} from '../graphql'
 import {isTeamMember, getUserId} from '../../utils/authorization'
 import isTaskPrivate from 'parabol-client/utils/isTaskPrivate'
 
-const NotifyTaskInvolves = new GraphQLObjectType<any, GQLContext, any>({
+const NotifyTaskInvolves = new GraphQLObjectType<any, GQLContext>({
   name: 'NotifyTaskInvolves',
   description: 'A notification sent to someone who was just added to a team',
   interfaces: () => [Notification, TeamNotification],

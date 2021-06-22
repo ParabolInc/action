@@ -1,9 +1,9 @@
 import React, {ReactNode} from 'react'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 
 // inline styles so oy-vey doesn't barf when making emails using draft-js cards
 const style = {
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   fontWeight: 600
 }
 

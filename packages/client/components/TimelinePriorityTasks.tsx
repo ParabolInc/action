@@ -8,10 +8,9 @@ import withAtmosphere, {WithAtmosphereProps} from '../decorators/withAtmosphere/
 import useAtmosphere from '../hooks/useAtmosphere'
 import useEventCallback from '../hooks/useEventCallback'
 import UpdateTaskMutation from '../mutations/UpdateTaskMutation'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {ICON_SIZE} from '../styles/typographyV2'
 import {DroppableType} from '../types/constEnums'
-import {AreaEnum, TaskStatusEnum} from '../types/graphql'
 import {ACTIVE, SORT_STEP} from '../utils/constants'
 import dndNoise from '../utils/dndNoise'
 import {TimelinePriorityTasks_viewer} from '../__generated__/TimelinePriorityTasks_viewer.graphql'
@@ -23,8 +22,8 @@ interface Props extends WithAtmosphereProps {
 }
 
 const PriorityTasksHeader = styled('div')({
-  background: PALETTE.BACKGROUND_MAIN,
-  color: PALETTE.TEXT_GRAY,
+  background: PALETTE.SLATE_200,
+  color: PALETTE.SLATE_600,
   fontSize: 14,
   fontWeight: 600,
   paddingTop: 16,
@@ -75,17 +74,17 @@ const TimelinePriorityTasks = (props: Props) => {
       sortOrder =
         (activeTasks[destination.index + offset].sortOrder +
           activeTasks[destination.index].sortOrder) /
-          2 +
+        2 +
         dndNoise()
     }
     const updatedTask = {id: draggableId, sortOrder}
-    UpdateTaskMutation(atmosphere, {updatedTask, area: AreaEnum.userDash})
+    UpdateTaskMutation(atmosphere, {updatedTask, area: 'userDash'}, {})
   })
 
   if (activeTasks.length === 0) return <TimelineNoTasks />
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId={TaskStatusEnum.active} type={DroppableType.TASK}>
+      <Droppable droppableId='active' type={DroppableType.TASK}>
         {(dropProvided: DroppableProvided) => (
           <TaskList>
             <PriorityTasksHeader>
@@ -94,7 +93,7 @@ const TimelinePriorityTasks = (props: Props) => {
             </PriorityTasksHeader>
             <PriorityTaskBody {...dropProvided.droppableProps} ref={dropProvided.innerRef}>
               {activeTasks.map((task, idx) => (
-                <DraggableTask key={task.id} area={AreaEnum.userDash} task={task} idx={idx} />
+                <DraggableTask key={task.id} area='userDash' task={task} idx={idx} />
               ))}
               {dropProvided.placeholder}
             </PriorityTaskBody>
@@ -108,7 +107,7 @@ const TimelinePriorityTasks = (props: Props) => {
 export default createFragmentContainer(withAtmosphere(TimelinePriorityTasks), {
   viewer: graphql`
     fragment TimelinePriorityTasks_viewer on User {
-      tasks(first: 1000) @connection(key: "UserColumnsContainer_tasks") {
+      tasks(first: 1000, userIds: $userIds) @connection(key: "UserColumnsContainer_tasks") {
         __typename
         edges {
           node {

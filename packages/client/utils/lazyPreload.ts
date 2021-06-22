@@ -3,7 +3,7 @@ import {ComponentType, lazy, LazyExoticComponent} from 'react'
 
 type ImportThunk<T> = () => Promise<{default: T}>
 
-interface LazyExoticPreload<T extends ComponentType<any>> extends LazyExoticComponent<T> {
+export interface LazyExoticPreload<T extends ComponentType<any>> extends LazyExoticComponent<T> {
   preload: ImportThunk<T>
 }
 

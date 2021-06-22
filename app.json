@@ -4,7 +4,7 @@
   "repository": "https://github.com/ParabolInc/parabol",
   "scripts": {
     "dokku": {
-      "predeploy": "yarn db:migrate",
+      "predeploy": "yarn db:migrate && yarn pg:migrate up",
       "postdeploy": "yarn postdeploy"
     }
   }

@@ -3,7 +3,7 @@ import React, {PureComponent, RefObject, Suspense} from 'react'
 import './TaskEditor/Draft.css'
 import withKeyboardShortcuts from './TaskEditor/withKeyboardShortcuts'
 import withMarkdown from './TaskEditor/withMarkdown'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {FONT_FAMILY} from '../styles/typographyV2'
 import {textTags} from '../utils/constants'
 import entitizeText from '../utils/draftjs/entitizeText'
@@ -42,14 +42,14 @@ interface Props {
 
 const editorBlockquote = {
   fontStyle: 'italic',
-  borderLeft: `4px ${PALETTE.BORDER_MAIN_40} solid`,
+  borderLeft: `4px ${PALETTE.SLATE_500} solid`,
   margin: '16px 0',
   padding: '0 8px'
 }
 
 const codeBlock = {
-  backgroundColor: PALETTE.BACKGROUND_PRIMARY_10A,
-  color: PALETTE.TEXT_RED,
+  backgroundColor: PALETTE.SLATE_200,
+  color: PALETTE.TOMATO_600,
   fontFamily: FONT_FAMILY.MONOSPACE,
   fontSize: 13,
   lineHeight: '24px',
@@ -58,7 +58,7 @@ const codeBlock = {
 }
 
 const EditorStyles = styled('div')(({useFallback, userSelect, isClipped}: any) => ({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   fontSize: Card.FONT_SIZE,
   lineHeight: useFallback ? '14px' : Card.LINE_HEIGHT,
   maxHeight: isClipped ? 44 : ElementHeight.REFLECTION_CARD_MAX,

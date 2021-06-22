@@ -2,7 +2,7 @@ import getIsDrag from '~/utils/retroGroup/getIsDrag'
 import {cacheCoveringBBox, ensureAllCovering} from './useControlBarCovers'
 import useEventCallback from './useEventCallback'
 import useBreakpoint from './useBreakpoint'
-import {Breakpoint} from '~/types/constEnums'
+import {Breakpoint, DiscussionThreadEnum, NavSidebar} from '~/types/constEnums'
 
 const makeDrag = (ref: HTMLDivElement, lastX: number) => ({
   ref,
@@ -17,7 +17,7 @@ const makeDrag = (ref: HTMLDivElement, lastX: number) => ({
 let drag: ReturnType<typeof makeDrag>
 
 const noop = () => {}
-const useDraggableFixture = () => {
+const useDraggableFixture = (isLeftSidebarOpen: boolean, isRightDrawerOpen: boolean) => {
   const isDesktop = useBreakpoint(Breakpoint.SINGLE_REFLECTION_COLUMN)
   const onMouseUp = useEventCallback((e: MouseEvent | TouchEvent) => {
     if (e.type === 'touchend') {
@@ -36,16 +36,16 @@ const useDraggableFixture = () => {
     if (!wasDrag) {
       drag.isDrag = getIsDrag(clientX, 0, drag.lastX, 0)
       if (!drag.isDrag) return
-      const {left, right} = cacheCoveringBBox()
+      const {left, right} = cacheCoveringBBox(isLeftSidebarOpen, isRightDrawerOpen)
       const width = right - left
       drag.translation = -Math.round((window.innerWidth - left - right) / 2)
-      const startingLeft = left - drag.translation
-      const startingRight = left + width - drag.translation
+      const startingLeft = left - drag.translation + (isLeftSidebarOpen ? NavSidebar.WIDTH : 0)
+      const startingRight =
+        left + width - drag.translation - (isRightDrawerOpen ? DiscussionThreadEnum.WIDTH : 0)
       const PADDING = 8
       drag.minTranslation = -startingLeft + PADDING
       drag.maxTranslation = window.innerWidth - startingRight - PADDING
       drag.width = width
-
       const eventName = isTouchMove ? 'touchend' : 'mouseup'
       document.addEventListener(eventName, onMouseUp, {once: true})
     }
@@ -57,8 +57,16 @@ const useDraggableFixture = () => {
       drag.minTranslation
     )
     drag.ref.style.transform = `translateX(${drag.translation}px)`
-    const left = window.innerWidth / 2 - 0.5 * drag.width + drag.translation
-    const right = left + drag.width
+    const left =
+      window.innerWidth / 2 -
+      0.5 * drag.width +
+      drag.translation +
+      (isLeftSidebarOpen ? NavSidebar.WIDTH : 0)
+    const right =
+      left +
+      drag.width -
+      (isLeftSidebarOpen ? NavSidebar.WIDTH : 0) -
+      (isRightDrawerOpen ? DiscussionThreadEnum.WIDTH : 0)
     ensureAllCovering(left, right)
   })
 

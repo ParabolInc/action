@@ -10,7 +10,7 @@ const closeWRTC = (ws: UWebSocket) => {
   if (userId) {
     getPubSub().publish(`signal/room/${roomId}`, {type: 'leaveSwarm', userId})
   }
-  delete ws.context
+  delete (ws as any).context
 }
 
 export default closeWRTC

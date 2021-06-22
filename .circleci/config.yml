@@ -2,27 +2,34 @@ version: 2.0
 jobs:
   build:
     docker:
-      - image: circleci/node:13.6.0
-      - image: rethinkdb:2.3.6
+      - image: circleci/node:14.10
+      - image: rethinkdb:2.4.0
+      - image: circleci/postgres:12.3
+        environment:
+          POSTGRES_PASSWORD: 'EcLtsBMRtra33jqUCQWtSZwt4zfGBzdUvJE74fzSxX'
+          POSTGRES_USER: 'parabol'
+          POSTGRES_DB: 'web'
+          POSTGRES_HOST: 'localhost'
+          POSTGRES_PORT: '5432'
       - image: redis:3.2.8
       - image: cypress/base:10
         environment:
           TERM: xterm
     environment:
-      DEVOPS_REPO: "git@github.com:ParabolInc/action-devops.git"
-      DEVOPS_WORKDIR: "~/action-devops"
-      GITHUB_REMOTE_DEVELOPMENT: "dokku@action-dev-nyc1-01.parabol.co:web"
-      GITHUB_REMOTE_PRODUCTION: "dokku@action-production.parabol.co:web"
-      GITHUB_REMOTE_STAGING: "dokku@action-staging.parabol.co:web"
-      PRODUCTION_BACKUP_LOCATION: "dokku@backups.action-production.parabol.co"
-      PRODUCTION_BACKUP_VOLUME: "/mnt/volume_nyc1_01/action-production-rethinkdb-nyc1-01"
-      SENTRY_ORG: "parabol"
-      SENTRY_PROJECT: "action-production"
+      DEVOPS_REPO: 'git@github.com:ParabolInc/action-devops.git'
+      DEVOPS_WORKDIR: '~/action-devops'
+      GITHUB_REMOTE_DEVELOPMENT: 'dokku@action-dev-nyc1-01.parabol.co:web'
+      GITHUB_REMOTE_PRODUCTION: 'dokku@action-production.parabol.co:web'
+      GITHUB_REMOTE_STAGING: 'dokku@action-staging.parabol.co:web'
+      PRODUCTION_BACKUP_LOCATION: 'dokku@backups.action-production.parabol.co'
+      PRODUCTION_BACKUP_VOLUME: '/mnt/volume_nyc1_01/action-production-rethinkdb-nyc1-01'
+      SENTRY_ORG: 'parabol'
+      SENTRY_PROJECT: 'action-production'
     working_directory: ~/action
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "53:a8:37:35:c3:7e:54:f5:19:f6:8e:a1:e0:78:52:da"
+            - '53:a8:37:35:c3:7e:54:f5:19:f6:8e:a1:e0:78:52:da'
       - run:
           name: Slack setup
           command: |
@@ -42,11 +49,11 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            yarn --frozen-lockfile
+            MEDIASOUP_MAX_CORES=8 yarn --frozen-lockfile
       - save_cache:
           key: yarn-packages-v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
           paths:
-          - ~/.cache/yarn
+            - ~/.cache/yarn
       - run:
           name: DevOps checkout
           command: |
@@ -54,26 +61,37 @@ jobs:
       - run:
           name: Build Assets
           command: |
-            if [ "${CIRCLE_BRANCH}" == "production" ] || [ "${CIRCLE_BRANCH}" == "staging" ]; then
+            if [ "${CIRCLE_BRANCH}" == "production" ] || [ "${CIRCLE_BRANCH}" == "staging" ] || [ "${CIRCLE_BRANCH}" == "development" ]; then
               cp $DEVOPS_WORKDIR/environments/$CIRCLE_BRANCH .env
+              yarn build --deploy
+            fi
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              cp $DEVOPS_WORKDIR/environments/development .env
               yarn build --deploy
             fi
       - run:
           name: Cypress Tests
           command: |
-            if [ "${CIRCLE_BRANCH}" == "production" ] || [ "${CIRCLE_BRANCH}" == "staging" ]; then
+            if [ "${CIRCLE_BRANCH}" == "production" ] || [ "${CIRCLE_BRANCH}" == "staging" ] || [ "${CIRCLE_BRANCH}" == "master" ]; then
               cp $DEVOPS_WORKDIR/environments/cypress .env
               # cypress docker image has a bug, sideloading these mitigates it
               sudo apt-get update && sudo apt-get install xvfb libgtk2.0-0 libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2
-              curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-              sudo python get-pip.py
-              sudo pip install rethinkdb==2.3.0
+              curl https://bootstrap.pypa.io/pip/3.4/get-pip.py -o get-pip.py
+              sudo python get-pip.py pip==20.3.3
+              sudo pip install rethinkdb==2.4.0
               rethinkdb-restore --force packages/cypress/fixtures/rdb_test.tar.gz
               node scripts/toolbox/softenDurability.js
-              yarn db:migrate
+              yarn db:migrate && yarn pg:migrate up
               yarn postdeploy
-              yarn test
+              # yarn test
             fi
+      - run:
+          name: Alert Failed Tests
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              curl --ssl -X POST -H 'Content-type: application/json' --data '{"text":"`master` branch CI Cypress Tests failed! Please investigate."}' $SLACK_DEVOPS_URL
+            fi
+          when: on_fail
       - deploy:
           name: Commit Deployment
           command: |
@@ -124,6 +142,14 @@ jobs:
       - store_artifacts:
           path: ~/action/dist
           destination: dist
+      - store_artifacts:
+          name: Upload Cypress Videos
+          path: ~/action/packages/cypress/videos
+          destination: cypress/videos
+      - store_artifacts:
+          name: Upload Cypress Screenshots
+          path: ~/action/packages/cypress/screenshots
+          destination: cypress/screenshots
       - run:
           name: Upload sentry artifacts
           command: |
@@ -136,7 +162,7 @@ jobs:
               sentry-cli releases finalize "$ACTION_VERSION"
             fi
       - store_test_results:
-          path: ~/action/test-report
+          path: ~/action/packages/cypress/results
 workflows:
   version: 2
   build-and-deploy:

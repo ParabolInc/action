@@ -1,20 +1,21 @@
-import {useEffect} from 'react'
-import useRefState from './useRefState'
+import {useEffect, useRef} from 'react'
+import useForceUpdate from './useForceUpdate'
 
 const useInterval = (duration: number, iters: number) => {
-  const [countRef, setCount] = useRefState<number>(0)
+  const countRef = useRef(0)
+  const forceUpdate = useForceUpdate()
   useEffect(() => {
     const interval = window.setInterval(() => {
-      const nextCount = countRef.current + 1
-      setCount(nextCount)
-      if (nextCount >= iters) {
+      countRef.current++
+      forceUpdate()
+      if (countRef.current >= iters) {
         window.clearInterval(interval)
       }
     }, duration)
     return () => {
       window.clearInterval(interval)
     }
-  }, [countRef, duration, iters, setCount])
+  }, [duration, iters])
   return countRef.current
 }
 

@@ -2,8 +2,8 @@ import {EditorState, SelectionState} from 'draft-js'
 import React, {RefObject, useEffect} from 'react'
 import styled from '@emotion/styled'
 import RaisedButton from '../RaisedButton'
-import {PALETTE} from '../../styles/paletteV2'
-import completeEntity from '../../utils/draftjs/completeEnitity'
+import {PALETTE} from '../../styles/paletteV3'
+import completeEntity from '../../utils/draftjs/completeEntity'
 import linkify from '../../utils/linkify'
 import withForm, {WithFormProps} from '../../utils/relay/withForm'
 import Legitity from '../../validation/Legitity'
@@ -14,7 +14,7 @@ import {MenuPosition} from '../../hooks/useCoords'
 import useMenu from '../../hooks/useMenu'
 
 const ModalBoundary = styled('div')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   padding: '.5rem .5rem .5rem 1rem',
   minWidth: '20rem',
   outline: 0

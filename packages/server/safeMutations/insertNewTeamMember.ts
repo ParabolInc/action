@@ -7,7 +7,7 @@ const insertNewTeamMember = async (userId: string, teamId: string) => {
   const r = await getRethink()
   const now = new Date()
   const teamMemberId = toTeamMemberId(teamId, userId)
-  const [user, checkInOrder, existingTeamMember] = await Promise.all([
+  const [user, teamMemberCount, existingTeamMember] = await Promise.all([
     db.read('User', userId),
     r
       .table('TeamMember')
@@ -32,14 +32,13 @@ const insertNewTeamMember = async (userId: string, teamId: string) => {
   }
 
   const {picture, preferredName, email} = user
-  const isLead = checkInOrder === 0
+  const isLead = teamMemberCount === 0
   const teamMember = new TeamMember({
     teamId,
     userId,
     picture,
     preferredName,
     email,
-    checkInOrder,
     isLead
   })
   await r

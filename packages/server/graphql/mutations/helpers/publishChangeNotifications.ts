@@ -1,4 +1,3 @@
-import {NotificationEnum} from 'parabol-client/types/graphql'
 import {ASSIGNEE, MENTIONEE} from 'parabol-client/utils/constants'
 import getTypeFromEntityMap from 'parabol-client/utils/draftjs/getTypeFromEntityMap'
 import getRethink from '../../../database/rethinkDriver'
@@ -56,8 +55,8 @@ const publishChangeNotifications = async (
     })
   })
   // add in the assignee changes
-  if (oldTask.userId !== task.userId) {
-    if (task.userId !== changeUserId && !usersToIgnore.includes(task.userId)) {
+  if (oldTask.userId && oldTask.userId !== task.userId) {
+    if (task.userId && task.userId !== changeUserId && !usersToIgnore.includes(task.userId)) {
       notificationsToAdd.push(
         new NotificationTaskInvolves({
           userId: task.userId,
@@ -75,14 +74,14 @@ const publishChangeNotifications = async (
   const oldContentLen = oldBlocks[0] ? oldBlocks[0].text.length : 0
   if (oldContentLen < 3) {
     const contentLen = blocks[0] ? blocks[0].text.length : 0
-    if (contentLen > oldContentLen) {
+    if (contentLen > oldContentLen && task.userId) {
       const maybeInvolvedUserIds = mentions.concat(task.userId)
       const existingTaskNotifications = (await r
         .table('Notification')
         .getAll(r.args(maybeInvolvedUserIds), {index: 'userId'})
         .filter({
           taskId: task.id,
-          type: NotificationEnum.TASK_INVOLVES
+          type: 'TASK_INVOLVES'
         })
         .run()) as NotificationTaskInvolves[]
       notificationsToAdd.push(...existingTaskNotifications)

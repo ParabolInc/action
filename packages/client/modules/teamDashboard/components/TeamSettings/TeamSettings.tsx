@@ -8,9 +8,8 @@ import Panel from '../../../../components/Panel/Panel'
 import PrimaryButton from '../../../../components/PrimaryButton'
 import Row from '../../../../components/Row/Row'
 import {WithAtmosphereProps} from '../../../../decorators/withAtmosphere/withAtmosphere'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import {Layout, TierLabel} from '../../../../types/constEnums'
-import {TierEnum} from '../../../../types/graphql'
 import useDocumentTitle from '../../../../hooks/useDocumentTitle'
 import useRouter from '../../../../hooks/useRouter'
 import ArchiveTeam from '../ArchiveTeam/ArchiveTeam'
@@ -29,7 +28,7 @@ const PanelsLayout = styled('div')({
 })
 
 const PanelRow = styled('div')({
-  borderTop: `1px solid ${PALETTE.BORDER_LIGHTER}`,
+  borderTop: `1px solid ${PALETTE.SLATE_300}`,
   padding: Layout.ROW_GUTTER
 })
 
@@ -54,7 +53,7 @@ const TeamSettings = (props: Props) => {
   return (
     <TeamSettingsLayout>
       <PanelsLayout>
-        {tier === TierEnum.personal && (
+        {tier === 'personal' && (
           <Panel>
             <StyledRow>
               <div>{'This team is currently on a personal plan.'}</div>

@@ -11,7 +11,6 @@
 import {createSourceEventStream, ExecutionResult} from 'graphql'
 import {decode} from 'jsonwebtoken'
 import {TrebuchetCloseReason} from 'parabol-client/types/constEnums'
-import {IAuthTokenPayload} from 'parabol-client/types/graphql'
 import AuthToken from '../database/types/AuthToken'
 import handleDisconnect from '../socketHandlers/handleDisconnect'
 import ConnectionContext from '../socketHelpers/ConnectionContext'
@@ -44,10 +43,14 @@ export interface PubSubPayload {
 }
 
 const documentCache = new DocumentCache()
-
+const reliableSubscriptionPayloadBlackList = [
+  'UpdateDragLocationPayload',
+  'AuthTokenPayload',
+  'InvalidateSessionsPayload'
+]
 const subscribeGraphQL = async (req: SubscribeRequest) => {
   const {connectionContext, variables, docId, query, opId, hideErrors} = req
-  const {id: socketId, authToken, socket} = connectionContext
+  const {id: socketId, authToken} = connectionContext
   const document = docId ? await documentCache.fromID(docId) : documentCache.fromString(query!)
   if (!document) {
     if (!hideErrors) {
@@ -75,11 +78,11 @@ const subscribeGraphQL = async (req: SubscribeRequest) => {
   // hold onto responseStream so we can unsubscribe from other contexts
   connectionContext.subs[opId] = responseStream
   for await (const payload of responseStream) {
-    const {data} = payload
+    const {data} = payload as ExecutionResult
     const notificationType = data?.notificationSubscription?.__typename
     if (notificationType === 'AuthTokenPayload') {
       // AuthTokenPayload is sent when a user is added/removed from a team and their JWT is soft invalidated
-      const jwt = (data.notificationSubscription as IAuthTokenPayload).id
+      const jwt = data?.notificationSubscription.id
       connectionContext.authToken = new AuthToken(decode(jwt) as any)
       // When a JWT is invalidated, so are the subscriptions.
       // Allow the other subscription payloads to complete, then resubscribe
@@ -93,7 +96,14 @@ const subscribeGraphQL = async (req: SubscribeRequest) => {
         reason: TrebuchetCloseReason.SESSION_INVALIDATED
       })
     }
-    sendGQLMessage(socket, 'data', payload, opId)
+    if (!data) {
+      sendGQLMessage(connectionContext, 'data', false, payload, opId)
+    } else {
+      const subscriptionName = Object.keys(data)[0]
+      const subscriptionType = data[subscriptionName].__typename
+      const syn = !reliableSubscriptionPayloadBlackList.includes(subscriptionType)
+      sendGQLMessage(connectionContext, 'data', syn, payload, opId)
+    }
   }
   const resubIdx = connectionContext.availableResubs.indexOf(opId)
   if (resubIdx !== -1) {
@@ -101,7 +111,7 @@ const subscribeGraphQL = async (req: SubscribeRequest) => {
     connectionContext.availableResubs.splice(resubIdx, 1)
     subscribeGraphQL({...req, hideErrors: true}).catch()
   } else {
-    sendGQLMessage(socket, 'complete', undefined, opId)
+    sendGQLMessage(connectionContext, 'complete', false, undefined, opId)
   }
 }
 

@@ -1,4 +1,3 @@
-import {OrgUserRole, TierEnum} from 'parabol-client/types/graphql'
 import getRethink from '../../database/rethinkDriver'
 import Organization from '../../database/types/Organization'
 import segmentIo from '../../utils/segmentIo'
@@ -24,7 +23,7 @@ const sendEnterpriseOverageToSegment = async (organization: Organization) => {
     const billingLeaderOrgUser = await r
       .table('OrganizationUser')
       .getAll(orgId, {index: 'orgId'})
-      .filter({removedAt: null, role: OrgUserRole.BILLING_LEADER})
+      .filter({removedAt: null, role: 'BILLING_LEADER'})
       .nth(0)
       .run()
     const {id: userId} = billingLeaderOrgUser
@@ -37,7 +36,7 @@ const sendEnterpriseOverageToSegment = async (organization: Organization) => {
 }
 
 const handleEnterpriseOrgQuantityChanges = async (paidOrgs: Organization[]) => {
-  const enterpriseOrgs = paidOrgs.filter((org) => org.tier === TierEnum.enterprise)
+  const enterpriseOrgs = paidOrgs.filter((org) => org.tier === 'enterprise')
   if (enterpriseOrgs.length === 0) return
   enterpriseOrgs.forEach(sendEnterpriseOverageToSegment)
 }

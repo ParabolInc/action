@@ -18,6 +18,10 @@ const Button = styled(PrimaryButton)({
   marginTop: 8
 })
 
+const Link = styled('a')({
+  color: 'inherit'
+})
+
 interface Props {
   error: Error
   eventId: string
@@ -27,6 +31,24 @@ const ErrorComponent = (props: Props) => {
   const {error, eventId} = props
   console.error(error)
   const {modalPortal, openPortal, closePortal} = useModal()
+  const oldBrowserErrs = ['flatMap is not a function']
+
+  const isOldBrowserErr = oldBrowserErrs.find((err) => error.message.includes(err))
+  if (isOldBrowserErr) {
+    const url = 'https://browser-update.org/update-browser.html'
+    return (
+      <ErrorBlock>
+        {"Oh no! You've found a bug because the browser you're using needs to be updated."}
+        {
+          <Button>
+            <Link href={url} target='_blank' rel='noreferrer'>
+              Update now
+            </Link>
+          </Button>
+        }
+      </ErrorBlock>
+    )
+  }
   return (
     <ErrorBlock>
       {'An error has occurred! We’ve alerted the developers. Try refreshing the page'}

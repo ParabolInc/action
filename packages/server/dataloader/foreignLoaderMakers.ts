@@ -2,6 +2,7 @@ import TimelineEventCheckinComplete from 'parabol-server/database/types/Timeline
 import TimelineEventRetroComplete from 'parabol-server/database/types/TimelineEventRetroComplete'
 import getRethink from '../database/rethinkDriver'
 import LoaderMakerForeign from './LoaderMakerForeign'
+import getTeamsByOrgId from '../postgres/queries/getTeamsByOrgId'
 
 export const activeMeetingsByTeamId = new LoaderMakerForeign(
   'newMeetings',
@@ -43,7 +44,6 @@ export const agendaItemsByMeetingId = new LoaderMakerForeign(
       .run()
   }
 )
-
 export const atlassianAuthByUserId = new LoaderMakerForeign(
   'atlassianAuths',
   'userId',
@@ -55,7 +55,17 @@ export const atlassianAuthByUserId = new LoaderMakerForeign(
       .run()
   }
 )
-
+export const atlassianAuthByTeamId = new LoaderMakerForeign(
+  'atlassianAuths',
+  'teamId',
+  async (teamIds) => {
+    const r = await getRethink()
+    return r
+      .table('AtlassianAuth')
+      .getAll(r.args(teamIds), {index: 'teamId'})
+      .run()
+  }
+)
 export const commentsByThreadId = new LoaderMakerForeign(
   'comments',
   'threadId',
@@ -90,15 +100,15 @@ export const completedMeetingsByTeamId = new LoaderMakerForeign(
   }
 )
 
-export const customPhaseItemsByTeamId = new LoaderMakerForeign(
-  'customPhaseItems',
-  'teamId',
-  async (teamIds) => {
+export const reflectPromptsByTemplateId = new LoaderMakerForeign(
+  'reflectPrompts',
+  'templateId',
+  async (templateIds) => {
     const r = await getRethink()
     return r
-      .table('CustomPhaseItem')
-      .getAll(r.args(teamIds), {index: 'teamId'})
-      .filter({isActive: true})
+      .table('ReflectPrompt')
+      .getAll(r.args(templateIds), {index: 'templateId'})
+      .orderBy('sortOrder')
       .run()
   }
 )
@@ -189,15 +199,45 @@ export const retroReflectionGroupsByMeetingId = new LoaderMakerForeign(
   }
 )
 
-export const reflectTemplatesByTeamId = new LoaderMakerForeign(
-  'reflectTemplates',
+export const meetingTemplatesByOrgId = new LoaderMakerForeign(
+  'meetingTemplates',
+  'orgId',
+  async (orgId) => {
+    const r = await getRethink()
+    return r
+      .table('MeetingTemplate')
+      .getAll(r.args(orgId), {index: 'orgId'})
+      .filter({isActive: true})
+      .run()
+  }
+)
+export const meetingTemplatesByTeamId = new LoaderMakerForeign(
+  'meetingTemplates',
   'teamId',
   async (teamIds) => {
     const r = await getRethink()
     return r
-      .table('ReflectTemplate')
+      .table('MeetingTemplate')
       .getAll(r.args(teamIds), {index: 'teamId'})
       .filter({isActive: true})
+      .run()
+  }
+)
+
+export const scalesByTeamId = new LoaderMakerForeign(
+  'templateScales',
+  'teamId',
+  async (teamIds) => {
+    const r = await getRethink()
+    return r
+      .table('TemplateScale')
+      .getAll(r.args(teamIds), {index: 'teamId'})
+      .filter((row) =>
+        row('removedAt')
+          .default(null)
+          .eq(null)
+      )
+      .orderBy('sortOrder')
       .run()
   }
 )
@@ -215,6 +255,22 @@ export const retroReflectionsByMeetingId = new LoaderMakerForeign(
   }
 )
 
+export const templateDimensionsByTemplateId = new LoaderMakerForeign(
+  'templateDimensions',
+  'templateId',
+  async (templateIds) => {
+    const r = await getRethink()
+    return (
+      r
+        .table('TemplateDimension')
+        .getAll(r.args(templateIds), {index: 'templateId'})
+        // NOTE: isActive must be false so we can see meetings in the past that use a now-inactive template
+        // .filter({isActive: true})
+        .orderBy('sortOrder')
+        .run()
+    )
+  }
+)
 export const timelineEventsByMeetingId = new LoaderMakerForeign(
   'timelineEvents',
   'meetingId',
@@ -262,16 +318,7 @@ export const suggestedActionsByUserId = new LoaderMakerForeign(
 )
 
 export const teamsByOrgId = new LoaderMakerForeign('teams', 'orgId', async (orgIds) => {
-  const r = await getRethink()
-  return r
-    .table('Team')
-    .getAll(r.args(orgIds), {index: 'orgId'})
-    .filter((team) =>
-      team('isArchived')
-        .default(false)
-        .ne(true)
-    )
-    .run()
+  return await getTeamsByOrgId(orgIds, {isArchived: false})
 })
 
 export const tasksByThreadId = new LoaderMakerForeign('tasks', 'threadId', async (threadIds) => {
@@ -323,6 +370,20 @@ export const teamMembersByTeamId = new LoaderMakerForeign(
     return r
       .table('TeamMember')
       .getAll(r.args(teamIds), {index: 'teamId'})
+      .filter({isNotRemoved: true})
+      .run()
+  }
+)
+
+export const teamMembersByUserId = new LoaderMakerForeign(
+  'teamMembers',
+  'userId',
+  async (userIds) => {
+    // tasksByUserId is expensive since we have to look up each team to check the team archive status
+    const r = await getRethink()
+    return r
+      .table('TeamMember')
+      .getAll(r.args(userIds), {index: 'userId'})
       .filter({isNotRemoved: true})
       .run()
   }

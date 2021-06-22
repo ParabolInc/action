@@ -12,7 +12,7 @@ class SlackClientManager extends SlackManager {
       .toString(36)
       .substring(5)
     const redirect = makeHref('/auth/slack')
-    const uri = `https://slack.com/oauth/authorize?client_id=${window.__ACTION__.slack}&scope=${SlackClientManager.SCOPE}&state=${providerState}&redirect_uri=${redirect}`
+    const uri = `https://slack.com/oauth/v2/authorize?client_id=${window.__ACTION__.slack}&scope=${SlackClientManager.SCOPE}&state=${providerState}&redirect_uri=${redirect}`
     const popup = window.open(
       uri,
       'OAuth',

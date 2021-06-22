@@ -1,19 +1,14 @@
 import sanitizeSVG from '@mattkrick/sanitize-svg'
-import React, {Component} from 'react'
+import React from 'react'
 import styled from '@emotion/styled'
 import Avatar from './Avatar/Avatar'
 import AvatarInput from './AvatarInput'
 import DialogTitle from './DialogTitle'
-import withAtmosphere, {WithAtmosphereProps} from '../decorators/withAtmosphere/withAtmosphere'
-import CreateOrgPicturePutUrlMutation from '../mutations/CreateOrgPicturePutUrlMutation'
-import UpdateOrgMutation from '../mutations/UpdateOrgMutation'
-import withMutationProps, {WithMutationProps} from '../utils/relay/withMutationProps'
-import sendAssetToS3 from '../utils/sendAssetToS3'
-
-interface Props extends WithAtmosphereProps, WithMutationProps {
-  picture: string
-  orgId: string
-}
+import UploadOrgImageMutation from '~/mutations/UploadOrgImageMutation'
+import useMutationProps from '../hooks/useMutationProps'
+import useAtmosphere from '../hooks/useAtmosphere'
+import jpgWithoutEXIF from '../utils/jpgWithoutEXIF'
+import svgToPng from '../utils/svgToPng'
 
 const AvatarBlock = styled('div')({
   margin: '1.5rem auto',
@@ -39,60 +34,49 @@ const StyledDialogTitle = styled(DialogTitle)({
   textAlign: 'center'
 })
 
-class OrgAvatarInput extends Component<Props> {
-  onSubmit = async (file: File) => {
-    const {
-      atmosphere,
-      setDirty,
-      submitting,
-      orgId,
-      onError,
-      onCompleted,
-      submitMutation
-    } = this.props
-    setDirty()
-    if (file.size > 2 ** 21) {
-      onError('File is too large')
-      return
-    }
-    const isSanitary = await sanitizeSVG(file)
-    if (!isSanitary) {
-      onError('xss')
-      return
-    }
-    if (submitting) return
-    submitMutation()
-    const variables = {
-      contentType: file.type,
-      contentLength: file.size,
-      orgId
-    }
-    const handleCompleted = async (res) => {
-      const {
-        createOrgPicturePutUrl: {url}
-      } = res
-      const pictureUrl = await sendAssetToS3(file, url)
-      const updatedOrg = {
-        id: orgId,
-        picture: pictureUrl
-      }
-      UpdateOrgMutation(atmosphere, {updatedOrg}, {onError, onCompleted})
-    }
-    CreateOrgPicturePutUrlMutation(atmosphere, variables, onError, handleCompleted)
-  }
-
-  render() {
-    const {picture, dirty, error} = this.props
-    return (
-      <ModalBoundary>
-        <StyledDialogTitle>{'Upload a New Photo'}</StyledDialogTitle>
-        <AvatarBlock>
-          <Avatar picture={picture} size={96} />
-        </AvatarBlock>
-        <AvatarInput error={dirty ? (error as string) : undefined} onSubmit={this.onSubmit} />
-      </ModalBoundary>
-    )
-  }
+interface Props {
+  picture: string
+  orgId: string
 }
 
-export default withAtmosphere(withMutationProps(OrgAvatarInput))
+const OrgAvatarInput = (props: Props) => {
+  const {picture, orgId} = props
+  const {error, onCompleted, onError, submitMutation, submitting} = useMutationProps()
+  const atmosphere = useAtmosphere()
+
+  const onSubmit = async (file: File) => {
+    if (submitting) return
+    if (file.type === 'image/jpeg') {
+      file = (await jpgWithoutEXIF(file)) as File
+    }
+    if (file.size > 2 ** 20) {
+      onError(new Error('File is too large (1MB Max)'))
+      return
+    }
+    if (file.type === 'image/svg+xml') {
+      const isSanitary = await sanitizeSVG(file)
+      if (!isSanitary) {
+        onError(new Error('xss'))
+        return
+      }
+      const png = await svgToPng(file)
+      if (png) {
+        file = new File([png], file.name.slice(0, -3) + 'png', {type: png.type})
+      }
+    }
+    submitMutation()
+    UploadOrgImageMutation(atmosphere, {orgId}, {onCompleted, onError}, {file})
+  }
+
+  return (
+    <ModalBoundary>
+      <StyledDialogTitle>{'Upload a New Photo'}</StyledDialogTitle>
+      <AvatarBlock>
+        <Avatar picture={picture} size={96} />
+      </AvatarBlock>
+      <AvatarInput error={error?.message} onSubmit={onSubmit} />
+    </ModalBoundary>
+  )
+}
+
+export default OrgAvatarInput

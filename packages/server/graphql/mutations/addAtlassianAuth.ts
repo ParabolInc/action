@@ -1,12 +1,13 @@
 import {GraphQLID, GraphQLNonNull} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import shortid from 'shortid'
 import getRethink from '../../database/rethinkDriver'
+import AtlassianAuth from '../../database/types/AtlassianAuth'
 import AtlassianServerManager from '../../utils/AtlassianServerManager'
 import {getUserId, isTeamMember} from '../../utils/authorization'
 import publish from '../../utils/publish'
 import segmentIo from '../../utils/segmentIo'
 import standardError from '../../utils/standardError'
+import {GQLMutation} from '../graphql'
 import AddAtlassianAuthPayload from '../types/AddAtlassianAuthPayload'
 
 export default {
@@ -54,32 +55,33 @@ export default {
       .nth(0)
       .default(null)
       .run()
-    const updateDoc = {
-      isActive: true,
-      accessToken,
-      accountId: self.accountId,
-      cloudIds,
-      refreshToken,
-      teamId,
-      updatedAt: now,
-      userId: viewerId
-    }
     if (existingAuth) {
       atlassianAuthId = existingAuth.id
       await r
         .table('AtlassianAuth')
         .get(existingAuth.id)
-        .update(updateDoc)
+        .update({
+          isActive: true,
+          accessToken,
+          accountId: self.accountId,
+          cloudIds,
+          refreshToken,
+          updatedAt: now
+        })
         .run()
     } else {
-      atlassianAuthId = shortid.generate()
+      const atlassianAuth = new AtlassianAuth({
+        accessToken,
+        accountId: self.accountId,
+        cloudIds,
+        refreshToken: refreshToken!,
+        teamId,
+        userId: viewerId
+      })
+      atlassianAuthId = atlassianAuth.id
       await r
         .table('AtlassianAuth')
-        .insert({
-          ...updateDoc,
-          id: atlassianAuthId,
-          createdAt: now
-        })
+        .insert(atlassianAuth)
         .run()
     }
 
@@ -91,8 +93,8 @@ export default {
         service: 'Atlassian'
       }
     })
-    const data = {atlassianAuthId}
+    const data = {atlassianAuthId, teamId, userId: viewerId}
     publish(SubscriptionChannel.TEAM, teamId, 'AddAtlassianAuthPayload', data, subOptions)
     return data
   }
-}
+} as GQLMutation

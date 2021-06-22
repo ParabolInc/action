@@ -23,7 +23,7 @@ type Loaders = keyof LoaderMakers
 
 type PrimaryLoaderMakers = typeof primaryLoaderMakers
 type PrimaryLoaders = keyof PrimaryLoaderMakers
-type Unprimary<T> = T extends LoaderMakerPrimary<infer U> ? DBType[U]['type'] : never
+type Unprimary<T> = T extends LoaderMakerPrimary<infer U> ? DBType[U] : never
 type TypeFromPrimary<T extends PrimaryLoaders> = Unprimary<PrimaryLoaderMakers[T]>
 
 type ForeignLoaderMakers = typeof foreignLoaderMakers
@@ -64,7 +64,7 @@ export default class RethinkDataLoader {
       this.loaders[loaderName]
     } else if (loaderMaker instanceof LoaderMakerForeign) {
       const {fetch, field, pk} = loaderMaker
-      const basePkLoader = this.get(pk)
+      const basePkLoader = this.get(pk as PrimaryLoaders)
       loader = fkLoader(basePkLoader, this.dataLoaderOptions, field, fetch)
     } else {
       loader = (loaderMaker as any)(this)

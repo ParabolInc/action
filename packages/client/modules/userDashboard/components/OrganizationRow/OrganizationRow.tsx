@@ -18,10 +18,9 @@ import TierTag from '../../../../components/Tag/TierTag'
 import {MenuPosition} from '../../../../hooks/useCoords'
 import useRouter from '../../../../hooks/useRouter'
 import useTooltip from '../../../../hooks/useTooltip'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import defaultOrgAvatar from '../../../../styles/theme/images/avatar-organization.svg'
 import {Breakpoint, TierLabel} from '../../../../types/constEnums'
-import {TierEnum} from '../../../../types/graphql'
 import plural from '../../../../utils/plural'
 
 const RowInner = styled('div')({
@@ -57,7 +56,7 @@ const StyledButton = styled(SecondaryButton)({
 })
 
 const StyledIcon = styled(Icon)({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: 18
 })
 
@@ -100,7 +99,7 @@ const OrganizationRow = (props: Props) => {
     history.push(`/me/organizations/${orgId}`)
   }
   const totalUsers = activeUserCount + inactiveUserCount
-  const showUpgradeCTA = tier === TierEnum.personal
+  const showUpgradeCTA = tier === 'personal'
   const upgradeCTALabel = (
     <span>
       {'Upgrade to '}
@@ -119,9 +118,9 @@ const OrganizationRow = (props: Props) => {
         <StyledRowInfo>
           <RowInfoHeader>
             <Name onClick={onRowClick}>{name}</Name>
-            {tier !== TierEnum.personal && (
+            {tier !== 'personal' && (
               <StyledTagBlock>
-                <TierTag tier={tier as TierEnum} />
+                <TierTag tier={tier} />
               </StyledTagBlock>
             )}
           </RowInfoHeader>

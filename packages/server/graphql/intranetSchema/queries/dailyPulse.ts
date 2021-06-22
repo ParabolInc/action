@@ -117,7 +117,7 @@ const dailyPulse = {
       .default(null)
       .run()
     if (!slackAuth) throw new Error('No Slack Auth Found!')
-    const {accessToken} = slackAuth
+    const {botAccessToken} = slackAuth
     const [rawSignups, rawLogins] = await Promise.all([
       authCountByDomain(after, true, 'createdAt'),
       authCountByDomain(after, true, 'lastSeenAt')
@@ -138,7 +138,7 @@ const dailyPulse = {
       makeSection(`*Top Logins*`),
       loginsList
     ]
-    const manager = new SlackServerManager(accessToken)
+    const manager = new SlackServerManager(botAccessToken)
     const res = await manager.postMessage(channelId, blocks)
     return res.ok
   }

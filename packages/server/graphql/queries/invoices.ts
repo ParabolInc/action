@@ -1,5 +1,4 @@
 import {GraphQLID, GraphQLNonNull, GraphQLInt} from 'graphql'
-import {InvoiceStatusEnum} from 'parabol-client/types/graphql'
 import getRethink from '../../database/rethinkDriver'
 import Invoice from '../../database/types/Invoice'
 import {getUserId, isUserBillingLeader} from '../../utils/authorization'
@@ -49,7 +48,7 @@ export default {
         })
         .filter((invoice) =>
           invoice('status')
-            .ne(InvoiceStatusEnum.UPCOMING)
+            .ne('UPCOMING')
             .and(invoice('total').ne(0))
         )
         // it's possible that stripe gives the same startAt to 2 invoices (the first $5 charge & the next)
@@ -81,4 +80,4 @@ export default {
       }
     }
   }
-}
+} as any

@@ -1,13 +1,14 @@
 import graphql from 'babel-plugin-relay/macro'
 import {commitMutation} from 'react-relay'
 import {ChangeTaskTeamMutation_task} from '~/__generated__/ChangeTaskTeamMutation_task.graphql'
-import Atmosphere from '../Atmosphere'
-import {IChangeTaskTeamOnMutationArguments, ITask, ITeam} from '../types/graphql'
-import {LocalHandlers, SharedUpdater} from '../types/relayMutations'
+import {SharedUpdater, StandardMutation} from '../types/relayMutations'
 import getBaseRecord from '../utils/relay/getBaseRecord'
 import safeRemoveNodeFromUnknownConn from '../utils/relay/safeRemoveNodeFromUnknownConn'
 import updateProxyRecord from '../utils/relay/updateProxyRecord'
-import {ChangeTaskTeamMutation as TChangeTaskTeamMutation} from '../__generated__/ChangeTaskTeamMutation.graphql'
+import {
+  ChangeTaskTeamMutation as TChangeTaskTeamMutation,
+  ChangeTaskTeamMutationResponse
+} from '../__generated__/ChangeTaskTeamMutation.graphql'
 import handleUpsertTasks from './handlers/handleUpsertTasks'
 
 graphql`
@@ -34,6 +35,8 @@ const mutation = graphql`
   }
 `
 
+type Task = NonNullable<NonNullable<ChangeTaskTeamMutationResponse['changeTaskTeam']>['task']>
+
 export const changeTaskTeamTaskUpdater: SharedUpdater<ChangeTaskTeamMutation_task> = (
   payload,
   {store}
@@ -41,7 +44,7 @@ export const changeTaskTeamTaskUpdater: SharedUpdater<ChangeTaskTeamMutation_tas
   const task = payload.getLinkedRecord('task')
   const taskId = (task && task.getValue('id')) || payload.getValue('removedTaskId')
   if (!taskId) return
-  const oldTask = getBaseRecord(store, taskId) as Partial<ITask> | null
+  const oldTask = getBaseRecord(store, taskId) as Partial<Task> | null
   if (!oldTask) return
   const oldTeamId = oldTask.teamId || (oldTask.team && oldTask.team.id)
   if (!oldTeamId) return
@@ -49,10 +52,10 @@ export const changeTaskTeamTaskUpdater: SharedUpdater<ChangeTaskTeamMutation_tas
   handleUpsertTasks(task, store)
 }
 
-const ChangeTaskTeamMutation = (
-  atmosphere: Atmosphere,
-  variables: IChangeTaskTeamOnMutationArguments,
-  {onError, onCompleted}: LocalHandlers
+const ChangeTaskTeamMutation: StandardMutation<TChangeTaskTeamMutation> = (
+  atmosphere,
+  variables,
+  {onError, onCompleted}
 ) => {
   return commitMutation<TChangeTaskTeamMutation>(atmosphere, {
     mutation,
@@ -65,7 +68,7 @@ const ChangeTaskTeamMutation = (
     optimisticUpdater: (store) => {
       const {taskId, teamId} = variables
       if (!taskId) return
-      const task = store.get<ITask>(taskId)
+      const task = store.get<Task>(taskId)
       if (!task) return
       const now = new Date()
       const optimisticTask = {
@@ -73,7 +76,7 @@ const ChangeTaskTeamMutation = (
       }
       updateProxyRecord(task, optimisticTask)
       task.setValue(teamId, 'teamId')
-      const team = store.get<ITeam>(teamId)
+      const team = store.get(teamId)
       if (team) {
         task.setLinkedRecord(team, 'team')
       }

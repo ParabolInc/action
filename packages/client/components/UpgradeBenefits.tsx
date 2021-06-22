@@ -2,10 +2,10 @@ import React from 'react'
 import styled from '@emotion/styled'
 import Icon from './Icon'
 import {ICON_SIZE} from '../styles/typographyV2'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 
 const StyledIcon = styled(Icon)({
-  color: PALETTE.TEXT_GREEN,
+  color: PALETTE.JADE_400,
   fontSize: ICON_SIZE.MD18,
   marginRight: 8,
   opacity: 1

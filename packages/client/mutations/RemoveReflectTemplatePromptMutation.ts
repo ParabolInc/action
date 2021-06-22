@@ -1,18 +1,16 @@
 import {commitMutation} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
-import {Disposable} from 'relay-runtime'
-import Atmosphere from '../Atmosphere'
-import getInProxy from '../utils/relay/getInProxy'
-import {CompletedHandler, ErrorHandler, SharedUpdater} from '../types/relayMutations'
+import {SharedUpdater, StandardMutation} from '../types/relayMutations'
 import handleRemoveReflectTemplatePrompt from './handlers/handleRemoveReflectTemplatePrompt'
-import {IRemoveReflectTemplatePromptOnMutationArguments} from '../types/graphql'
 import {RemoveReflectTemplatePromptMutation_team} from '../__generated__/RemoveReflectTemplatePromptMutation_team.graphql'
 import {RemoveReflectTemplatePromptMutation as IRemoveReflectTemplatePromptMutation} from '../__generated__/RemoveReflectTemplatePromptMutation.graphql'
+import getInProxy from '~/utils/relay/getInProxy'
 
 graphql`
   fragment RemoveReflectTemplatePromptMutation_team on RemoveReflectTemplatePromptPayload {
     prompt {
       id
+      teamId
     }
   }
 `
@@ -30,16 +28,15 @@ export const removeReflectTemplatePromptTeamUpdater: SharedUpdater<RemoveReflect
   {store}
 ) => {
   const promptId = getInProxy(payload, 'prompt', 'id')
-  handleRemoveReflectTemplatePrompt(promptId, store)
+  const teamId = getInProxy(payload, 'prompt', 'teamId')
+  handleRemoveReflectTemplatePrompt(promptId, teamId, store)
 }
 
-const RemoveReflectTemplatePromptMutation = (
-  atmosphere: Atmosphere,
-  variables: IRemoveReflectTemplatePromptOnMutationArguments,
-  _context: {},
-  onError: ErrorHandler,
-  onCompleted: CompletedHandler
-): Disposable => {
+const RemoveReflectTemplatePromptMutation: StandardMutation<IRemoveReflectTemplatePromptMutation> = (
+  atmosphere,
+  variables,
+  {onError, onCompleted}
+) => {
   return commitMutation<IRemoveReflectTemplatePromptMutation>(atmosphere, {
     mutation,
     variables,
@@ -52,7 +49,11 @@ const RemoveReflectTemplatePromptMutation = (
     },
     optimisticUpdater: (store) => {
       const {promptId} = variables
-      handleRemoveReflectTemplatePrompt(promptId, store)
+      const prompt = store.get(promptId)
+      if (!prompt) return
+      const teamId = prompt.getValue('teamId') as string
+      if (!teamId) return
+      handleRemoveReflectTemplatePrompt(promptId, teamId, store)
     }
   })
 }

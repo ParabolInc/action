@@ -4,14 +4,16 @@ import {convertToRaw} from 'draft-js'
 import React, {useEffect, useRef} from 'react'
 import {commitLocalUpdate, createFragmentContainer} from 'react-relay'
 import AddReactjiToReactableMutation from '~/mutations/AddReactjiToReactableMutation'
-import {ReflectionCard_meeting} from '~/__generated__/ReflectionCard_meeting.graphql'
+import {
+  NewMeetingPhaseTypeEnum,
+  ReflectionCard_meeting
+} from '~/__generated__/ReflectionCard_meeting.graphql'
 import useAtmosphere from '../../hooks/useAtmosphere'
 import useEditorState from '../../hooks/useEditorState'
 import useMutationProps from '../../hooks/useMutationProps'
 import EditReflectionMutation from '../../mutations/EditReflectionMutation'
 import RemoveReflectionMutation from '../../mutations/RemoveReflectionMutation'
 import UpdateReflectionContentMutation from '../../mutations/UpdateReflectionContentMutation'
-import {NewMeetingPhaseTypeEnum, ReactableEnum} from '../../types/graphql'
 import convertToTaskContent from '../../utils/draftjs/convertToTaskContent'
 import isAndroid from '../../utils/draftjs/isAndroid'
 import isPhaseComplete from '../../utils/meetings/isPhaseComplete'
@@ -45,10 +47,10 @@ const getReadOnly = (
   phases: any | null
 ) => {
   const {isViewerCreator, isEditing, id} = reflection
-  if (phases && isPhaseComplete(NewMeetingPhaseTypeEnum.group, phases)) return true
+  if (phases && isPhaseComplete('group', phases)) return true
   if (!isViewerCreator || isTempId(id)) return true
-  if (phaseType === NewMeetingPhaseTypeEnum.reflect) return stackCount && stackCount > 1
-  if (phaseType === NewMeetingPhaseTypeEnum.group && isEditing) return false
+  if (phaseType === 'reflect') return stackCount && stackCount > 1
+  if (phaseType === 'group' && isEditing) return false
   return true
 }
 
@@ -57,7 +59,7 @@ const ReflectionCard = (props: Props) => {
   const {meetingId, reactjis} = reflection
   const phaseType = meeting ? meeting.localPhase.phaseType : null
   const phases = meeting ? meeting.phases : null
-  const {id: reflectionId, content, retroPhaseItemId, isViewerCreator} = reflection
+  const {id: reflectionId, content, promptId, isViewerCreator} = reflection
   const atmosphere = useAtmosphere()
   const {onCompleted, submitting, submitMutation, error, onError} = useMutationProps()
   const editorRef = useRef<HTMLTextAreaElement>(null)
@@ -65,17 +67,22 @@ const ReflectionCard = (props: Props) => {
 
   const handleEditorFocus = () => {
     if (isTempId(reflectionId)) return
-    EditReflectionMutation(atmosphere, {isEditing: true, meetingId, phaseItemId: retroPhaseItemId})
+    EditReflectionMutation(atmosphere, {isEditing: true, meetingId, promptId})
+  }
+
+  const updateIsEditing = (isEditing: boolean) => {
+    commitLocalUpdate(atmosphere, (store) => {
+      const reflection = store.get(reflectionId)
+      if (!reflection) return
+      reflection.setValue(isEditing, 'isEditing')
+    })
   }
 
   useEffect(() => {
     if (isViewerCreator && !editorState.getCurrentContent().hasText()) {
-      commitLocalUpdate(atmosphere, (store) => {
-        const reflection = store.get(reflectionId)
-        if (!reflection) return
-        reflection.setValue(true, 'isEditing')
-      })
+      updateIsEditing(true)
     }
+    return () => updateIsEditing(false)
   }, [])
 
   const handleContentUpdate = () => {
@@ -127,7 +134,7 @@ const ReflectionCard = (props: Props) => {
   const handleEditorBlur = () => {
     if (isTempId(reflectionId)) return
     handleContentUpdate()
-    EditReflectionMutation(atmosphere, {isEditing: false, meetingId, phaseItemId: retroPhaseItemId})
+    EditReflectionMutation(atmosphere, {isEditing: false, meetingId, promptId})
   }
 
   const handleReturn = (e) => {
@@ -148,11 +155,7 @@ const ReflectionCard = (props: Props) => {
   }
 
   const readOnly = getReadOnly(reflection, phaseType as NewMeetingPhaseTypeEnum, stackCount, phases)
-  const userSelect = readOnly
-    ? phaseType === NewMeetingPhaseTypeEnum.discuss
-      ? 'text'
-      : 'none'
-    : undefined
+  const userSelect = readOnly ? (phaseType === 'discuss' ? 'text' : 'none') : undefined
 
   const onToggleReactji = (emojiId: string) => {
     if (submitting) return
@@ -164,9 +167,10 @@ const ReflectionCard = (props: Props) => {
       atmosphere,
       {
         reactableId: reflectionId,
-        reactableType: ReactableEnum.REFLECTION,
+        reactableType: 'REFLECTION',
         isRemove,
-        reactji: emojiId
+        reactji: emojiId,
+        meetingId
       },
       {onCompleted, onError}
     )
@@ -215,7 +219,7 @@ export default createFragmentContainer(ReflectionCard, {
       isEditing
       meetingId
       reflectionGroupId
-      retroPhaseItemId
+      promptId
       content
       reactjis {
         ...ReactjiSection_reactjis

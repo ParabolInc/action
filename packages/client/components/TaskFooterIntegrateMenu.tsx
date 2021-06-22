@@ -1,13 +1,13 @@
-import {TaskFooterIntegrateMenu_task} from '../__generated__/TaskFooterIntegrateMenu_task.graphql'
-import {TaskFooterIntegrateMenu_viewer} from '../__generated__/TaskFooterIntegrateMenu_viewer.graphql'
+import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
 import {createFragmentContainer} from 'react-relay'
-import graphql from 'babel-plugin-relay/macro'
+import {MenuProps} from '../hooks/useMenu'
+import {MenuMutationProps} from '../hooks/useMutationProps'
+import {TaskFooterIntegrateMenu_task} from '../__generated__/TaskFooterIntegrateMenu_task.graphql'
+import {TaskFooterIntegrateMenu_viewer} from '../__generated__/TaskFooterIntegrateMenu_viewer.graphql'
 import TaskFooterIntegrateMenuList from './TaskFooterIntegrateMenuList'
 import TaskFooterIntegrateMenuNoIntegrations from './TaskFooterIntegrateMenuNoIntegrations '
 import TaskFooterIntegrateMenuSignup from './TaskFooterIntegrateMenuSignup'
-import {MenuProps} from '../hooks/useMenu'
-import {MenuMutationProps} from '../hooks/useMutationProps'
 
 interface Props {
   menuProps: MenuProps
@@ -25,15 +25,16 @@ const makePlaceholder = (hasGitHub: boolean, hasAtlassian: boolean) => {
 
 const TaskFooterIntegrateMenu = (props: Props) => {
   const {menuProps, mutationProps, task, viewer} = props
-  const {id: viewerId, userOnTeam} = viewer
+  const {id: viewerId, teamMember} = viewer
   // not 100% sure how this could be, maybe if we manually deleted a user?
   // https://github.com/ParabolInc/parabol/issues/2980
-  if (!userOnTeam) return null
-  const {atlassianAuth, githubAuth, preferredName, suggestedIntegrations} = userOnTeam
+  if (!teamMember) return null
+  const {integrations, preferredName, suggestedIntegrations} = teamMember
+  const {atlassian, github} = integrations
   const {teamId, userId} = task
   const isViewerAssignee = viewerId === userId
-  const hasAtlassian = !!(atlassianAuth && atlassianAuth.isActive)
-  const hasGitHub = !!(githubAuth && githubAuth.isActive)
+  const hasAtlassian = atlassian?.isActive ?? false
+  const hasGitHub = github?.isActive ?? false
   const isAssigneeIntegrated = hasAtlassian || hasGitHub
   if (!isAssigneeIntegrated) {
     return isViewerAssignee ? (
@@ -43,8 +44,8 @@ const TaskFooterIntegrateMenu = (props: Props) => {
         teamId={teamId}
       />
     ) : (
-      <TaskFooterIntegrateMenuNoIntegrations menuProps={menuProps} preferredName={preferredName} />
-    )
+        <TaskFooterIntegrateMenuNoIntegrations menuProps={menuProps} preferredName={preferredName} />
+      )
   }
   const placeholder = makePlaceholder(hasGitHub, hasAtlassian)
   return (
@@ -59,24 +60,20 @@ const TaskFooterIntegrateMenu = (props: Props) => {
 }
 
 graphql`
-  fragment TaskFooterIntegrateMenuViewerAtlassianAuth on User {
-    atlassianAuth(teamId: $teamId) {
-      isActive
-    }
+  fragment TaskFooterIntegrateMenuViewerAtlassianIntegration on AtlassianIntegration {
+    isActive
   }
 `
 
 graphql`
-  fragment TaskFooterIntegrateMenuViewerGitHubAuth on User {
-    githubAuth(teamId: $teamId) {
-      isActive
-    }
+  fragment TaskFooterIntegrateMenuViewerGitHubIntegration on GitHubIntegration {
+    isActive
   }
 `
 
 graphql`
-  fragment TaskFooterIntegrateMenuViewerSuggestedIntegrations on User {
-    suggestedIntegrations(teamId: $teamId) {
+  fragment TaskFooterIntegrateMenuViewerSuggestedIntegrations on TeamMember {
+    suggestedIntegrations {
       ...TaskFooterIntegrateMenuList_suggestedIntegrations
     }
   }
@@ -86,11 +83,17 @@ export default createFragmentContainer(TaskFooterIntegrateMenu, {
   viewer: graphql`
     fragment TaskFooterIntegrateMenu_viewer on User {
       id
-      userOnTeam(userId: $userId) {
+      teamMember(userId: $userId, teamId: $teamId) {
         preferredName
-        ...TaskFooterIntegrateMenuViewerAtlassianAuth @relay(mask: false)
+        integrations {
+          atlassian {
+            ...TaskFooterIntegrateMenuViewerAtlassianIntegration @relay(mask: false)
+          }
+          github {
+            ...TaskFooterIntegrateMenuViewerGitHubIntegration @relay(mask: false)
+          }
+        }
         ...TaskFooterIntegrateMenuViewerSuggestedIntegrations @relay(mask: false)
-        ...TaskFooterIntegrateMenuViewerGitHubAuth @relay(mask: false)
       }
     }
   `,

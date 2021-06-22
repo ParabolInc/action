@@ -10,12 +10,15 @@ const {SEGMENT_FN_KEY, SERVER_SECRET} = process.env
 
 interface IntranetPayload {
   query: string
-  variables: object
+  variables: Record<string, unknown>
 }
 
 const TOKEN_LIFE = ms('5m')
 const webhookGraphQLHandler = uWSAsyncHandler(async (res: HttpResponse, req: HttpRequest) => {
-  const [timestampStr, signature] = req.getHeader('authorization').slice(7).split('.')
+  const [timestampStr, signature] = req
+    .getHeader('authorization')
+    .slice(7)
+    .split('.')
   const timestamp = parseInt(timestampStr, 10)
   // check out
   if (!timestamp || !signature) {
@@ -33,10 +36,14 @@ const webhookGraphQLHandler = uWSAsyncHandler(async (res: HttpResponse, req: Htt
   }
 
   // verify timestamp
-  const segmentSig = crypto.createHmac('sha256', SEGMENT_FN_KEY!)
-    .update(crypto.createHmac('sha256', SERVER_SECRET!)
-      .update(timestampStr)
-      .digest('base64'))
+  const segmentSig = crypto
+    .createHmac('sha256', SEGMENT_FN_KEY!)
+    .update(
+      crypto
+        .createHmac('sha256', SERVER_SECRET!)
+        .update(timestampStr)
+        .digest('base64')
+    )
     .digest('base64')
 
   if (segmentSig !== signature) {
@@ -54,7 +61,7 @@ const webhookGraphQLHandler = uWSAsyncHandler(async (res: HttpResponse, req: Htt
   }
 
   // verify body
-  const body = await parseBody(res)
+  const body = await parseBody({res})
   if (!body) {
     res.writeStatus('422').end()
     return

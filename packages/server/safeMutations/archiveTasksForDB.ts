@@ -2,9 +2,7 @@ import {convertFromRaw, convertToRaw} from 'draft-js'
 import getRethink from '../database/rethinkDriver'
 import addTagToTask from 'parabol-client/utils/draftjs/addTagToTask'
 import getTagsFromEntityMap from 'parabol-client/utils/draftjs/getTagsFromEntityMap'
-import {ITask} from 'parabol-client/types/graphql'
-
-type Task = Pick<ITask, 'content' | 'id' | 'tags'>
+import Task from '../database/types/Task'
 
 const archiveTasksForDB = async (tasks: Task[], doneMeetingId?: string) => {
   if (!tasks || tasks.length === 0) return []

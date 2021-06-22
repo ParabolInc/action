@@ -4,10 +4,9 @@ import React from 'react'
 import {createFragmentContainer} from 'react-relay'
 import {InvoiceHeader_invoice} from '~/__generated__/InvoiceHeader_invoice.graphql'
 import TierTag from '../../../../components/Tag/TierTag'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import defaultOrgAvatar from '../../../../styles/theme/images/avatar-organization.svg'
 import {Breakpoint} from '../../../../types/constEnums'
-import {TierEnum} from '../../../../types/graphql'
 
 const Header = styled('div')({
   alignItems: 'center',
@@ -17,7 +16,7 @@ const Header = styled('div')({
 
 const LogoPanel = styled('div')({
   backgroundColor: '#FFFFFF',
-  border: `1px solid ${PALETTE.BORDER_MAIN_40}`,
+  border: `1px solid ${PALETTE.SLATE_500}`,
   borderRadius: 8,
   height: 64,
   padding: 8,
@@ -74,7 +73,7 @@ const InvoiceHeader = (props: Props) => {
       </LogoPanel>
       <Info>
         <OrgName>{orgName}</OrgName>
-        {tier !== TierEnum.personal && <StyledTierTag tier={tier as TierEnum} />}
+        {tier !== 'personal' && <StyledTierTag tier={tier} />}
         {billingLeaderEmails.map((email) => (
           <Email key={`email${email}`}>{email}</Email>
         ))}

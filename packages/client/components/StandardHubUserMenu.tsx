@@ -12,16 +12,15 @@ import MenuItemIcon from './MenuItemIcon'
 import MenuItemLabel from './MenuItemLabel'
 import {MenuProps} from '../hooks/useMenu'
 import {SIGNOUT_LABEL, SIGNOUT_SLUG} from '../utils/constants'
-import {PALETTE} from '../styles/paletteV2'
-import {TierEnum} from '../types/graphql'
+import {PALETTE} from '../styles/paletteV3'
 import {TierLabel} from '../types/constEnums'
 
 const UpgradeIcon = styled(MenuItemIcon)({
-  color: PALETTE.EMPHASIS_COOL
+  color: PALETTE.SKY_500
 })
 
 const UpgradeCTA = styled('span')({
-  color: PALETTE.EMPHASIS_COOL,
+  color: PALETTE.SKY_500,
   fontSize: 15,
   lineHeight: '32px',
   marginRight: '2rem'
@@ -51,7 +50,7 @@ const StandardHubUserMenu = (props: Props) => {
     history.push(`/${SIGNOUT_SLUG}`)
   }
 
-  const ownedFreeOrgs = organizations.filter((org) => org.tier === TierEnum.personal)
+  const ownedFreeOrgs = organizations.filter((org) => org.tier === 'personal')
   const showUpgradeCTA = ownedFreeOrgs.length > 0
 
   const handleUpgradeClick = () => {

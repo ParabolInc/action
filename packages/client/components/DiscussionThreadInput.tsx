@@ -1,20 +1,23 @@
 import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
-import {convertToRaw, EditorState, ContentState} from 'draft-js'
+import {ContentState, convertToRaw, EditorState} from 'draft-js'
+import React, {forwardRef, RefObject, useEffect, useState} from 'react'
+import {commitLocalUpdate, createFragmentContainer} from 'react-relay'
 import useAtmosphere from '~/hooks/useAtmosphere'
 import useMutationProps from '~/hooks/useMutationProps'
 import useReplyEditorState from '~/hooks/useReplyEditorState'
 import AddCommentMutation from '~/mutations/AddCommentMutation'
-import React, {forwardRef, RefObject, useState} from 'react'
-import {commitLocalUpdate, createFragmentContainer} from 'react-relay'
+import EditCommentingMutation from '~/mutations/EditCommentingMutation'
 import {Elevation} from '~/styles/elevation'
-import {ThreadSourceEnum} from '~/types/graphql'
-import {MeetingTypeEnum} from '~/types/graphql'
 import {SORT_STEP} from '~/utils/constants'
 import dndNoise from '~/utils/dndNoise'
 import convertToTaskContent from '~/utils/draftjs/convertToTaskContent'
 import isAndroid from '~/utils/draftjs/isAndroid'
-import {DiscussionThreadInput_meeting} from '~/__generated__/DiscussionThreadInput_meeting.graphql'
+import {
+  MeetingTypeEnum,
+  DiscussionThreadInput_meeting
+} from '~/__generated__/DiscussionThreadInput_meeting.graphql'
+import {ThreadSourceEnum} from '~/__generated__/UpdateTaskMutation.graphql'
 import anonymousAvatar from '../styles/theme/images/anonymous-avatar.svg'
 import Avatar from './Avatar/Avatar'
 import CommentSendOrAdd from './CommentSendOrAdd'
@@ -22,7 +25,7 @@ import CommentEditor from './TaskEditor/CommentEditor'
 import {ReplyMention, SetReplyMention} from './ThreadedItem'
 
 const Wrapper = styled('div')<{isReply: boolean; isDisabled: boolean}>(({isDisabled, isReply}) => ({
-  alignItems: 'center',
+  alignItems: 'flex-end',
   borderRadius: isReply ? '4px 0 0 4px' : undefined,
   display: 'flex',
   boxShadow: isReply ? Elevation.Z2 : Elevation.DISCUSSION_INPUT,
@@ -37,6 +40,11 @@ const Wrapper = styled('div')<{isReply: boolean; isDisabled: boolean}>(({isDisab
 const CommentAvatar = styled(Avatar)({
   margin: 8,
   transition: 'all 150ms'
+})
+
+const EditorWrap = styled('div')({
+  flex: 1,
+  margin: '14px 0'
 })
 
 interface Props {
@@ -68,18 +76,40 @@ const DiscussionThreadInput = forwardRef((props: Props, ref: any) => {
   const isReply = !!props.isReply
   const isDisabled = !!props.isDisabled
   const {id: meetingId, isAnonymousComment, teamId, viewerMeetingMember, meetingType} = meeting
-  const {user} = viewerMeetingMember
-  const {picture} = user
+  const picture = viewerMeetingMember?.user.picture ?? anonymousAvatar
   const [editorState, setEditorState] = useReplyEditorState(replyMention, setReplyMention)
   const atmosphere = useAtmosphere()
   const {submitting, onError, onCompleted, submitMutation} = useMutationProps()
+  const [isCommenting, setIsCommenting] = useState(false)
   const placeholder = isAnonymousComment ? 'Comment anonymously' : 'Comment publicly'
+  const [lastTypedTimestamp, setLastTypedTimestamp] = useState<Date>()
 
   const threadSourceByMeetingType = {
-    [MeetingTypeEnum.retrospective]: ThreadSourceEnum.REFLECTION_GROUP,
-    [MeetingTypeEnum.action]: ThreadSourceEnum.AGENDA_ITEM
-  }
+    retrospective: 'REFLECTION_GROUP',
+    action: 'AGENDA_ITEM',
+    poker: 'STORY'
+  } as Record<MeetingTypeEnum, ThreadSourceEnum>
   const threadSource = threadSourceByMeetingType[meetingType]
+
+  useEffect(() => {
+    const inactiveCommenting = setTimeout(() => {
+      if (isCommenting) {
+        EditCommentingMutation(
+          atmosphere,
+          {
+            isCommenting: false,
+            meetingId,
+            threadId: threadSourceId
+          },
+          {onError, onCompleted}
+        )
+        setIsCommenting(false)
+      }
+    }, 5000)
+    return () => {
+      clearTimeout(inactiveCommenting)
+    }
+  }, [lastTypedTimestamp])
 
   const toggleAnonymous = () => {
     commitLocalUpdate(atmosphere, (store) => {
@@ -103,13 +133,12 @@ const DiscussionThreadInput = forwardRef((props: Props, ref: any) => {
     const comment = {
       content: rawContent,
       isAnonymous: isAnonymousComment,
-      meetingId,
       threadId: threadSourceId,
       threadParentId,
       threadSource: threadSource,
       threadSortOrder: getMaxSortOrder() + SORT_STEP + dndNoise()
     }
-    AddCommentMutation(atmosphere, {comment}, {onError, onCompleted})
+    AddCommentMutation(atmosphere, {comment, meetingId}, {onError, onCompleted})
     // move focus to end is very important! otherwise ghost chars appear
     setEditorState(
       EditorState.moveFocusToEnd(
@@ -119,8 +148,41 @@ const DiscussionThreadInput = forwardRef((props: Props, ref: any) => {
     onSubmitCommentSuccess?.()
   }
 
+  const ensureCommenting = () => {
+    const timestamp = new Date()
+    setLastTypedTimestamp(timestamp)
+
+    collapseAddTask()
+    if (isAnonymousComment || isCommenting) return
+    EditCommentingMutation(
+      atmosphere,
+      {
+        isCommenting: true,
+        meetingId,
+        threadId: threadSourceId
+      },
+      {onError, onCompleted}
+    )
+    setIsCommenting(true)
+  }
+
+  const ensureNotCommenting = () => {
+    if (isAnonymousComment || !isCommenting) return
+    EditCommentingMutation(
+      atmosphere,
+      {
+        isCommenting: false,
+        meetingId,
+        threadId: threadSourceId
+      },
+      {onError, onCompleted}
+    )
+    setIsCommenting(false)
+  }
+
   const onSubmit = () => {
     if (submitting) return
+    ensureNotCommenting()
     const editorEl = editorRef.current
     if (isAndroid) {
       if (!editorEl || editorEl.type !== 'textarea') return
@@ -138,27 +200,32 @@ const DiscussionThreadInput = forwardRef((props: Props, ref: any) => {
   return (
     <Wrapper data-cy={`${dataCy}-wrapper`} ref={ref} isReply={isReply} isDisabled={isDisabled}>
       <CommentAvatar size={32} picture={avatar} onClick={toggleAnonymous} />
-      <CommentEditor
-        dataCy={`${dataCy}`}
-        teamId={teamId}
-        editorRef={editorRef}
-        editorState={editorState}
-        onSubmit={onSubmit}
-        setEditorState={setEditorState}
-        placeholder={placeholder}
-        onFocus={collapseAddTask}
-      />
-      <CommentSendOrAdd
-        dataCy={`${dataCy}`}
-        getMaxSortOrder={getMaxSortOrder}
-        commentSubmitState={commentSubmitState}
-        meeting={meeting}
-        threadSourceId={threadSourceId}
-        threadParentId={threadParentId}
-        threadSource={threadSource}
-        collapseAddTask={collapseAddTask}
-        onSubmit={onSubmit}
-      />
+      <EditorWrap>
+        <CommentEditor
+          dataCy={`${dataCy}`}
+          editorRef={editorRef}
+          editorState={editorState}
+          ensureCommenting={ensureCommenting}
+          onBlur={ensureNotCommenting}
+          onSubmit={onSubmit}
+          placeholder={placeholder}
+          setEditorState={setEditorState}
+          teamId={teamId}
+        />
+      </EditorWrap>
+      {meetingType !== 'poker' && (
+        <CommentSendOrAdd
+          dataCy={`${dataCy}`}
+          getMaxSortOrder={getMaxSortOrder}
+          commentSubmitState={commentSubmitState}
+          meeting={meeting}
+          threadSourceId={threadSourceId}
+          threadParentId={threadParentId}
+          threadSource={threadSource}
+          collapseAddTask={collapseAddTask}
+          onSubmit={onSubmit}
+        />
+      )}
     </Wrapper>
   )
 })

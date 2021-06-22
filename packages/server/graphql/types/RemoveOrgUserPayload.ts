@@ -17,6 +17,7 @@ import Team from './Team'
 import TeamMember from './TeamMember'
 import User from './User'
 import {getUserId} from '../../utils/authorization'
+import errorFilter from '../errorFilter'
 
 const RemoveOrgUserPayload = new GraphQLObjectType<any, GQLContext>({
   name: 'RemoveOrgUserPayload',
@@ -55,7 +56,9 @@ const RemoveOrgUserPayload = new GraphQLObjectType<any, GQLContext>({
       resolve: async ({kickOutNotificationIds}, _args, {authToken, dataLoader}) => {
         if (!kickOutNotificationIds) return null
         const viewerId = getUserId(authToken)
-        const notifications = await dataLoader.get('notifications').loadMany(kickOutNotificationIds)
+        const notifications = (
+          await dataLoader.get('notifications').loadMany(kickOutNotificationIds)
+        ).filter(errorFilter)
         return notifications.filter((notification) => notification.userId === viewerId)
       }
     },

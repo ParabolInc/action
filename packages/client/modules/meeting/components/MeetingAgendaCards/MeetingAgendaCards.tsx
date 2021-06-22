@@ -10,7 +10,6 @@ import useEventCallback from '../../../../hooks/useEventCallback'
 import useHotkey from '../../../../hooks/useHotkey'
 import CreateTaskMutation from '../../../../mutations/CreateTaskMutation'
 import {meetingGridMinWidth} from '../../../../styles/meeting'
-import {AreaEnum, TaskStatusEnum, ThreadSourceEnum} from '../../../../types/graphql'
 import {MeetingAgendaCards_tasks} from '../../../../__generated__/MeetingAgendaCards_tasks.graphql'
 
 const makePlaceholders = (
@@ -43,16 +42,14 @@ const MeetingAgendaCards = (props: Props) => {
     const {viewerId} = atmosphere
     const maybeLastTask = tasks[tasks.length - 1]
     const newTask = {
-      status: TaskStatusEnum.active,
+      status: 'active',
       sortOrder: sortOrderBetween(maybeLastTask, null, null, false) || 0,
       meetingId,
       threadId: reflectionGroupId || agendaId,
-      threadSource: reflectionGroupId
-        ? ThreadSourceEnum.REFLECTION_GROUP
-        : ThreadSourceEnum.AGENDA_ITEM,
+      threadSource: reflectionGroupId ? 'REFLECTION_GROUP' : 'AGENDA_ITEM',
       userId: viewerId,
       teamId
-    }
+    } as const
     CreateTaskMutation(atmosphere, {newTask}, {})
   })
   useHotkey('t', handleAddTask)
@@ -67,7 +64,7 @@ const MeetingAgendaCards = (props: Props) => {
                 <div key={task.id} ref={setItemRef(task.id)}>
                   <NullableTask
                     dataCy={`meeting-agenda-task`}
-                    area={AreaEnum.meeting}
+                    area='meeting'
                     isAgenda
                     task={task}
                   />

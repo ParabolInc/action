@@ -205,14 +205,14 @@ const useCoords = <
     options.portalStatus
   ])
 
-  useResizeObserver(targetRef.current, () => {
+  useResizeObserver(() => {
     const targetBBox = targetRef.current?.getBoundingClientRect()
     const originBBox = originRef.current?.getBoundingClientRect()
     if (targetBBox && originBBox) {
       const coordState = getNextCoords(targetBBox, originBBox, preferredMenuPosition)
       setCoords(coordState)
     }
-  })
+  }, targetRef)
 
   useWindowResize(coordsRef, targetRef.current, setCoords)
   const {coords, menuPosition} = coordsRef.current

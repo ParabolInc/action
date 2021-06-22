@@ -7,7 +7,6 @@ import {LoaderSize} from '../../../types/constEnums'
 import renderQuery from '../../../utils/relay/renderQuery'
 import useAtmosphere from '../../../hooks/useAtmosphere'
 
-// Changing the name here requires a change to getLastSeenAtURL.ts
 const query = graphql`
   query AgendaAndTasksRootQuery($teamId: ID!) {
     viewer {

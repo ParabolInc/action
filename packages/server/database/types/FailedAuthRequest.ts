@@ -1,4 +1,4 @@
-import shortid from 'shortid'
+import generateUID from '../../generateUID'
 
 interface Input {
   id?: string
@@ -14,7 +14,7 @@ export default class FailedAuthRequest {
   time: Date
   constructor(input: Input) {
     const {id, email, ip, time} = input
-    this.id = id ?? shortid.generate()
+    this.id = id ?? generateUID()
     this.email = email
     this.ip = ip
     this.time = time ?? new Date()

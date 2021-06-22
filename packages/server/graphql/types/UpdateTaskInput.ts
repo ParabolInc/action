@@ -18,7 +18,11 @@ const UpdateTaskInput = new GraphQLInputObjectType({
     sortOrder: {type: GraphQLFloat},
     status: {type: TaskStatusEnum},
     teamId: {type: GraphQLID},
-    userId: {type: GraphQLID}
+    userId: {
+      type: GraphQLID,
+      description:
+        'userId, the owner of the task. This can be null if the task is not assigned to anyone.'
+    }
   })
 })
 

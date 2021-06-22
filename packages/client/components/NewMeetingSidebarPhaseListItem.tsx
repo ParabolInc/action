@@ -1,29 +1,42 @@
-import React, {ReactNode} from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../styles/paletteV2'
+import React, {ReactNode} from 'react'
+import {PALETTE} from '../styles/paletteV3'
 import {NavSidebar} from '../types/constEnums'
-import {phaseIconLookup, phaseLabelLookup} from '../utils/meetings/lookups'
-import Icon from './Icon'
+import {NewMeetingPhaseTypeEnum} from '~/__generated__/NewMeetingSettingsToggleCheckIn_settings.graphql.ts'
+import {phaseIconLookup, phaseImageLookup, phaseLabelLookup} from '../utils/meetings/lookups'
 import Badge from './Badge/Badge'
-import {NewMeetingPhaseTypeEnum} from '../types/graphql'
+import Icon from './Icon'
 
-const NavListItem = styled('li')<{phaseType: string}>(({phaseType}) => ({
+const NavListItem = styled('li')<{phaseType: NewMeetingPhaseTypeEnum}>(({phaseType}) => ({
   fontWeight: 600,
   display: 'flex',
   flexDirection: 'column',
   margin: 0,
   // hack to work around broken flexbox
   // https://bugs.chromium.org/p/chromium/issues/detail?id=927066
-  minHeight: phaseType === NewMeetingPhaseTypeEnum.agendaitems ? 98 : 40
+  minHeight: phaseType === 'agendaitems' ? 98 : 40
 }))
 
 const NavItemIcon = styled(Icon)<{isUnsyncedFacilitatorPhase: boolean}>(
   {
-    color: PALETTE.TEXT_GRAY,
+    color: PALETTE.SLATE_600,
     margin: '0 16px'
   },
   ({isUnsyncedFacilitatorPhase}) => ({
-    color: isUnsyncedFacilitatorPhase ? PALETTE.EMPHASIS_WARM : undefined
+    color: isUnsyncedFacilitatorPhase ? PALETTE.ROSE_500 : undefined
+  })
+)
+
+const NavItemSVG = styled('div')<{isUnsyncedFacilitatorPhase: boolean}>(
+  ({isUnsyncedFacilitatorPhase}) => ({
+    height: 24,
+    margin: '0 16px',
+    width: 24,
+    '& svg': {
+      '& path': {
+        fill: isUnsyncedFacilitatorPhase ? PALETTE.ROSE_500 : PALETTE.SLATE_600
+      }
+    }
   })
 )
 
@@ -34,13 +47,13 @@ const NavItemLabel = styled('span')({
 })
 
 const navListItemLinkActive = {
-  backgroundColor: PALETTE.BACKGROUND_NAV_LIGHT_ACTIVE,
-  borderLeftColor: PALETTE.BORDER_MAIN,
+  backgroundColor: PALETTE.SLATE_100,
+  borderLeftColor: PALETTE.GRAPE_700,
   borderRadius: '0 4px 4px 0',
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   cursor: 'default',
   ':hover,:focus': {
-    backgroundColor: PALETTE.BACKGROUND_NAV_LIGHT_HOVER
+    backgroundColor: PALETTE.SLATE_100
   }
 }
 
@@ -63,7 +76,7 @@ const NavListItemLink = styled('div')<LinkProps>(
   {
     alignItems: 'center',
     borderRadius: '0 4px 4px 0',
-    color: PALETTE.TEXT_MAIN,
+    color: PALETTE.SLATE_700,
     cursor: 'pointer',
     display: 'flex',
     flexShrink: 0,
@@ -72,7 +85,7 @@ const NavListItemLink = styled('div')<LinkProps>(
     textDecoration: 'none',
     userSelect: 'none',
     ':hover,:focus': {
-      backgroundColor: PALETTE.BACKGROUND_NAV_LIGHT_HOVER
+      backgroundColor: PALETTE.SLATE_100
     }
   },
   ({isDisabled}) => isDisabled && navListItemLinkDisabled,
@@ -105,7 +118,7 @@ const PhaseCountBlock = styled('div')({
 })
 
 const StyledBadge = styled(Badge)({
-  backgroundColor: PALETTE.BACKGROUND_GRAY,
+  backgroundColor: PALETTE.SLATE_600,
   boxShadow: 'none',
   marginRight: 8,
   minWidth: 24,
@@ -121,7 +134,7 @@ interface Props {
   isUnsyncedFacilitatorPhase: boolean
   isUnsyncedFacilitatorStage?: boolean
   phaseCount?: number | null
-  phaseType: string
+  phaseType: NewMeetingPhaseTypeEnum
 }
 
 const NewMeetingSidebarPhaseListItem = (props: Props) => {
@@ -138,6 +151,7 @@ const NewMeetingSidebarPhaseListItem = (props: Props) => {
   } = props
   const label = phaseLabelLookup[phaseType]
   const icon = phaseIconLookup[phaseType]
+  const Image = phaseImageLookup[phaseType]
   const showPhaseCount = Boolean(phaseCount || phaseCount === 0)
   return (
     <NavListItem phaseType={phaseType}>
@@ -150,7 +164,14 @@ const NewMeetingSidebarPhaseListItem = (props: Props) => {
         onClick={handleClick}
         title={label}
       >
-        <NavItemIcon isUnsyncedFacilitatorPhase={isUnsyncedFacilitatorPhase}>{icon}</NavItemIcon>
+        {icon && (
+          <NavItemIcon isUnsyncedFacilitatorPhase={isUnsyncedFacilitatorPhase}>{icon}</NavItemIcon>
+        )}
+        {Image && (
+          <NavItemSVG isUnsyncedFacilitatorPhase={isUnsyncedFacilitatorPhase}>
+            <Image />
+          </NavItemSVG>
+        )}
         <NavItemLabel>{label}</NavItemLabel>
         {showPhaseCount && (
           <PhaseCountBlock>

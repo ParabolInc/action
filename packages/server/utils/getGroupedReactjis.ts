@@ -1,5 +1,4 @@
 import Reactji from '../database/types/Reactji'
-import {IReactji} from 'parabol-client/types/graphql'
 
 const getGroupedReactjis = (reactjis: Reactji[], viewerId: string, idPrefix: string) => {
   const agg = {}
@@ -15,7 +14,7 @@ const getGroupedReactjis = (reactjis: Reactji[], viewerId: string, idPrefix: str
       record.isViewerReactji = record.isViewerReactji || isViewerReactji
     }
   }
-  return Object.values(agg) as IReactji[]
+  return Object.values(agg) as Reactji[]
 }
 
 export default getGroupedReactjis

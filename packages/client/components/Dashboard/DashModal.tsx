@@ -1,7 +1,7 @@
 import React, {ReactNode} from 'react'
 import styled from '@emotion/styled'
 import {modalShadow} from '../../styles/elevation'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import {DECELERATE} from '../../styles/animation'
 import {Radius, ZIndex} from '../../types/constEnums'
 
@@ -18,7 +18,7 @@ const animateIn = {
 
 const Backdrop = styled('div')({
   alignItems: 'center',
-  background: PALETTE.BACKGROUND_BACKDROP,
+  background: PALETTE.SLATE_700_30,
   bottom: 0,
   display: 'flex !important',
   flex: 1,

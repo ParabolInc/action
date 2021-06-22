@@ -1,4 +1,3 @@
-import {OrgUserRole, TierEnum} from 'parabol-client/types/graphql'
 import getRethink from '../database/rethinkDriver'
 import toTeamMemberId from 'parabol-client/utils/relay/toTeamMemberId'
 import AuthToken from '../database/types/AuthToken'
@@ -66,7 +65,7 @@ export const isUserBillingLeader = async (
   if (options && options.clearCache) {
     dataLoader.get('organizationUsersByUserId').clear(userId)
   }
-  return organizationUser ? organizationUser.role === OrgUserRole.BILLING_LEADER : false
+  return organizationUser ? organizationUser.role === 'BILLING_LEADER' : false
 }
 
 export const isUserInOrg = async (userId, orgId) => {
@@ -88,7 +87,7 @@ export const isOrgLeaderOfUser = async (authToken, userId) => {
     viewerOrgIds: (r
       .table('OrganizationUser')
       .getAll(viewerId, {index: 'userId'})
-      .filter({removedAt: null, role: OrgUserRole.BILLING_LEADER})('orgId')
+      .filter({removedAt: null, role: 'BILLING_LEADER'})('orgId')
       .coerceTo('array') as any) as OrganizationUser[],
     userOrgIds: (r
       .table('OrganizationUser')
@@ -101,11 +100,12 @@ export const isOrgLeaderOfUser = async (authToken, userId) => {
   return uniques.size < total
 }
 
+// this function is not used anywhere
 export const isPaidTier = async (teamId) => {
   const r = await getRethink()
   const tier = await r
     .table('Team')
     .get(teamId)('tier')
     .run()
-  return tier !== TierEnum.personal
+  return tier !== 'personal'
 }

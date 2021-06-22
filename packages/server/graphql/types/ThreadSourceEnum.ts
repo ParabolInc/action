@@ -5,7 +5,8 @@ const ThreadSourceEnum = new GraphQLEnumType({
   description: 'The source of the thread',
   values: {
     AGENDA_ITEM: {},
-    REFLECTION_GROUP: {}
+    REFLECTION_GROUP: {},
+    STORY: {}
   }
 })
 

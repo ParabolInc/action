@@ -1,6 +1,9 @@
-import {GraphQLID, GraphQLNonNull} from 'graphql'
+import {GraphQLNonNull} from 'graphql'
 import ms from 'ms'
+import {getUserId} from '../../utils/authorization'
+import standardError from '../../utils/standardError'
 import {GQLContext} from '../graphql'
+import SuggestedIntegrationQueryPayload from '../types/SuggestedIntegrationQueryPayload'
 import fetchAllIntegrations from './helpers/fetchAllIntegrations'
 import {
   getPermsByTaskService,
@@ -8,25 +11,11 @@ import {
   IntegrationByUserId,
   useOnlyUserIntegrations
 } from './helpers/suggestedIntegrationHelpers'
-import SuggestedIntegrationQueryPayload from '../types/SuggestedIntegrationQueryPayload'
-import {getUserId} from '../../utils/authorization'
-import standardError from '../../utils/standardError'
-import {ISuggestedIntegrationsOnUserArguments, IUser} from 'parabol-client/types/graphql'
 
 export default {
   description: 'The integrations that the user would probably like to use',
   type: new GraphQLNonNull(SuggestedIntegrationQueryPayload),
-  args: {
-    teamId: {
-      type: new GraphQLNonNull(GraphQLID),
-      description: 'a teamId to use as a filter to provide more accurate suggestions'
-    }
-  },
-  resolve: async (
-    {id: userId}: IUser,
-    {teamId}: ISuggestedIntegrationsOnUserArguments,
-    {authToken, dataLoader}: GQLContext
-  ) => {
+  resolve: async ({teamId, userId}, _args, {authToken, dataLoader}: GQLContext) => {
     const viewerId = getUserId(authToken)
 
     // AUTH

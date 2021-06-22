@@ -1,10 +1,10 @@
 import {GraphQLNonNull, GraphQLString} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import {SuggestedActionTypeEnum} from 'parabol-client/types/graphql'
+import {SuggestedActionTypeEnum} from '../../../client/types/constEnums'
 import toTeamMemberId from 'parabol-client/utils/relay/toTeamMemberId'
-import shortid from 'shortid'
 import AuthToken from '../../database/types/AuthToken'
 import db from '../../db'
+import generateUID from '../../generateUID'
 import removeSuggestedAction from '../../safeMutations/removeSuggestedAction'
 import {getUserId} from '../../utils/authorization'
 import encodeAuthToken from '../../utils/encodeAuthToken'
@@ -27,7 +27,7 @@ export default {
       description: 'The new team object with exactly 1 team member'
     },
     orgName: {
-      type: GraphQLString,
+      type: new GraphQLNonNull(GraphQLString),
       description: 'The name of the new team'
     }
   },
@@ -49,8 +49,8 @@ export default {
       }
 
       // RESOLUTION
-      const orgId = shortid.generate()
-      const teamId = shortid.generate()
+      const orgId = generateUID()
+      const teamId = generateUID()
       const user = await db.read('User', viewerId)
       const {email} = user
       await createNewOrg(orgId, orgName, viewerId, email)
@@ -90,7 +90,7 @@ export default {
 
       return {
         ...data,
-        authToken: encodeAuthToken(new AuthToken({tms, sub: viewerId}))
+        authToken: encodeAuthToken(new AuthToken({tms, sub: viewerId, rol: authToken.rol}))
       }
     }
   )

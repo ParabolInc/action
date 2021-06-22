@@ -3,7 +3,6 @@ import React, {useMemo} from 'react'
 import {createFragmentContainer} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
 import TaskColumns from '../../../../components/TaskColumns/TaskColumns'
-import {AreaEnum} from '../../../../types/graphql'
 import toTeamMemberId from '../../../../utils/relay/toTeamMemberId'
 import useAtmosphere from '../../../../hooks/useAtmosphere'
 import getSafeRegex from '~/utils/getSafeRegex'
@@ -26,7 +25,7 @@ const TeamColumnsContainer = (props: Props) => {
     }))
     return teamMemberFilterId
       ? nodes.filter((node) => {
-          return toTeamMemberId(node.teamId, node.userId) === teamMemberFilterId
+          return node.userId && toTeamMemberId(node.teamId, node.userId) === teamMemberFilterId
         })
       : nodes
   }, [tasks.edges, teamMemberFilterId, teamMembers])
@@ -36,13 +35,12 @@ const TeamColumnsContainer = (props: Props) => {
     const dashSearchRegex = getSafeRegex(dashSearch, 'i')
     return teamMemberFilteredTasks.filter((task) => task.contentText?.match(dashSearchRegex))
   }, [dashSearch, teamMemberFilteredTasks])
-
   return (
     <TaskColumns
       myTeamMemberId={toTeamMemberId(teamId, viewerId)}
       tasks={filteredTasks}
       teamMemberFilterId={teamMemberFilterId}
-      area={AreaEnum.teamDash}
+      area='teamDash'
       teams={null}
     />
   )

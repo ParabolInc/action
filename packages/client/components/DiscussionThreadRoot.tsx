@@ -1,5 +1,5 @@
 import graphql from 'babel-plugin-relay/macro'
-import React from 'react'
+import React, {RefObject} from 'react'
 import {QueryRenderer} from 'react-relay'
 import useAtmosphere from '~/hooks/useAtmosphere'
 import renderQuery from '../utils/relay/renderQuery'
@@ -15,19 +15,20 @@ const query = graphql`
 
 interface Props {
   meetingId: string
+  meetingContentRef?: RefObject<HTMLDivElement>
   threadSourceId: string
 }
 
 const DiscussionThreadRoot = (props: Props) => {
   const atmosphere = useAtmosphere()
-  const {meetingId, threadSourceId} = props
+  const {meetingContentRef, meetingId, threadSourceId} = props
   return (
     <QueryRenderer
       environment={atmosphere}
       query={query}
       variables={{meetingId, threadSourceId}}
       fetchPolicy={'store-or-network' as any}
-      render={renderQuery(DiscussionThread)}
+      render={renderQuery(DiscussionThread, {props: {meetingContentRef, threadSourceId}})}
     />
   )
 }

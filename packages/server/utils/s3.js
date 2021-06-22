@@ -32,6 +32,24 @@ export function s3GetObject(url) {
   return s3.getObject({Bucket: process.env.AWS_S3_BUCKET, Key: url}).promise()
 }
 
+export function s3PutObject(
+  url,
+  buffer,
+  contentType = null, 
+  acl = 'authenticated-read'
+) {
+  s3CheckInitialized()
+  contentType = contentType || mime.lookup(url) || 'application/octet-stream'
+  const s3Params = {
+    Body: buffer,
+    Bucket: process.env.AWS_S3_BUCKET,
+    Key: keyifyPath(url),
+    ContentType: contentType,
+    ACL: acl
+  }
+  return s3.putObject(s3Params).promise()
+}
+
 export function s3DeleteObject(url) {
   s3CheckInitialized()
   const s3Params = {

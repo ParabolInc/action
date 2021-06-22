@@ -1,15 +1,16 @@
 import styled from '@emotion/styled'
 import * as Sentry from '@sentry/browser'
 import graphql from 'babel-plugin-relay/macro'
-import React, {useRef} from 'react'
+import React from 'react'
 import {createFragmentContainer} from 'react-relay'
 import useBreakpoint from '~/hooks/useBreakpoint'
+import useCallbackRef from '~/hooks/useCallbackRef'
 import {RetroDiscussPhase_meeting} from '~/__generated__/RetroDiscussPhase_meeting.graphql'
 import EditorHelpModalContainer from '../containers/EditorHelpModalContainer/EditorHelpModalContainer'
-import {PALETTE} from '../styles/paletteV2'
+import useScreenBugs from '../hooks/useScreenBugs'
+import {PALETTE} from '../styles/paletteV3'
 import {ICON_SIZE} from '../styles/typographyV2'
 import {Breakpoint} from '../types/constEnums'
-import {NewMeetingPhaseTypeEnum} from '../types/graphql'
 import {phaseLabelLookup} from '../utils/meetings/lookups'
 import plural from '../utils/plural'
 import DiscussionThreadRoot from './DiscussionThreadRoot'
@@ -25,8 +26,7 @@ import PhaseHeaderTitle from './PhaseHeaderTitle'
 import PhaseWrapper from './PhaseWrapper'
 import ReflectionGroup from './ReflectionGroup/ReflectionGroup'
 import {RetroMeetingPhaseProps} from './RetroMeeting'
-import StageTimerDisplay from './RetroReflectPhase/StageTimerDisplay'
-
+import StageTimerDisplay from './StageTimerDisplay'
 interface Props extends RetroMeetingPhaseProps {
   meeting: RetroDiscussPhase_meeting
 }
@@ -41,7 +41,7 @@ const HeaderContainer = styled('div')({
 })
 
 const LabelContainer = styled(LabelHeading)<{isDesktop: boolean}>(({isDesktop}) => ({
-  background: PALETTE.BACKGROUND_MAIN,
+  background: PALETTE.SLATE_200,
   margin: '0 16px',
   padding: isDesktop ? '0 0 8px' : undefined,
   position: 'sticky',
@@ -79,7 +79,7 @@ const TopicHeading = styled('div')({
 
 const VoteMeta = styled('div')({
   alignItems: 'center',
-  backgroundColor: PALETTE.BACKGROUND_GRAY,
+  backgroundColor: PALETTE.SLATE_600,
   borderRadius: '5em',
   color: '#FFFFFF',
   display: 'flex',
@@ -135,13 +135,17 @@ const ColumnInner = styled('div')<{isDesktop: boolean}>(({isDesktop}) => ({
 
 const RetroDiscussPhase = (props: Props) => {
   const {avatarGroup, toggleSidebar, meeting} = props
-  const phaseRef = useRef<HTMLDivElement>(null)
+  const [callbackRef, phaseRef] = useCallbackRef()
   const {id: meetingId, endedAt, localStage, showSidebar, organization} = meeting
-  const {reflectionGroup} = localStage
+  const {reflectionGroup, isComplete} = localStage
   const isDesktop = useBreakpoint(Breakpoint.SINGLE_REFLECTION_COLUMN)
+  const title = reflectionGroup?.title ?? ''
+  const isBuggy = (!isComplete && title?.toLowerCase().includes('bug')) ?? false
+  useScreenBugs(isBuggy, meetingId)
   // reflection group will be null until the server overwrites the placeholder.
   if (!reflectionGroup) return null
-  const {id: reflectionGroupId, title, voteCount} = reflectionGroup
+  const {id: reflectionGroupId, voteCount} = reflectionGroup
+
   const reflections = reflectionGroup.reflections ?? []
   if (!reflectionGroup.reflections) {
     // this shouldn't ever happen, yet
@@ -153,7 +157,7 @@ const RetroDiscussPhase = (props: Props) => {
     Sentry.captureException(new Error(`NO REFLECTIONS ${JSON.stringify(errObj)}`))
   }
   return (
-    <MeetingContent ref={phaseRef}>
+    <MeetingContent ref={callbackRef}>
       <DiscussPhaseSqueeze meeting={meeting} organization={organization} />
       <MeetingHeaderAndPhase hideBottomBar={!!endedAt}>
         <MeetingTopBar
@@ -161,7 +165,7 @@ const RetroDiscussPhase = (props: Props) => {
           isMeetingSidebarCollapsed={!showSidebar}
           toggleSidebar={toggleSidebar}
         >
-          <PhaseHeaderTitle>{phaseLabelLookup[NewMeetingPhaseTypeEnum.discuss]}</PhaseHeaderTitle>
+          <PhaseHeaderTitle>{phaseLabelLookup.discuss}</PhaseHeaderTitle>
           <PhaseHeaderDescription>
             {'Create takeaway task cards to capture next steps'}
           </PhaseHeaderDescription>
@@ -196,7 +200,11 @@ const RetroDiscussPhase = (props: Props) => {
                 </ColumnInner>
               </ReflectionColumn>
               <ThreadColumn isDesktop={isDesktop}>
-                <DiscussionThreadRoot meetingId={meetingId} threadSourceId={reflectionGroupId!} />
+                <DiscussionThreadRoot
+                  meetingContentRef={phaseRef}
+                  meetingId={meetingId}
+                  threadSourceId={reflectionGroupId!}
+                />
               </ThreadColumn>
             </ColumnsContainer>
           </DiscussPhaseWrapper>
@@ -210,9 +218,14 @@ const RetroDiscussPhase = (props: Props) => {
 graphql`
   fragment RetroDiscussPhase_stage on NewMeetingStage {
     ... on RetroDiscussStage {
+      isComplete
       reflectionGroup {
         ...ReflectionGroup_reflectionGroup
         id
+        commentors {
+          userId
+          preferredName
+        }
         title
         voteCount
         reflections {
@@ -242,7 +255,6 @@ export default createFragmentContainer(RetroDiscussPhase, {
           ...RetroDiscussPhase_stage @relay(mask: false)
         }
       }
-
       localStage {
         ...RetroDiscussPhase_stage @relay(mask: false)
       }

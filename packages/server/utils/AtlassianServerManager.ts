@@ -1,6 +1,7 @@
 import fetch from 'node-fetch'
-import makeAppLink from './makeAppLink'
 import AtlassianManager from 'parabol-client/utils/AtlassianManager'
+import makeAppURL from 'parabol-client/utils/makeAppURL'
+import appOrigin from '../appOrigin'
 
 interface AuthQueryParams {
   grant_type: 'authorization_code'
@@ -21,12 +22,12 @@ interface OAuth2Response {
 }
 
 class AtlassianServerManager extends AtlassianManager {
-  fetch = fetch
+  fetch = fetch as any
   static async init(code: string) {
     return AtlassianServerManager.fetchToken({
       grant_type: 'authorization_code',
       code,
-      redirect_uri: makeAppLink('auth/atlassian')
+      redirect_uri: makeAppURL(appOrigin, 'auth/atlassian')
     })
   }
 

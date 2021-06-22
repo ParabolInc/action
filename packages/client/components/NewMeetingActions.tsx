@@ -2,14 +2,16 @@ import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
 import {createFragmentContainer} from 'react-relay'
+import StartCheckInMutation from '~/mutations/StartCheckInMutation'
+import StartRetrospectiveMutation from '~/mutations/StartRetrospectiveMutation'
 import {NewMeetingActions_team} from '~/__generated__/NewMeetingActions_team.graphql'
 import useAtmosphere from '../hooks/useAtmosphere'
 import useBreakpoint from '../hooks/useBreakpoint'
 import useMutationProps from '../hooks/useMutationProps'
 import useRouter from '../hooks/useRouter'
-import StartNewMeetingMutation from '../mutations/StartNewMeetingMutation'
+import StartSprintPokerMutation from '../mutations/StartSprintPokerMutation'
 import {Breakpoint} from '../types/constEnums'
-import {MeetingTypeEnum} from '../types/graphql'
+import {MeetingTypeEnum} from '~/__generated__/NewMeeting_viewer.graphql'
 import Icon from './Icon'
 import NewMeetingActionsCurrentMeetings from './NewMeetingActionsCurrentMeetings'
 import PrimaryButton from './PrimaryButton'
@@ -63,12 +65,18 @@ const NewMeetingActions = (props: Props) => {
   const onStartMeetingClick = () => {
     if (submitting) return
     submitMutation()
-    StartNewMeetingMutation(atmosphere, {teamId, meetingType}, {history, onError, onCompleted})
+    if (meetingType === 'poker') {
+      StartSprintPokerMutation(atmosphere, {teamId}, {history, onError, onCompleted})
+    } else if (meetingType === 'action') {
+      StartCheckInMutation(atmosphere, {teamId}, {history, onError, onCompleted})
+    } else {
+      StartRetrospectiveMutation(atmosphere, {teamId}, {history, onError, onCompleted})
+    }
   }
 
   return (
     <ButtonBlock isDesktop={isDesktop}>
-      <NewMeetingActionsCurrentMeetings meetingType={meetingType} team={team} />
+      <NewMeetingActionsCurrentMeetings team={team} />
       {error && <StyledError>{error.message}</StyledError>}
       <StartButton size={'large'} onClick={onStartMeetingClick} waiting={submitting}>
         Start Meeting

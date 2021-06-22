@@ -1,10 +1,10 @@
 import {GraphQLObjectType} from 'graphql'
-import getRethink from '../../database/rethinkDriver'
-import StandardMutationError from './StandardMutationError'
-import {GITHUB} from 'parabol-client/utils/constants'
-import GitHubAuth from './GitHubAuth'
-import User from './User'
+import toTeamMemberId from '../../../client/utils/relay/toTeamMemberId'
 import {GQLContext} from '../graphql'
+import GitHubIntegration from './GitHubIntegration'
+import StandardMutationError from './StandardMutationError'
+import TeamMember from './TeamMember'
+import User from './User'
 
 const AddGitHubAuthPayload = new GraphQLObjectType<any, GQLContext>({
   name: 'AddGitHubAuthPayload',
@@ -12,18 +12,19 @@ const AddGitHubAuthPayload = new GraphQLObjectType<any, GQLContext>({
     error: {
       type: StandardMutationError
     },
-    githubAuth: {
-      type: GitHubAuth,
+    githubIntegration: {
+      type: GitHubIntegration,
       description: 'The newly created auth',
-      resolve: async ({teamId, userId}) => {
-        const r = await getRethink()
-        return r
-          .table('Provider')
-          .getAll(teamId, {index: 'teamId'})
-          .filter({service: GITHUB, isActive: true, userId})
-          .nth(0)
-          .default(null)
-          .run()
+      resolve: async ({teamId, userId}, _args, {dataLoader}) => {
+        return dataLoader.get('githubAuth').load({teamId, userId})
+      }
+    },
+    teamMember: {
+      type: TeamMember,
+      description: 'The team member with the updated auth',
+      resolve: ({teamId, userId}, _args, {dataLoader}) => {
+        const teamMemberId = toTeamMemberId(teamId, userId)
+        return dataLoader.get('teamMembers').load(teamMemberId)
       }
     },
     user: {

@@ -10,6 +10,7 @@ interface Props {
 }
 
 const StyledDialogContainer = styled(DialogContainer)({
+  overflow: 'auto',
   width: 500
 })
 

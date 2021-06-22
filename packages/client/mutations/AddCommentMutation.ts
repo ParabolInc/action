@@ -18,12 +18,13 @@ graphql`
       threadSortOrder
       threadParentId
     }
+    meetingId
   }
 `
 
 const mutation = graphql`
-  mutation AddCommentMutation($comment: AddCommentInput!) {
-    addComment(comment: $comment) {
+  mutation AddCommentMutation($comment: AddCommentInput!, $meetingId: ID!) {
+    addComment(comment: $comment, meetingId: $meetingId) {
       ... on ErrorPayload {
         error {
           message
@@ -38,6 +39,12 @@ export const addCommentMeetingUpdater: SharedUpdater<AddCommentMutation_meeting>
   payload,
   {store}
 ) => {
+  const meetingId = payload.getValue('meetingId')
+  const meeting = store.get(meetingId)
+  const isRightDrawerOpen = meeting?.getValue('isRightDrawerOpen')
+  if (isRightDrawerOpen === false) {
+    meeting?.setValue(true, 'isCommentUnread')
+  }
   const comment = payload.getLinkedRecord('comment')
   if (!comment) return
   const threadParentId = comment.getValue('threadParentId')

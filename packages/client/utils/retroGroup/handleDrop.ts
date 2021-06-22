@@ -1,7 +1,7 @@
 import Atmosphere from '../../Atmosphere'
-import {DragReflectionDropTargetTypeEnum} from '../../types/graphql'
 import {commitLocalUpdate} from 'relay-runtime'
 import EndDraggingReflectionMutation from '../../mutations/EndDraggingReflectionMutation'
+import {DragReflectionDropTargetTypeEnum} from '~/__generated__/EndDraggingReflectionMutation_meeting.graphql'
 import {ReflectionDragState} from '../../components/ReflectionGroup/DraggableReflectionCard'
 
 const handleDrop = (

@@ -5,7 +5,6 @@ import {MenuPosition} from '~/hooks/useCoords'
 import useMenu from '~/hooks/useMenu'
 import lazyPreload from '~/utils/lazyPreload'
 import {TopBarNotifications_viewer} from '~/__generated__/TopBarNotifications_viewer.graphql'
-import {NotificationStatusEnum} from '../types/graphql'
 import TopBarIcon from './TopBarIcon'
 
 const NotificationDropdown = lazyPreload(() =>
@@ -21,9 +20,9 @@ interface Props {
 
 const TopBarNotifications = (props: Props) => {
   const {viewer} = props
-  const {notifications} = viewer || {notifications: {edges: []}}
+  const notifications = viewer?.notifications || {edges: []}
   const {edges} = notifications
-  const hasNotifications = edges.some(({node}) => node.status === NotificationStatusEnum.UNREAD)
+  const hasNotifications = edges.some(({node}) => node.status === 'UNREAD')
   const menuContentRef = useRef<HTMLDivElement>(null)
   const {togglePortal, originRef, menuPortal, menuProps} = useMenu<HTMLDivElement>(
     MenuPosition.UPPER_RIGHT,

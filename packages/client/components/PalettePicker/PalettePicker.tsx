@@ -64,13 +64,13 @@ const PalettePicker = (props: Props) => {
 
 export default createFragmentContainer(PalettePicker, {
   prompts: graphql`
-    fragment PalettePicker_prompts on RetroPhaseItem @relay(plural: true) {
+    fragment PalettePicker_prompts on ReflectPrompt @relay(plural: true) {
       id
       groupColor
     }
   `,
   prompt: graphql`
-    fragment PalettePicker_prompt on RetroPhaseItem {
+    fragment PalettePicker_prompt on ReflectPrompt {
       id
       groupColor
     }

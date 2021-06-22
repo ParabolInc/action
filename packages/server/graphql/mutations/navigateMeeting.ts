@@ -47,9 +47,9 @@ export default {
       .default(null)
       .run()) as Meeting | null
     if (!meeting) return standardError(new Error('Meeting not found'), {userId: viewerId})
-    const {defaultFacilitatorUserId, facilitatorUserId, phases, teamId} = meeting
+    const {createdBy, facilitatorUserId, phases, teamId, meetingType} = meeting
     if (viewerId !== facilitatorUserId) {
-      if (viewerId !== defaultFacilitatorUserId) {
+      if (viewerId !== createdBy) {
         return standardError(new Error('Not meeting facilitator'), {userId: viewerId})
       }
       return standardError(new Error('Not meeting facilitator anymore'), {userId: viewerId})
@@ -71,9 +71,11 @@ export default {
         // MUTATIVE
         stage.isComplete = true
         stage.endAt = now
-        stage.readyToAdvance = stage.readyToAdvance || []
-        if (!stage.readyToAdvance.includes(facilitatorUserId)) {
-          stage.readyToAdvance.push(facilitatorUserId)
+        if (meetingType !== 'poker') {
+          stage.readyToAdvance = stage.readyToAdvance || []
+          if (!stage.readyToAdvance.includes(facilitatorUserId)) {
+            stage.readyToAdvance.push(facilitatorUserId)
+          }
         }
         // handle any side effects, this could mutate the meeting object!
         phaseCompleteData = await handleCompletedStage(stage, meeting, dataLoader)

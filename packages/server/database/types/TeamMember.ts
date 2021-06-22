@@ -4,10 +4,10 @@ interface Input {
   isNotRemoved?: boolean
   isLead?: boolean
   hideAgenda?: boolean
+  isSpectatingPoker?: boolean
   email: string
   picture: string
   preferredName: string
-  checkInOrder: number
   teamId: string
   userId: string
   updatedAt?: Date
@@ -17,18 +17,17 @@ export default class TeamMember {
   id: string
   isNotRemoved: boolean
   isLead: boolean
+  isSpectatingPoker: boolean
   hideAgenda: boolean
   email: string
   picture: string
   preferredName: string
-  checkInOrder: number
   teamId: string
   userId: string
   createdAt: Date
   updatedAt: Date
   constructor(input: Input) {
     const {
-      checkInOrder,
       teamId,
       email,
       hideAgenda,
@@ -36,14 +35,15 @@ export default class TeamMember {
       isNotRemoved,
       picture,
       preferredName,
-      userId
+      userId,
+      isSpectatingPoker
     } = input
     this.id = toTeamMemberId(teamId, userId)
-    this.checkInOrder = checkInOrder
     this.teamId = teamId
     this.email = email
     this.hideAgenda = hideAgenda || false
     this.isLead = isLead || false
+    this.isSpectatingPoker = isSpectatingPoker || false
     this.isNotRemoved = isNotRemoved === undefined ? true : isNotRemoved
     this.picture = picture
     this.preferredName = preferredName

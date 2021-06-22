@@ -1,8 +1,9 @@
 import React from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 
 interface Props {
+  isComplete: boolean
   isDashboard: boolean
 }
 
@@ -13,7 +14,7 @@ const EmptyBlock = styled('div')({
 })
 
 const EmptyMessage = styled('div')({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   flex: 1,
   fontSize: 13,
   fontWeight: 400,
@@ -22,8 +23,10 @@ const EmptyMessage = styled('div')({
 })
 
 const AgendaListEmptyState = (props: Props) => {
-  const {isDashboard} = props
+  const {isComplete, isDashboard} = props
   const meetingContext = isDashboard ? 'next meeting' : 'meeting'
+
+  if (isComplete) return null
   return (
     <EmptyBlock>
       <EmptyMessage>

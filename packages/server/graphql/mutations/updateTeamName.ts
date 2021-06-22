@@ -7,6 +7,8 @@ import publish from '../../utils/publish'
 import teamNameValidation from 'parabol-client/validation/teamNameValidation'
 import standardError from '../../utils/standardError'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
+import updateTeamByTeamId from '../../postgres/queries/updateTeamByTeamId'
+import getTeamByTeamId from '../../postgres/queries/getTeamByTeamId'
 
 export default {
   type: UpdateTeamNamePayload,
@@ -30,10 +32,7 @@ export default {
     }
 
     // VALIDATION
-    const team = await r
-      .table('Team')
-      .get(teamId)
-      .run()
+    const team = await getTeamByTeamId(teamId)
     const orgTeams = await dataLoader.get('teamsByOrgId').load(team.orgId)
     const orgTeamNames = orgTeams.filter((team) => team.id !== teamId).map((team) => team.name)
     const {error, value: name} = teamNameValidation(updatedTeam.name, orgTeamNames)
@@ -49,11 +48,14 @@ export default {
       name,
       updatedAt: now
     }
-    await r
-      .table('Team')
-      .get(teamId)
-      .update(dbUpdate)
-      .run()
+    await Promise.all([
+      r
+        .table('Team')
+        .get(teamId)
+        .update(dbUpdate)
+        .run(),
+      updateTeamByTeamId(dbUpdate, teamId)
+    ])
 
     const data = {teamId}
     publish(SubscriptionChannel.TEAM, teamId, 'UpdateTeamNamePayload', data, subOptions)

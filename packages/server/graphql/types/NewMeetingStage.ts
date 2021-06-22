@@ -6,27 +6,11 @@ import {
   GraphQLInterfaceType,
   GraphQLNonNull
 } from 'graphql'
-import {
-  AGENDA_ITEMS,
-  CHECKIN,
-  DISCUSS,
-  FIRST_CALL,
-  GROUP,
-  LAST_CALL,
-  REFLECT,
-  UPDATES,
-  VOTE
-} from 'parabol-client/utils/constants'
 import {getUserId} from '../../utils/authorization'
-import AgendaItemsStage from './AgendaItemsStage'
-import CheckInStage from './CheckInStage'
-import GenericMeetingStage from './GenericMeetingStage'
 import GraphQLISO8601Type from './GraphQLISO8601Type'
 import NewMeeting from './NewMeeting'
 import NewMeetingPhase from './NewMeetingPhase'
 import NewMeetingPhaseTypeEnum from './NewMeetingPhaseTypeEnum'
-import RetroDiscussStage from './RetroDiscussStage'
-import UpdatesStage from './UpdatesStage'
 
 /*
  * Each meeting has many phases.
@@ -132,6 +116,9 @@ export const newMeetingStageFields = () => ({
     description:
       'The suggested time limit for a phase to be completed together, null if not enough data to make a suggestion'
   },
+  teamId: {
+    type: GraphQLNonNull(GraphQLID)
+  },
   timeRemaining: {
     type: GraphQLFloat,
     description:
@@ -146,21 +133,7 @@ const NewMeetingStage = new GraphQLInterfaceType({
   name: 'NewMeetingStage',
   description:
     'An instance of a meeting phase item. On the client, this usually represents a single view',
-  fields: newMeetingStageFields,
-  resolveType: ({phaseType}) => {
-    const resolveTypeLookup = {
-      [CHECKIN]: CheckInStage,
-      [REFLECT]: GenericMeetingStage,
-      [GROUP]: GenericMeetingStage,
-      [VOTE]: GenericMeetingStage,
-      [DISCUSS]: RetroDiscussStage,
-      [UPDATES]: UpdatesStage,
-      [FIRST_CALL]: GenericMeetingStage,
-      [AGENDA_ITEMS]: AgendaItemsStage,
-      [LAST_CALL]: GenericMeetingStage
-    }
-    return resolveTypeLookup[phaseType]
-  }
+  fields: newMeetingStageFields
 })
 
 export default NewMeetingStage

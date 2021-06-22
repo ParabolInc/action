@@ -1,12 +1,13 @@
 import React, {forwardRef} from 'react'
 import AvatarBadge from '../AvatarBadge/AvatarBadge'
 import styled from '@emotion/styled'
+import defaultUserAvatar from '../../styles/theme/images/avatar-user.svg'
 
 type ImageBlockProps = Pick<Props, 'sansRadius' | 'sansShadow' | 'picture' | 'size' | 'onClick'>
 
 const ImageBlock = styled('div')<ImageBlockProps>(
   ({sansRadius, sansShadow, picture, size, onClick}) => ({
-    backgroundImage: `url(${picture})`,
+    backgroundImage: `url(${picture}), url(${defaultUserAvatar})`,
     backgroundPosition: 'center center',
     backgroundRepeat: 'no-repeat',
     backgroundSize: 'cover',
@@ -41,6 +42,7 @@ interface Props {
   isConnected?: boolean
   onClick?: (e?: React.MouseEvent) => void
   onMouseEnter?: () => void
+  onTransitionEnd?: () => void
   picture: string
   sansRadius?: boolean
   sansShadow?: boolean
@@ -54,6 +56,7 @@ const Avatar = forwardRef((props: Props, ref: any) => {
     isConnected,
     onClick,
     onMouseEnter,
+    onTransitionEnd,
     picture,
     sansRadius,
     sansShadow,
@@ -62,6 +65,7 @@ const Avatar = forwardRef((props: Props, ref: any) => {
 
   return (
     <ImageBlock
+      onTransitionEnd={onTransitionEnd}
       className={className}
       ref={ref}
       onClick={onClick}

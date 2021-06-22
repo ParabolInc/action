@@ -1,12 +1,12 @@
 import React, {ReactNode} from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import Header from './AuthPage/Header'
 
 const PageContainer = styled('div')({
   alignItems: 'center',
-  backgroundColor: PALETTE.BACKGROUND_MAIN,
-  color: PALETTE.TEXT_MAIN,
+  backgroundColor: PALETTE.SLATE_200,
+  color: PALETTE.SLATE_700,
   display: 'flex',
   flexDirection: 'column',
   maxWidth: '100%',

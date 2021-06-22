@@ -1,8 +1,7 @@
-import DataLoader from 'dataloader'
 import getLoaderNameByTable from '../dataloader/getLoaderNameByTable'
 
 export interface DataLoaderBase {
-  get: (loaderName: any) => DataLoader<any, any>
+  get: (loaderName: any) => unknown
   loaders: {
     [key: string]: {
       clear(id: string): void

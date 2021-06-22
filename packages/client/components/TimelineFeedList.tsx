@@ -1,9 +1,14 @@
+import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
 import {createPaginationContainer, RelayPaginationProp} from 'react-relay'
 import useLoadMoreOnScrollBottom from '~/hooks/useLoadMoreOnScrollBottom'
 import {TimelineFeedList_viewer} from '../__generated__/TimelineFeedList_viewer.graphql'
 import TimelineEvent from './TimelineEvent'
+
+const ResultScroller = styled('div')({
+  overflow: 'auto'
+})
 
 interface Props {
   viewer: TimelineFeedList_viewer
@@ -13,14 +18,14 @@ interface Props {
 const TimelineFeedList = (props: Props) => {
   const {relay, viewer} = props
   const {timeline} = viewer
-  const lastItem = useLoadMoreOnScrollBottom(relay)
+  const lastItem = useLoadMoreOnScrollBottom(relay, {}, 10)
   return (
-    <div>
+    <ResultScroller>
       {timeline.edges.map(({node: timelineEvent}) => (
         <TimelineEvent key={timelineEvent.id} timelineEvent={timelineEvent} />
       ))}
       {lastItem}
-    </div>
+    </ResultScroller>
   )
 }
 

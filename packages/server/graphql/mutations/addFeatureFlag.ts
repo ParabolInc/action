@@ -1,45 +1,68 @@
-import {GraphQLNonNull, GraphQLString} from 'graphql'
+import {GraphQLList, GraphQLNonNull, GraphQLString} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
 import getRethink from '../../database/rethinkDriver'
+import User from '../../database/types/User'
 import db from '../../db'
-import {getUserId, requireSU} from '../../utils/authorization'
+import {requireSU} from '../../utils/authorization'
 import publish from '../../utils/publish'
-import standardError from '../../utils/standardError'
 import AddFeatureFlagPayload from '../types/AddFeatureFlagPayload'
 import UserFlagEnum from '../types/UserFlagEnum'
+import {appendUserFeatureFlagsQuery} from '../../postgres/queries/generated/appendUserFeatureFlagsQuery'
+import getPg from '../../postgres/getPg'
+import catchAndLog from '../../postgres/utils/catchAndLog'
 
 export default {
-  type: AddFeatureFlagPayload,
+  type: GraphQLNonNull(AddFeatureFlagPayload),
   description: 'Give someone advanced features in a flag',
   args: {
-    email: {
-      type: new GraphQLNonNull(GraphQLString),
-      description: `the complete or partial email of the person to whom you are giving advanced features.
+    emails: {
+      type: GraphQLList(GraphQLNonNull(GraphQLString)),
+      description: `a list of the complete or partial email of the person to whom you are giving advanced features.
       Matches via a regex to support entire domains`
+    },
+    domain: {
+      type: GraphQLString,
+      description: 'grant access to an entire domain. the part of the email after the @'
     },
     flag: {
       type: new GraphQLNonNull(UserFlagEnum),
       description: 'the flag that you want to give to the user'
     }
   },
-  async resolve(_source, {email, flag}: {email: string; flag: string}, {authToken, dataLoader}) {
+  async resolve(
+    _source,
+    {emails, domain, flag}: {emails: string[] | null; domain: string | null; flag: string},
+    {authToken, dataLoader}
+  ) {
     const r = await getRethink()
     const operationId = dataLoader.share()
     const subOptions = {operationId}
-    const viewerId = getUserId(authToken)
 
     // AUTH
     requireSU(authToken)
 
     // RESOLUTION
-    const users = await r
-      .table('User')
-      .filter((doc) => (doc as any)('email').match(email))
-      .run()
-    await db.prime('User', users)
-    if (users.length === 0) {
-      return standardError(new Error('Team member not found'), {userId: viewerId})
+    const users = [] as User[]
+    if (emails) {
+      const usersByEmail = await r
+        .table('User')
+        .getAll(r.args(emails), {index: 'email'})
+        .run()
+      users.push(...usersByEmail)
     }
+    if (domain) {
+      const usersByDomain = await r
+        .table('User')
+        .filter((doc) => (doc as any)('email').match(domain))
+        .run()
+      users.push(...usersByDomain)
+    }
+    await db.prime('User', users)
+
+    if (users.length === 0) {
+      return {error: {message: 'No users found matching the email or domain'}}
+    }
+
     const reqlUpdater = (user) => ({
       featureFlags: user('featureFlags')
         .default([])
@@ -47,12 +70,14 @@ export default {
         .distinct()
     })
     const userIds = users.map(({id}) => id)
-    await db.writeMany('User', userIds, reqlUpdater)
-    const result = `${email} has been given access to the ${flag} feature. If the app is open, it should magically appear.`
+    await Promise.all([
+      catchAndLog(() => appendUserFeatureFlagsQuery.run({ids: userIds, flag}, getPg())),
+      db.writeMany('User', userIds, reqlUpdater)
+    ])
     userIds.forEach((userId) => {
-      const data = {result, userId}
+      const data = {userId}
       publish(SubscriptionChannel.NOTIFICATION, userId, 'AddFeatureFlagPayload', data, subOptions)
     })
-    return {result, userIds}
+    return {userIds}
   }
 }

@@ -1,4 +1,3 @@
-import shortid from 'shortid'
 import {
   COMPLETED_ACTION_MEETING,
   COMPLETED_RETRO_MEETING,
@@ -6,15 +5,16 @@ import {
 } from '../../graphql/types/TimelineEventTypeEnum'
 
 exports.up = async (r) => {
+  let counter = 432
   try {
     await r.tableCreate('TimelineEvent').run()
-  } catch (e) {}
+  } catch (e) { }
   try {
     await r
       .table('TimelineEvent')
       .indexCreate('userIdCreatedAt', (row) => [row('userId'), row('createdAt')])
       .run()
-  } catch (e) {}
+  } catch (e) { }
 
   const {users, completedActionMeetings, completedRetroMeetings} = await r({
     users: r
@@ -54,7 +54,7 @@ exports.up = async (r) => {
   events.push(
     ...users.map((user) => {
       return {
-        id: shortid.generate(),
+        id: String(counter++),
         createdAt: user.createdAt,
         interactionCount: 0,
         seenCount: 0,
@@ -78,7 +78,7 @@ exports.up = async (r) => {
     const userIds = usersByTeamId[meeting.teamId]
     if (!userIds) return
     const userEvents = userIds.map((userId) => ({
-      id: shortid.generate(),
+      id: String(counter++),
       createdAt: meeting.endedAt,
       interactionCount: 0,
       seenCount: 0,
@@ -99,5 +99,5 @@ exports.up = async (r) => {
 exports.down = async (r) => {
   try {
     await r.tableDrop('TimelineEvent').run()
-  } catch (e) {}
+  } catch (e) { }
 }

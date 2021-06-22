@@ -109,7 +109,7 @@ const useForm = (fieldInputDict: FieldInputDict, deps: any[] = []) => {
 
   const validate = useEventCallback((name: string, value: any) => {
     const validateField = fieldInputDict[name].validate
-    if (!validateField) return {error: undefined, value: state[name].value}
+    if (!validateField) return {error: undefined, value}
     const res: Legitity = validateField(value)
     dispatch({type: 'setError', name, error: res.error})
     return res

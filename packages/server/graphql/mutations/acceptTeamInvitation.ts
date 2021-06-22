@@ -1,11 +1,12 @@
 import {GraphQLID, GraphQLNonNull} from 'graphql'
-import {InvitationTokenError, SubscriptionChannel} from 'parabol-client/types/constEnums'
 import toTeamMemberId from 'parabol-client/utils/relay/toTeamMemberId'
+import {InvitationTokenError, SubscriptionChannel} from '../../../client/types/constEnums'
 import AuthToken from '../../database/types/AuthToken'
 import acceptTeamInvitation from '../../safeMutations/acceptTeamInvitation'
 import {getUserId, isAuthenticated} from '../../utils/authorization'
 import encodeAuthToken from '../../utils/encodeAuthToken'
 import publish from '../../utils/publish'
+import RedisLock from '../../utils/RedisLock'
 import segmentIo from '../../utils/segmentIo'
 import rateLimit from '../rateLimit'
 import AcceptTeamInvitationPayload from '../types/AcceptTeamInvitationPayload'
@@ -72,13 +73,25 @@ export default {
       const {meetingId, teamId} = invitation
       const meeting = meetingId ? await dataLoader.get('newMeetings').load(meetingId) : null
       const activeMeetingId = meeting && !meeting.endedAt ? meetingId : null
+      const team = await dataLoader.get('teams').load(teamId)
+      const {orgId} = team
+
+      // make sure that same invite can't be accepted at the same moment
+      const ttl = 3000
+      const redisLock = new RedisLock(`acceptTeamInvitation:${viewerId}:${orgId}`, ttl)
+      const lockTTL = await redisLock.checkLock()
+      if (lockTTL > 0) {
+        return {
+          error: {message: `You already called this ${ttl - lockTTL}ms ago!`}
+        }
+      }
 
       // RESOLUTION
       const {teamLeadUserIdWithNewActions, invitationNotificationIds} = await acceptTeamInvitation(
         teamId,
-        viewerId,
-        dataLoader
+        viewerId
       )
+      await redisLock.unlock()
       const tms = authToken.tms ? authToken.tms.concat(teamId) : [teamId]
       // IMPORTANT! mutate the current authToken so any queries or subscriptions can get the latest
       authToken.tms = tms
@@ -91,7 +104,9 @@ export default {
         invitationNotificationIds
       }
 
-      const encodedAuthToken = encodeAuthToken(new AuthToken({tms, sub: viewerId}))
+      const encodedAuthToken = encodeAuthToken(
+        new AuthToken({tms, sub: viewerId, rol: authToken.rol})
+      )
 
       // Send the new team member a welcome & a new token
       publish(SubscriptionChannel.NOTIFICATION, viewerId, 'AuthTokenPayload', {tms})

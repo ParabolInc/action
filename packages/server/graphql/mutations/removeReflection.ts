@@ -7,7 +7,6 @@ import RemoveReflectionPayload from '../types/RemoveReflectionPayload'
 import removeEmptyReflectionGroup from './helpers/removeEmptyReflectionGroup'
 import unlockAllStagesForPhase from 'parabol-client/utils/unlockAllStagesForPhase'
 import standardError from '../../utils/standardError'
-import {NewMeetingPhaseTypeEnum} from 'parabol-client/types/graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
 
 export default {
@@ -43,7 +42,7 @@ export default {
       return standardError(new Error('Team not found'), {userId: viewerId})
     }
     if (endedAt) return standardError(new Error('Meeting already ended'), {userId: viewerId})
-    if (isPhaseComplete(NewMeetingPhaseTypeEnum.group, phases)) {
+    if (isPhaseComplete('group', phases)) {
       return standardError(new Error('Meeting phase already completed'), {userId: viewerId})
     }
 
@@ -60,7 +59,7 @@ export default {
     const reflections = await dataLoader.get('retroReflectionsByMeetingId').load(meetingId)
     let unlockedStageIds
     if (reflections.length === 0) {
-      unlockedStageIds = unlockAllStagesForPhase(phases, NewMeetingPhaseTypeEnum.group, true, false)
+      unlockedStageIds = unlockAllStagesForPhase(phases, 'group', true, false)
       await r
         .table('NewMeeting')
         .get(meetingId)

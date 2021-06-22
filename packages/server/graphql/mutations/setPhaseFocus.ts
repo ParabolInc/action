@@ -1,13 +1,13 @@
 import {GraphQLID, GraphQLNonNull} from 'graphql'
-import getRethink from '../../database/rethinkDriver'
-import {getUserId} from '../../utils/authorization'
-import SetPhaseFocusPayload from '../types/SetPhaseFocusPayload'
-import publish from '../../utils/publish'
+import {SubscriptionChannel} from 'parabol-client/types/constEnums'
 import {GROUP, REFLECT} from 'parabol-client/utils/constants'
 import isPhaseComplete from 'parabol-client/utils/meetings/isPhaseComplete'
-import standardError from '../../utils/standardError'
-import {SubscriptionChannel} from 'parabol-client/types/constEnums'
+import getRethink from '../../database/rethinkDriver'
 import ReflectPhase from '../../database/types/ReflectPhase'
+import {getUserId} from '../../utils/authorization'
+import publish from '../../utils/publish'
+import standardError from '../../utils/standardError'
+import SetPhaseFocusPayload from '../types/SetPhaseFocusPayload'
 
 const setPhaseFocus = {
   type: SetPhaseFocusPayload,
@@ -16,14 +16,14 @@ const setPhaseFocus = {
     meetingId: {
       type: new GraphQLNonNull(GraphQLID)
     },
-    focusedPhaseItemId: {
+    focusedPromptId: {
       type: GraphQLID,
       description: 'The currently focused phase item'
     }
   },
   async resolve(
     _source,
-    {meetingId, focusedPhaseItemId},
+    {meetingId, focusedPromptId},
     {authToken, dataLoader, socketId: mutatorId}
   ) {
     const r = await getRethink()
@@ -53,7 +53,7 @@ const setPhaseFocus = {
 
     // RESOLUTION
     // mutative
-    phase.focusedPhaseItemId = focusedPhaseItemId || null
+    phase.focusedPromptId = focusedPromptId || null
     await r
       .table('NewMeeting')
       .get(meetingId)

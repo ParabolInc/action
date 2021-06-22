@@ -1,20 +1,17 @@
 import {DataLoaderWorker} from '../../graphql'
 import AtlassianServerManager from '../../../utils/AtlassianServerManager'
-import {Omit} from 'parabol-client/types/generics'
-import {ISuggestedIntegrationJira} from 'parabol-client/types/graphql'
 import makeJiraProjectName from 'parabol-client/utils/makeJiraProjectName'
 import makeSuggestedIntegrationId from 'parabol-client/utils/makeSuggestedIntegrationId'
+import {TaskServiceEnum} from '../../../database/types/Task'
 
-const fetchAtlassianProjects = async (dataLoader: DataLoaderWorker, teamId, userId) => {
-  const [accessToken, auths] = await Promise.all([
-    dataLoader.get('freshAtlassianAccessToken').load({teamId, userId}),
-    dataLoader.get('atlassianAuthByUserId').load(userId)
-  ])
-  const auth = auths.find((auth) => auth.teamId === teamId)
+const fetchAtlassianProjects = async (
+  dataLoader: DataLoaderWorker,
+  teamId: string,
+  userId: string
+) => {
+  const auth = await dataLoader.get('freshAtlassianAuth').load({teamId, userId})
   if (!auth) return []
-  // mutate the cache to ensure accessToken is always the same
-  auth.accessToken = accessToken
-
+  const {accessToken} = auth
   const manager = new AtlassianServerManager(accessToken)
   const sites = await manager.getAccessibleResources()
 
@@ -24,8 +21,8 @@ const fetchAtlassianProjects = async (dataLoader: DataLoaderWorker, teamId, user
   }
 
   const cloudIds = sites.map((site) => site.id)
-  const atlassianProjects = [] as Omit<ISuggestedIntegrationJira, '__typename' | 'remoteProject'>[]
-  const service = 'jira' as any // TaskServiceEnum.jira
+  const atlassianProjects = [] as any
+  const service: TaskServiceEnum = 'jira'
   await manager.getProjects(cloudIds, (err, res) => {
     if (err) {
       console.error(err)

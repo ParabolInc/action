@@ -1,10 +1,10 @@
 import graphql from 'babel-plugin-relay/macro'
-import React, {useRef, useState} from 'react'
+import React, {useState} from 'react'
 import {createFragmentContainer} from 'react-relay'
+import useCallbackRef from '~/hooks/useCallbackRef'
 import {RetroReflectPhase_meeting} from '~/__generated__/RetroReflectPhase_meeting.graphql'
 import useBreakpoint from '../../hooks/useBreakpoint'
 import {Breakpoint} from '../../types/constEnums'
-import {NewMeetingPhaseTypeEnum} from '../../types/graphql'
 import {phaseLabelLookup} from '../../utils/meetings/lookups'
 import MeetingContent from '../MeetingContent'
 import MeetingHeaderAndPhase from '../MeetingHeaderAndPhase'
@@ -13,10 +13,10 @@ import PhaseHeaderDescription from '../PhaseHeaderDescription'
 import PhaseHeaderTitle from '../PhaseHeaderTitle'
 import PhaseWrapper from '../PhaseWrapper'
 import {RetroMeetingPhaseProps} from '../RetroMeeting'
+import StageTimerDisplay from '../StageTimerDisplay'
 import PhaseItemColumn from './PhaseItemColumn'
 import ReflectWrapperMobile from './ReflectionWrapperMobile'
 import ReflectWrapperDesktop from './ReflectWrapperDesktop'
-import StageTimerDisplay from './StageTimerDisplay'
 
 interface Props extends RetroMeetingPhaseProps {
   meeting: RetroReflectPhase_meeting
@@ -24,23 +24,23 @@ interface Props extends RetroMeetingPhaseProps {
 
 const RetroReflectPhase = (props: Props) => {
   const {avatarGroup, toggleSidebar, meeting} = props
-  const phaseRef = useRef<HTMLDivElement>(null)
+  const [callbackRef, phaseRef] = useCallbackRef()
   const [activeIdx, setActiveIdx] = useState(0)
   const isDesktop = useBreakpoint(Breakpoint.SINGLE_REFLECTION_COLUMN)
   const {localPhase, endedAt, showSidebar} = meeting
   if (!localPhase || !localPhase.reflectPrompts) return null
   const reflectPrompts = localPhase!.reflectPrompts
-  const focusedPhaseItemId = localPhase!.focusedPhaseItemId
+  const focusedPromptId = localPhase!.focusedPromptId
   const ColumnWrapper = isDesktop ? ReflectWrapperDesktop : ReflectWrapperMobile
   return (
-    <MeetingContent ref={phaseRef}>
+    <MeetingContent ref={callbackRef}>
       <MeetingHeaderAndPhase hideBottomBar={!!endedAt}>
         <MeetingTopBar
           avatarGroup={avatarGroup}
           isMeetingSidebarCollapsed={!showSidebar}
           toggleSidebar={toggleSidebar}
         >
-          <PhaseHeaderTitle>{phaseLabelLookup[NewMeetingPhaseTypeEnum.reflect]}</PhaseHeaderTitle>
+          <PhaseHeaderTitle>{phaseLabelLookup.reflect}</PhaseHeaderTitle>
           <PhaseHeaderDescription>
             {'Add anonymous reflections for each prompt'}
           </PhaseHeaderDescription>
@@ -50,7 +50,7 @@ const RetroReflectPhase = (props: Props) => {
           <ColumnWrapper
             setActiveIdx={setActiveIdx}
             activeIdx={activeIdx}
-            focusedIdx={reflectPrompts.findIndex(({id}) => id === focusedPhaseItemId)}
+            focusedIdx={reflectPrompts.findIndex(({id}) => id === focusedPromptId)}
           >
             {reflectPrompts.map((prompt, idx) => (
               <PhaseItemColumn
@@ -71,10 +71,11 @@ const RetroReflectPhase = (props: Props) => {
 
 graphql`
   fragment RetroReflectPhase_phase on ReflectPhase {
-    focusedPhaseItemId
+    focusedPromptId
     reflectPrompts {
       ...PhaseItemColumn_prompt
       id
+      sortOrder
     }
   }
 `

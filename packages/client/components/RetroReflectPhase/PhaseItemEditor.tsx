@@ -1,38 +1,36 @@
+import styled from '@emotion/styled'
 import {convertFromRaw, convertToRaw, EditorState} from 'draft-js'
 import React, {MutableRefObject, RefObject, useEffect, useRef, useState} from 'react'
-import ReflectionCardRoot from '../ReflectionCard/ReflectionCardRoot'
-import ReflectionEditorWrapper from '../ReflectionEditorWrapper'
-import CreateReflectionMutation from '../../mutations/CreateReflectionMutation'
-import EditReflectionMutation from '../../mutations/EditReflectionMutation'
-import convertToTaskContent from '../../utils/draftjs/convertToTaskContent'
 import useAtmosphere from '../../hooks/useAtmosphere'
 import useMutationProps from '../../hooks/useMutationProps'
-import getBBox from './getBBox'
-import styled from '@emotion/styled'
-import {BezierCurve, ZIndex} from '../../types/constEnums'
-import {ReflectColumnCardInFlight} from './PhaseItemColumn'
-import {Elevation} from '../../styles/elevation'
 import usePortal from '../../hooks/usePortal'
+import CreateReflectionMutation from '../../mutations/CreateReflectionMutation'
+import EditReflectionMutation from '../../mutations/EditReflectionMutation'
+import {Elevation} from '../../styles/elevation'
+import {BezierCurve,  ZIndex} from '../../types/constEnums'
+import convertToTaskContent from '../../utils/draftjs/convertToTaskContent'
+import ReflectionCardRoot from '../ReflectionCard/ReflectionCardRoot'
+import ReflectionEditorWrapper from '../ReflectionEditorWrapper'
+import getBBox from './getBBox'
+import {ReflectColumnCardInFlight} from './PhaseItemColumn'
 
 const FLIGHT_TIME = 500
-const CardInFlightStyles = styled(ReflectionCardRoot)<{transform: string; isStart: boolean}>(
-  ({isStart, transform}) => ({
-    boxShadow: isStart ? Elevation.Z8 : Elevation.Z0,
-    position: 'absolute',
-    top: 0,
-    transform,
-    transition: `all ${FLIGHT_TIME}ms ${BezierCurve.DECELERATE}`,
-    zIndex: ZIndex.REFLECTION_IN_FLIGHT
-  })
-)
+const CardInFlightStyles = styled(ReflectionCardRoot)<{transform: string, isStart: boolean}>(({isStart, transform}) => ({
+  boxShadow: isStart ? Elevation.Z8 : Elevation.Z0,
+  position: 'absolute',
+  top: 0,
+  transform,
+  transition: `all ${FLIGHT_TIME}ms ${BezierCurve.DECELERATE}`,
+  zIndex: ZIndex.REFLECTION_IN_FLIGHT
+}))
 
 interface Props {
   cardsInFlightRef: MutableRefObject<ReflectColumnCardInFlight[]>
-  setCardsInFlight: (cards: ReflectColumnCardInFlight[]) => void
+  forceUpdateColumn: () => void
   meetingId: string
   nextSortOrder: () => number
   phaseEditorRef: React.RefObject<HTMLDivElement>
-  retroPhaseItemId: string
+  promptId: string
   stackTopRef: RefObject<HTMLDivElement>
   dataCy: string
 }
@@ -42,10 +40,10 @@ const PhaseItemEditor = (props: Props) => {
     meetingId,
     nextSortOrder,
     phaseEditorRef,
-    retroPhaseItemId,
+    promptId,
     stackTopRef,
     cardsInFlightRef,
-    setCardsInFlight,
+    forceUpdateColumn,
     dataCy
   } = props
   const atmosphere = useAtmosphere()
@@ -54,7 +52,6 @@ const PhaseItemEditor = (props: Props) => {
   const [isEditing, setIsEditing] = useState(false)
   const idleTimerIdRef = useRef<number>()
   const {terminatePortal, openPortal, portal} = usePortal({noClose: true, id: 'phaseItemEditor'})
-
   useEffect(() => {
     return () => {
       window.clearTimeout(idleTimerIdRef.current)
@@ -65,7 +62,7 @@ const PhaseItemEditor = (props: Props) => {
     const input = {
       content,
       meetingId,
-      retroPhaseItemId,
+      promptId,
       sortOrder: nextSortOrder()
     }
     submitMutation()
@@ -78,13 +75,17 @@ const PhaseItemEditor = (props: Props) => {
       isStart: true
     }
     openPortal()
-    setCardsInFlight([...cardsInFlightRef.current, cardInFlight])
+    cardsInFlightRef.current = [
+      ...cardsInFlightRef.current,
+      cardInFlight
+    ]
+    forceUpdateColumn()
     requestAnimationFrame(() => {
       const stackBBox = getBBox(stackTopRef.current)
       if (!stackBBox) return
       const {left, top} = stackBBox
       const idx = cardsInFlightRef.current.findIndex((card) => card.key == content)
-      setCardsInFlight([
+      cardsInFlightRef.current = [
         ...cardsInFlightRef.current.slice(0, idx),
         {
           ...cardInFlight,
@@ -92,7 +93,8 @@ const PhaseItemEditor = (props: Props) => {
           transform: `translate(${left}px,${top}px)`
         },
         ...cardsInFlightRef.current.slice(idx + 1)
-      ])
+      ]
+      forceUpdateColumn()
       setTimeout(removeCardInFlight(content), FLIGHT_TIME)
     })
     // move focus to end is very important! otherwise ghost chars appear
@@ -118,7 +120,7 @@ const PhaseItemEditor = (props: Props) => {
     if (!isEditing) return
     window.clearTimeout(idleTimerIdRef.current)
     idleTimerIdRef.current = undefined
-    EditReflectionMutation(atmosphere, {isEditing: false, meetingId, phaseItemId: retroPhaseItemId})
+    EditReflectionMutation(atmosphere, {isEditing: false, meetingId, promptId})
     setIsEditing(false)
   }
 
@@ -127,7 +129,7 @@ const PhaseItemEditor = (props: Props) => {
       EditReflectionMutation(atmosphere, {
         isEditing: true,
         meetingId,
-        phaseItemId: retroPhaseItemId
+        promptId
       })
       setIsEditing(true)
     }
@@ -136,7 +138,7 @@ const PhaseItemEditor = (props: Props) => {
       EditReflectionMutation(atmosphere, {
         isEditing: false,
         meetingId,
-        phaseItemId: retroPhaseItemId
+        promptId
       })
       setIsEditing(false)
     }, 5000)
@@ -156,7 +158,8 @@ const PhaseItemEditor = (props: Props) => {
       ...cardsInFlightRef.current.slice(idx + 1)
     ]
     if (nextCardsInFlight.length === 0) terminatePortal()
-    setCardsInFlight(nextCardsInFlight)
+    cardsInFlightRef.current = nextCardsInFlight
+    forceUpdateColumn()
   }
 
   const editorRef = useRef<HTMLTextAreaElement>(null)

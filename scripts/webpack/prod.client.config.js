@@ -15,7 +15,6 @@ const getProjectRoot = require('./utils/getProjectRoot')
 
 const PROJECT_ROOT = getProjectRoot()
 const CLIENT_ROOT = path.join(PROJECT_ROOT, 'packages', 'client')
-const SERVER_ROOT = path.join(PROJECT_ROOT, 'packages', 'server')
 const STATIC_ROOT = path.join(PROJECT_ROOT, 'static')
 const buildPath = path.join(PROJECT_ROOT, 'build')
 const publicPath = getWebpackPublicPath()
@@ -56,21 +55,22 @@ module.exports = ({isDeploy, isStats}) => ({
   resolve: {
     alias: {
       '~': CLIENT_ROOT,
-      'parabol-server': SERVER_ROOT,
       'parabol-client': CLIENT_ROOT,
-      'static': STATIC_ROOT
+      static: STATIC_ROOT
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.graphql'],
+    fallback: {
+      assert: path.join(PROJECT_ROOT, 'scripts/webpack/assert.js'),
+      os: false
+    },
     modules: [
       path.resolve(CLIENT_ROOT, '../node_modules'),
-      path.resolve(SERVER_ROOT, '../node_modules'),
       'node_modules'
     ]
   },
   resolveLoader: {
     modules: [
       path.resolve(CLIENT_ROOT, '../node_modules'),
-      path.resolve(SERVER_ROOT, '../node_modules'),
       'node_modules'
     ]
   },
@@ -78,9 +78,7 @@ module.exports = ({isDeploy, isStats}) => ({
     minimize: Boolean(isDeploy || isStats),
     minimizer: [
       new TerserPlugin({
-        cache: true,
         parallel: isDeploy ? 2 : true,
-        sourceMap: true, // Must be set to true if using source-maps in production
         terserOptions: {
           output: {
             comments: false,
@@ -92,22 +90,17 @@ module.exports = ({isDeploy, isStats}) => ({
           // https://github.com/webpack-contrib/terser-webpack-plugin#terseroptions
         }
       })
-    ],
-    splitChunks: {
-      chunks: 'all',
-      // OK to be above 6 because we serve these via http2
-      maxAsyncRequests: 20,
-      maxInitialRequests: 20,
-      minSize: 4096
-    }
+    ]
   },
   plugins: [
-    new CopyPlugin([
-      {
-        from: path.join(PROJECT_ROOT, 'static', 'manifest.json'),
-        to: buildPath
-      }
-    ]),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.join(PROJECT_ROOT, 'static', 'manifest.json'),
+          to: buildPath
+        }
+      ]
+    }),
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: path.join(PROJECT_ROOT, 'template.html'),
@@ -132,11 +125,15 @@ module.exports = ({isDeploy, isStats}) => ({
       __CLIENT__: true,
       __PRODUCTION__: true,
       __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
+      'process.env.DEBUG': false,
       'process.env.NODE_ENV': JSON.stringify('production'),
+      'process.env.PROTOO_LISTEN_PORT': JSON.stringify(
+        (process.env.PROTOO_LISTEN_PORT || 4444) - 1
+      ),
       __STATIC_IMAGES__: JSON.stringify(`https://${process.env.AWS_S3_BUCKET}/static`)
     }),
     new webpack.SourceMapDevToolPlugin({
-      filename: '[name]_[hash].js.map',
+      filename: '[name]_[contenthash].js.map',
       append: `\n//# sourceMappingURL=${publicPath}[url]`
     }),
     new InjectManifest({
@@ -166,7 +163,7 @@ module.exports = ({isDeploy, isStats}) => ({
       {
         test: /\.tsx?$/,
         // things that need the relay plugin
-        include: [path.join(SERVER_ROOT, 'email'), path.join(CLIENT_ROOT)],
+        include: [path.join(CLIENT_ROOT)],
         // but don't need the inline-import plugin
         exclude: [path.join(CLIENT_ROOT, 'utils/GitHubManager.ts')],
         use: [
@@ -195,28 +192,6 @@ module.exports = ({isDeploy, isStats}) => ({
             }
           }
         ]
-      },
-      {
-        test: /\.tsx?/,
-        // things that don't need babel
-        include: [SERVER_ROOT],
-        // things that need babel
-        exclude: path.join(SERVER_ROOT, 'email'),
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              cacheDirectory: true,
-              babelrc: false,
-              presets: babelPresets
-            }
-          },
-          {
-            loader: '@sucrase/webpack-loader',
-            options: {
-              transforms: ['jsx', 'typescript']
-            }
-          }]
       },
       {
         test: /GitHubManager\.ts/,
@@ -249,7 +224,7 @@ module.exports = ({isDeploy, isStats}) => ({
       },
       {
         test: /\.js$/,
-        include: [path.join(SERVER_ROOT), path.join(CLIENT_ROOT)],
+        include: [path.join(CLIENT_ROOT)],
         use: [
           {
             loader: 'babel-loader',

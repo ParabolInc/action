@@ -1,7 +1,7 @@
 import styled from '@emotion/styled'
 
 const RetroBackground = styled('div')({
-  backgroundColor: '#F1F0FA',
+  backgroundColor: 'white',
   padding: 16,
   height: '100%',
   width: '100%'

@@ -1,14 +1,14 @@
-import {AuthIdentityTypeEnum} from 'parabol-client/types/graphql'
+export type TAuthIdentity = 'GOOGLE' | 'LOCAL'
 
 interface Input {
   id: string
   isEmailVerified?: boolean
-  type: AuthIdentityTypeEnum
+  type: TAuthIdentity
 }
 
 export default abstract class AuthIdentity {
   isEmailVerified: boolean
-  type: AuthIdentityTypeEnum
+  type: TAuthIdentity
   id: string
   constructor(input: Input) {
     const {id, isEmailVerified, type} = input

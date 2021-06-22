@@ -1,9 +1,9 @@
 import {EditorState} from 'draft-js'
-import React, {RefObject, useEffect, useState} from 'react'
+import React, {ChangeEvent, ClipboardEvent, RefObject, useEffect, useState} from 'react'
 import styled from '@emotion/styled'
 import TextArea from 'react-textarea-autosize'
 import {Card, Gutters} from '../types/constEnums'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 
 interface Props {
   className?: string
@@ -11,6 +11,7 @@ interface Props {
   onBlur?: (e: React.FocusEvent) => void
   onFocus?: (e: React.FocusEvent) => void
   onKeyDown: (e: React.KeyboardEvent) => void
+  onPastedText?: (text: string) => void
   placeholder: string
   editorRef: RefObject<HTMLTextAreaElement>
   onChange?: () => void
@@ -19,7 +20,7 @@ interface Props {
 const TextAreaStyles = styled(TextArea)({
   backgroundColor: 'transparent',
   border: 0,
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   display: 'block',
   fontSize: Card.FONT_SIZE,
   lineHeight: Card.LINE_HEIGHT,
@@ -31,7 +32,7 @@ const TextAreaStyles = styled(TextArea)({
 })
 
 const AndroidEditorFallback = (props: Props) => {
-  const {className, editorState, onBlur, onFocus, onKeyDown, placeholder, editorRef} = props
+  const {className, editorState, onBlur, onFocus, onKeyDown, onPastedText, placeholder, editorRef} = props
   const [value, setValue] = useState('')
   const [height, setHeight] = useState<number | undefined>(44)
 
@@ -41,8 +42,16 @@ const AndroidEditorFallback = (props: Props) => {
     setValue(text)
   }, [editorState])
 
-  const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const onChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setValue(e.target.value)
+  }
+
+  const handlePaste = (e: ClipboardEvent) => {
+    if (onPastedText) {
+      const clipboardData = e.clipboardData
+      const pastedText = clipboardData.getData('Text')
+      onPastedText(pastedText)
+    }
   }
 
   return (
@@ -57,6 +66,7 @@ const AndroidEditorFallback = (props: Props) => {
       onChange={onChange}
       onBlur={onBlur}
       onFocus={onFocus}
+      onPaste={handlePaste}
       onKeyDown={onKeyDown}
     />
   )

@@ -26,22 +26,22 @@
 
 import {sign} from 'jsonwebtoken'
 import {toEpochSeconds} from '../../server/utils/epochTime'
-import {JWT_LIFESPAN} from '../../server/utils/serverConstants'
+import {Threshold} from '../../client/types/constEnums'
 
 const login = (_overrides = {}) => {
   Cypress.log({
     name: 'login'
   })
   const now = Date.now()
-  const exp = toEpochSeconds(now + JWT_LIFESPAN)
+  const exp = toEpochSeconds(now + Threshold.JWT_LIFESPAN)
   const iat = toEpochSeconds(now)
   const tokenObj = {
-    sub: 'local|wnVeDjF-n',
+    sub: 'local|bZgjbfchN',
     aud: 'action',
     iss: window.location.origin,
     exp,
     iat,
-    tms: []
+    tms: ['l6k4LyKnhP']
   }
   const secret = Buffer.from(Cypress.env('SERVER_SECRET'), 'base64')
   const authToken = sign(tokenObj, secret)
@@ -52,12 +52,31 @@ const login = (_overrides = {}) => {
 
 Cypress.Commands.add('login', login)
 
+const postGQL = (body: any) => {
+  return cy.request({
+    method: 'POST',
+    url: 'http://localhost:3000/graphql',
+    headers: {
+      accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${window.localStorage.getItem('Action:token')}`
+    },
+    body: body,
+    failOnStatusCode: false
+  })
+}
+
+Cypress.Commands.add('postGQL', postGQL)
+
 declare global {
   namespace Cypress {
     interface Chainable {
       login: () => Chainable
       visitReflect: () => Chainable
       visitPhase: (phase: string, idx?: string) => Chainable<ReturnType<typeof visitPhase>>
+      postGQL: (body: any) => ReturnType<typeof postGQL>
+      restoreLocalStorageCache: () => Chainable<Element>
+      saveLocalStorageCache: () => Chainable<Element>
     }
   }
 }
@@ -69,9 +88,7 @@ const propertyErr = /^Cannot read property/
 const visitReflect = () => {
   cy.viewport(1280, 720)
   cy.visit('/retrospective-demo/reflect')
-  cy.get('[data-cy=start-demo-button]')
-    .should('be.visible')
-    .click({force: true})
+  cy.get('[data-cy=start-demo-button]').should('be.visible').click({force: true})
 }
 
 const visitPhase = (phase: string, idx = '') => {
@@ -92,27 +109,27 @@ const visitPhase = (phase: string, idx = '') => {
     }
     return undefined
   })
-  cy.get(`[data-cy=next-phase]`)
-    .should('be.visible')
-    .dblclick()
+  cy.get(`[data-cy=next-phase]`).should('be.visible').dblclick()
 
   cy.url().should('be.eq', `http://localhost:3000/retrospective-demo/${phase}${idx}`)
 }
 
-// const click = ($el) => {
-//   return $el.click()
-// }
+const click = ($el) => {
+  return $el.click()
+}
 
-let LOCAL_STORAGE_MEMORY = {}
+export default click
 
-Cypress.Commands.add("saveLocalStorageCache", () => {
-  Object.keys(localStorage).forEach(key => {
+const LOCAL_STORAGE_MEMORY = {}
+
+Cypress.Commands.add('saveLocalStorageCache', () => {
+  Object.keys(localStorage).forEach((key) => {
     LOCAL_STORAGE_MEMORY[key] = localStorage[key]
   })
 })
 
-Cypress.Commands.add("restoreLocalStorageCache", () => {
-  Object.keys(LOCAL_STORAGE_MEMORY).forEach(key => {
+Cypress.Commands.add('restoreLocalStorageCache', () => {
+  Object.keys(LOCAL_STORAGE_MEMORY).forEach((key) => {
     localStorage.setItem(key, LOCAL_STORAGE_MEMORY[key])
   })
 })

@@ -1,5 +1,6 @@
 import {GraphQLList, GraphQLObjectType} from 'graphql'
 import {getUserId} from '../../utils/authorization'
+import errorFilter from '../errorFilter'
 import {GQLContext} from '../graphql'
 import Notification from './Notification'
 import SetOrgUserRolePayload, {setOrgUserRoleFields} from './SetOrgUserRolePayload'
@@ -15,7 +16,9 @@ const SetOrgUserRoleAddedPayload = new GraphQLObjectType<any, GQLContext>({
       resolve: async ({notificationIdsAdded}, _args, {authToken, dataLoader}) => {
         if (!notificationIdsAdded) return []
         const viewerId = getUserId(authToken)
-        const notifications = await dataLoader.get('notifications').loadMany(notificationIdsAdded)
+        const notifications = (
+          await dataLoader.get('notifications').loadMany(notificationIdsAdded)
+        ).filter(errorFilter)
         return notifications.filter((notification) => notification.userId === viewerId)
       }
     }

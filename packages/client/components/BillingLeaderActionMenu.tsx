@@ -4,7 +4,6 @@ import {createFragmentContainer} from 'react-relay'
 import withAtmosphere, {WithAtmosphereProps} from '../decorators/withAtmosphere/withAtmosphere'
 import {MenuProps} from '../hooks/useMenu'
 import SetOrgUserRoleMutation from '../mutations/SetOrgUserRoleMutation'
-import {OrgUserRole, TierEnum} from '../types/graphql'
 import withMutationProps, {WithMutationProps} from '../utils/relay/withMutationProps'
 import {BillingLeaderActionMenu_organization} from '../__generated__/BillingLeaderActionMenu_organization.graphql'
 import {BillingLeaderActionMenu_organizationUser} from '../__generated__/BillingLeaderActionMenu_organizationUser.graphql'
@@ -37,7 +36,7 @@ const BillingLeaderActionMenu = (props: Props) => {
   const {id: orgId, tier} = organization
   const {viewerId} = atmosphere
   const {newUserUntil, role, user} = organizationUser
-  const isBillingLeader = role === OrgUserRole.BILLING_LEADER
+  const isBillingLeader = role === 'BILLING_LEADER'
   const {id: userId} = user
 
   const setRole = (role: string | null = null) => () => {
@@ -54,10 +53,7 @@ const BillingLeaderActionMenu = (props: Props) => {
           <MenuItem label='Remove Billing Leader role' onClick={setRole(null)} />
         )}
         {!isBillingLeader && (
-          <MenuItem
-            label='Promote to Billing Leader'
-            onClick={setRole(OrgUserRole.BILLING_LEADER)}
-          />
+          <MenuItem label='Promote to Billing Leader' onClick={setRole('BILLING_LEADER')} />
         )}
         {viewerId === userId && !isViewerLastBillingLeader && (
           <MenuItem label='Leave Organization' onClick={toggleLeave} />
@@ -65,7 +61,7 @@ const BillingLeaderActionMenu = (props: Props) => {
         {viewerId !== userId && (
           <MenuItem
             label={
-              tier === TierEnum.pro && new Date(newUserUntil) > new Date()
+              tier === 'pro' && new Date(newUserUntil) > new Date()
                 ? 'Refund and Remove'
                 : 'Remove from Organization'
             }

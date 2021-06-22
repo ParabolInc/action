@@ -11,10 +11,9 @@ export interface SentryOptions {
 }
 
 // Even though this is a promise we'll never need to await it, so we'll never need to worry about catching an error
-// @ts-ignore
-const sendToSentry = async (error: Error, options: SentryOptions = {}): void => {
+const sendToSentry = async (error: Error, options: SentryOptions = {}) => {
   // if (!PROD) {
-  console.error('SEND TO SENTRY', error, options.tags)
+  console.error('SEND TO SENTRY', error, JSON.stringify(options.tags))
   // }
   const {sampleRate, tags, userId, ip} = options
   if (sampleRate && Math.random() > sampleRate) return

@@ -2,16 +2,9 @@ import React from 'react'
 import {render} from 'react-dom'
 import Root from './Root'
 import './scrollIntoViewIfNeeded'
+import './types/modules.d'
 
 render(<Root />, document.getElementById('root'))
-
-if ((module as any).hot) {
-  ;(module as any).hot.accept('./Root', () => {
-    const Root = require('./Root').default
-    render(<Root />, document.getElementById('root'))
-  })
-}
-
 if (__PRODUCTION__ && 'serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     navigator.serviceWorker.register('/sw.js', {scope: '/'}).catch(console.error)

@@ -2,10 +2,9 @@ import {GraphQLInt, GraphQLNonNull, GraphQLList, GraphQLObjectType} from 'graphq
 import {GQLContext} from '../graphql'
 import MeetingMember, {meetingMemberFields} from './MeetingMember'
 import Task from './Task'
-import {IRetrospectiveMeetingMember} from 'parabol-client/types/graphql'
 import isTaskPrivate from 'parabol-client/utils/isTaskPrivate'
 
-const RetrospectiveMeetingMember = new GraphQLObjectType<IRetrospectiveMeetingMember, GQLContext>({
+const RetrospectiveMeetingMember = new GraphQLObjectType<any, GQLContext>({
   name: 'RetrospectiveMeetingMember',
   interfaces: () => [MeetingMember],
   description: 'All the meeting specifics for a user in a retro meeting',

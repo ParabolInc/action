@@ -3,11 +3,13 @@ import NewMeetingStage, {newMeetingStageFields} from './NewMeetingStage'
 import RetroReflectionGroup from './RetroReflectionGroup'
 import {makeResolve} from '../resolvers'
 import {GQLContext} from '../graphql'
+import {NewMeetingPhaseTypeEnum} from '../../database/types/GenericMeetingPhase'
 
-const RetroDiscussStage = new GraphQLObjectType<any, GQLContext, any>({
+const RetroDiscussStage = new GraphQLObjectType<any, GQLContext>({
   name: 'RetroDiscussStage',
   description: 'The stage where the team discusses a single theme',
   interfaces: () => [NewMeetingStage],
+  isTypeOf: ({phaseType}) => (phaseType as NewMeetingPhaseTypeEnum) === 'discuss',
   fields: () => ({
     ...newMeetingStageFields(),
     reflectionGroupId: {

@@ -76,10 +76,19 @@ const usePortal = (options: UsePortalOptions = {}) => {
 
   const handleKeydown = useEventCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape') {
-      if (originRef.current) {
-        // give focus back to the thing that opened it
-        originRef.current.focus()
+      const children = Array.from(portalRef.current?.children ?? [])
+      const hasChildModal = children.some((child) => child.id)
+      if (hasChildModal) return
+      const {activeElement, body} = document
+      if (activeElement && activeElement !== body) {
+        const {contentEditable, tagName} = activeElement as HTMLElement
+        // if viewer is typing something, don't close the portal on escape
+        if (tagName === 'INPUT' || tagName === 'TEXTAREA' || contentEditable === 'true') {
+          return
+        }
       }
+      // give focus back to the thing that opened it
+      originRef.current?.focus()
       closePortal()
     }
   })

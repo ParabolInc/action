@@ -8,9 +8,10 @@ import ScheduledJobMeetingStageTimeLimit from '../../../database/types/Scheduled
 import SlackAuth from '../../../database/types/SlackAuth'
 import SlackNotification from '../../../database/types/SlackNotification'
 import {requireSU} from '../../../utils/authorization'
-import makeAppLink from '../../../utils/makeAppLink'
+import makeAppURL from 'parabol-client/utils/makeAppURL'
 import publish from '../../../utils/publish'
 import SlackServerManager from '../../../utils/SlackServerManager'
+import appOrigin from '../../../appOrigin'
 
 const processMeetingStageTimeLimits = async (job: ScheduledJobMeetingStageTimeLimit) => {
   const r = await getRethink()
@@ -43,7 +44,7 @@ const processMeetingStageTimeLimits = async (job: ScheduledJobMeetingStageTimeLi
     } else {
       const {botAccessToken} = slackAuth
       const manager = new SlackServerManager(botAccessToken)
-      const meetingUrl = makeAppLink(`meet/${meetingId}`)
+      const meetingUrl = makeAppURL(appOrigin, `meet/${meetingId}`)
       const slackText = `Time’s up! Advance your meeting to the next phase: ${meetingUrl}`
       const res = await manager.postMessage(channelId, slackText)
       if (!res.ok) {

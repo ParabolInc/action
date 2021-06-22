@@ -1,11 +1,11 @@
 import React, {Component} from 'react'
 import styled from '@emotion/styled'
 import ui from '../../styles/ui'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 
 const Base = styled('label')({
   alignItems: 'center',
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   display: 'flex',
   fontSize: ui.fieldSizeStyles.medium.fontSize,
   lineHeight: ui.fieldSizeStyles.medium.lineHeight,

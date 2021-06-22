@@ -1,15 +1,17 @@
-import {AddGitHubAuthMutation as TAddGitHubAuthMutation} from '../__generated__/AddGitHubAuthMutation.graphql'
-import {commitMutation} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
-import {Disposable} from 'relay-runtime'
-import {IAddGitHubAuthOnMutationArguments} from '../types/graphql'
-import {LocalHandlers} from '../types/relayMutations'
+import {commitMutation} from 'react-relay'
+import {StandardMutation} from '../types/relayMutations'
+import {AddGitHubAuthMutation as TAddGitHubAuthMutation} from '../__generated__/AddGitHubAuthMutation.graphql'
 
 graphql`
   fragment AddGitHubAuthMutation_team on AddGitHubAuthPayload {
-    user {
-      ...GitHubProviderRow_viewer
-      ...TaskFooterIntegrateMenuViewerGitHubAuth
+    teamMember {
+      integrations {
+        github {
+          ...TaskFooterIntegrateMenuViewerGitHubIntegration
+          ...GitHubProviderRowGitHubIntegration
+        }
+      }
       # after adding, check for new integrations (populates the menu)
       ...TaskFooterIntegrateMenuViewerSuggestedIntegrations
     }
@@ -27,11 +29,11 @@ const mutation = graphql`
   }
 `
 
-const AddGitHubAuthMutation = (
+const AddGitHubAuthMutation: StandardMutation<TAddGitHubAuthMutation> = (
   atmosphere,
-  variables: IAddGitHubAuthOnMutationArguments,
-  {onError, onCompleted}: LocalHandlers
-): Disposable => {
+  variables,
+  {onError, onCompleted}
+) => {
   return commitMutation<TAddGitHubAuthMutation>(atmosphere, {
     mutation,
     variables,

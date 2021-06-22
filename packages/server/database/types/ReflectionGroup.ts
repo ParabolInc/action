@@ -1,10 +1,10 @@
-import shortid from 'shortid'
+import generateUID from '../../generateUID'
 
 export interface ReflectionGroupInput {
   id?: string
   createdAt?: Date
   meetingId: string
-  retroPhaseItemId: string
+  promptId: string
   sortOrder?: number
   updatedAt?: Date
   voterIds?: string[]
@@ -17,20 +17,30 @@ export default class ReflectionGroup {
   createdAt: Date
   isActive: boolean
   meetingId: string
-  retroPhaseItemId: string
+  promptId: string
   sortOrder: number
   updatedAt: Date
   voterIds: string[]
   title: string | null
   smartTitle: string | null
   constructor(input: ReflectionGroupInput) {
-    const {createdAt, id, meetingId, retroPhaseItemId, sortOrder, updatedAt, voterIds, smartTitle, title} = input
+    const {
+      createdAt,
+      id,
+      meetingId,
+      promptId,
+      sortOrder,
+      updatedAt,
+      voterIds,
+      smartTitle,
+      title
+    } = input
     const now = new Date()
-    this.id = id || shortid.generate()
+    this.id = id || generateUID()
     this.createdAt = createdAt || now
     this.isActive = true
     this.meetingId = meetingId
-    this.retroPhaseItemId = retroPhaseItemId
+    this.promptId = promptId
     this.sortOrder = sortOrder || 0
     this.updatedAt = updatedAt || now
     this.voterIds = voterIds || []

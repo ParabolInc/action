@@ -1,15 +1,16 @@
-import {RemoveAtlassianAuthMutation as TRemoveAtlassianAuthMutation} from '../__generated__/RemoveAtlassianAuthMutation.graphql'
-import {commitMutation} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
-import {Disposable} from 'relay-runtime'
-import Atmosphere from '../Atmosphere'
-import {IRemoveAtlassianAuthOnMutationArguments} from '../types/graphql'
-import {LocalHandlers} from '../types/relayMutations'
+import {commitMutation} from 'react-relay'
+import {StandardMutation} from '../types/relayMutations'
+import {RemoveAtlassianAuthMutation as TRemoveAtlassianAuthMutation} from '../__generated__/RemoveAtlassianAuthMutation.graphql'
 
 graphql`
   fragment RemoveAtlassianAuthMutation_team on RemoveAtlassianAuthPayload {
-    user {
-      ...AtlassianProviderRowViewer @relay(mask: false)
+    teamMember {
+      integrations {
+        atlassian {
+          ...AtlassianProviderRowAtlassianIntegration @relay(mask: false)
+        }
+      }
     }
   }
 `
@@ -25,11 +26,11 @@ const mutation = graphql`
   }
 `
 
-const RemoveAtlassianAuthMutation = (
-  atmosphere: Atmosphere,
-  variables: IRemoveAtlassianAuthOnMutationArguments,
-  {onError, onCompleted}: LocalHandlers
-): Disposable => {
+const RemoveAtlassianAuthMutation: StandardMutation<TRemoveAtlassianAuthMutation> = (
+  atmosphere,
+  variables,
+  {onError, onCompleted}
+) => {
   return commitMutation<TRemoveAtlassianAuthMutation>(atmosphere, {
     mutation,
     variables,

@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 
 interface Props {
   number: number
@@ -9,7 +9,7 @@ interface Props {
 
 const Number = styled('div')({
   color: '#fff',
-  backgroundColor: PALETTE.BACKGROUND_GRAY,
+  backgroundColor: PALETTE.SLATE_600,
   borderRadius: '100%',
   gridColumn: '1 / 2',
   fontSize: 16,

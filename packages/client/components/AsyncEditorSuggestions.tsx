@@ -1,6 +1,6 @@
 import React, {ComponentType} from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {DraftSuggestion} from './TaskEditor/useSuggestions'
 
 const dontTellDraft = (e) => {
@@ -8,7 +8,7 @@ const dontTellDraft = (e) => {
 }
 
 const SuggestionStyles = styled('div')({
-  color: PALETTE.TEXT_MAIN
+  color: PALETTE.SLATE_700
 })
 
 interface Props {
@@ -26,7 +26,7 @@ const AsyncEditorSuggestions = (props: Props) => {
         suggestions.map((suggestion, idx) => {
           return (
             // eslint-disable-next-line
-          <div key={idx} onMouseDown={dontTellDraft} onClick={handleSelect(idx)}>
+            <div key={idx} onMouseDown={dontTellDraft} onClick={handleSelect(idx)}>
               <SuggestionItem active={activeIdx === idx} {...suggestion} />
             </div>
           )

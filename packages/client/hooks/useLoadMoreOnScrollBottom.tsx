@@ -3,7 +3,8 @@ import {RelayPaginationProp} from 'react-relay'
 
 const useLoadMoreOnScrollBottom = (
   relay: RelayPaginationProp,
-  options?: IntersectionObserverInit
+  options?: IntersectionObserverInit,
+  loadMoreQty: number = 20
 ) => {
   const {loadMore, hasMore, isLoading} = relay
   const [intersectionObserver] = useState(() => {
@@ -11,7 +12,7 @@ const useLoadMoreOnScrollBottom = (
       const [entry] = entries
       if (entry.intersectionRatio > 0) {
         if (!hasMore() || isLoading()) return
-        loadMore(20)
+        loadMore(loadMoreQty)
       }
     }, options)
   })

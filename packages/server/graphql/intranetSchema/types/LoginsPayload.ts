@@ -4,7 +4,7 @@ import DomainCountPayload from './DomainCountPayload'
 import authCount from '../queries/helpers/authCount'
 import authCountByDomain from '../queries/helpers/authCountByDomain'
 
-const LoginsPayload = new GraphQLObjectType<any, GQLContext, any>({
+const LoginsPayload = new GraphQLObjectType<any, GQLContext>({
   name: 'LoginsPayload',
   fields: () => ({
     total: {

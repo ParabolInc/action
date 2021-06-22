@@ -2,6 +2,7 @@ import styled from '@emotion/styled'
 import {ICON_SIZE} from '../styles/typographyV2'
 
 const Icon = styled('i')({
+  flexShrink: 0,
   fontFamily: 'Material Icons',
   fontWeight: 'normal',
   fontStyle: 'normal',

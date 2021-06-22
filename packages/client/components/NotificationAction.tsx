@@ -1,10 +1,10 @@
 import styled from '@emotion/styled'
 import React from 'react'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import PlainButton from './PlainButton/PlainButton'
 
 const Button = styled(PlainButton)({
-  color: PALETTE.LINK_BLUE,
+  color: PALETTE.SKY_500,
   padding: 0,
   paddingLeft: 8
 })

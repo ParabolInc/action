@@ -93,16 +93,16 @@ const Dashboard = (props: Props) => {
       {isDesktop ? (
         <DashTopBar viewer={viewer} toggle={toggle} />
       ) : (
-        <MobileDashTopBar viewer={viewer} toggle={toggle} />
-      )}
+          <MobileDashTopBar viewer={viewer} toggle={toggle} />
+        )}
       <DashPanel>
         {isDesktop ? (
           <DashSidebar viewer={viewer} isOpen={isOpen} />
         ) : (
-          <SwipeableDashSidebar isOpen={isOpen} onToggle={toggle}>
-            <MobileDashSidebar viewer={viewer} handleMenuClick={handleMenuClick} />
-          </SwipeableDashSidebar>
-        )}
+            <SwipeableDashSidebar isOpen={isOpen} onToggle={toggle}>
+              <MobileDashSidebar viewer={viewer} handleMenuClick={handleMenuClick} />
+            </SwipeableDashSidebar>
+          )}
         <DashMain>
           <Switch>
             <Route path='/me' component={UserDashboard} />

@@ -1,8 +1,8 @@
 import crypto from 'crypto'
 import promisify from 'es6-promisify'
 import {GraphQLID, GraphQLList, GraphQLNonNull} from 'graphql'
-import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import {SuggestedActionTypeEnum} from 'parabol-client/types/graphql'
+import {SubscriptionChannel, Threshold} from 'parabol-client/types/constEnums'
+import {SuggestedActionTypeEnum} from '../../../client/types/constEnums'
 import getRethink from '../../database/rethinkDriver'
 import NotificationTeamInvitation from '../../database/types/NotificationTeamInvitation'
 import TeamInvitation from '../../database/types/TeamInvitation'
@@ -11,15 +11,15 @@ import teamInviteEmailCreator from '../../email/teamInviteEmailCreator'
 import removeSuggestedAction from '../../safeMutations/removeSuggestedAction'
 import {getUserId, isTeamMember} from '../../utils/authorization'
 import getBestInvitationMeeting from '../../utils/getBestInvitationMeeting'
-import makeAppLink from '../../utils/makeAppLink'
+import makeAppURL from 'parabol-client/utils/makeAppURL'
 import publish from '../../utils/publish'
 import segmentIo from '../../utils/segmentIo'
-import {TEAM_INVITATION_LIFESPAN} from '../../utils/serverConstants'
 import standardError from '../../utils/standardError'
 import {GQLContext} from '../graphql'
 import rateLimit from '../rateLimit'
 import GraphQLEmailType from '../types/GraphQLEmailType'
 import InviteToTeamPayload from '../types/InviteToTeamPayload'
+import appOrigin from '../../appOrigin'
 
 const randomBytes = promisify(crypto.randomBytes, crypto)
 
@@ -75,7 +75,7 @@ export default {
       })
       const bufferTokens = await Promise.all<Buffer>(newInvitees.map(() => randomBytes(48)))
       const tokens = bufferTokens.map((buffer: Buffer) => buffer.toString('hex'))
-      const expiresAt = new Date(Date.now() + TEAM_INVITATION_LIFESPAN)
+      const expiresAt = new Date(Date.now() + Threshold.TEAM_INVITATION_LIFESPAN)
       // insert invitation records
       const teamInvitationsToInsert = newInvitees.map((email, idx) => {
         return new TeamInvitation({
@@ -124,17 +124,18 @@ export default {
       const bestMeeting = await getBestInvitationMeeting(teamId, meetingId, dataLoader)
 
       // send emails
-      const params = {
+      const searchParams = {
         utm_source: 'invite email',
         utm_medium: 'email',
         utm_campaign: 'invitations'
       }
-      const options = {params}
+      const options = {searchParams}
       const emailResults = await Promise.all(
         teamInvitationsToInsert.map((invitation) => {
           const user = users.find((user) => user.email === invitation.email)
           const {html, subject, body} = teamInviteEmailCreator({
-            inviteLink: makeAppLink(`team-invitation/${invitation.token}`, options),
+            appOrigin,
+            inviteLink: makeAppURL(appOrigin, `team-invitation/${invitation.token}`, options),
             inviteeName: user ? user.preferredName : '',
             inviteeEmail: invitation.email,
             inviterName: inviter.preferredName,

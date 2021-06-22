@@ -1,15 +1,13 @@
 import * as validator from '@authenio/samlify-node-xmllint'
 import base64url from 'base64url'
-import {GraphQLNonNull, GraphQLString} from 'graphql'
-import {TierEnum} from 'parabol-client/types/graphql'
+import {GraphQLID, GraphQLNonNull, GraphQLString} from 'graphql'
 import getSSODomainFromEmail from 'parabol-client/utils/getSSODomainFromEmail'
 import querystring from 'querystring'
 import * as samlify from 'samlify'
-import shortid from 'shortid'
 import getRethink from '../../../database/rethinkDriver'
 import AuthToken from '../../../database/types/AuthToken'
-import SAML from '../../../database/types/SAML'
 import User from '../../../database/types/User'
+import generateUID from '../../../generateUID'
 import encodeAuthToken from '../../../utils/encodeAuthToken'
 import bootstrapNewUser from '../../mutations/helpers/bootstrapNewUser'
 import {SSORelayState} from '../../queries/SAMLIdP'
@@ -35,26 +33,25 @@ const loginSAML = {
   args: {
     queryString: {
       type: new GraphQLNonNull(GraphQLString),
-      description: 'The querystring provided by the iDP including SAMLResponse and RelayState'
+      description: 'The querystring provided by the IdP including SAMLResponse and RelayState'
     },
-    domain: {
-      type: GraphQLNonNull(GraphQLString),
-      description: 'The domain the viewer is attempting to login to'
+    samlName: {
+      type: GraphQLNonNull(GraphQLID),
+      description: 'The name of the SAML identifier. The slug used in the redirect URL'
     }
   },
-  async resolve(_source, {domain, queryString}) {
+  async resolve(_source, {samlName, queryString}) {
     const r = await getRethink()
     const now = new Date()
     const body = querystring.parse(queryString)
-    const normalizedDomain = domain.toLowerCase()
-    const doc = (await r
+    const normalizedName = samlName.trim().toLowerCase()
+    const doc = await r
       .table('SAML')
-      .getAll(normalizedDomain, {index: 'domain'})
-      .nth(0)
-      .default(null)
-      .run()) as SAML | null
-    if (!doc) return {error: {message: 'Domain not yet created on Parabol'}}
-    const {metadata} = doc
+      .get(normalizedName)
+      .run()
+
+    if (!doc) return {error: {message: `${normalizedName} has not been created in Parabol yet`}}
+    const {domains, metadata} = doc
     const idp = samlify.IdentityProvider({metadata})
     let loginResponse
     try {
@@ -69,11 +66,14 @@ const loginSAML = {
     const {isInvited} = relayState
     const {extract} = loginResponse
     const {attributes, nameID: name} = extract
-    const email = attributes.email.toLowerCase()
+    const email = attributes.email?.toLowerCase()
+    if (!email) {
+      return {error: {message: 'Email attribute was not included in SAML response'}}
+    }
     const ssoDomain = getSSODomainFromEmail(email)
-    if (ssoDomain !== normalizedDomain) {
+    if (!ssoDomain || !domains.includes(ssoDomain)) {
       // don't blindly trust the IdP
-      return {error: {message: `Email domain must be ${normalizedDomain}`}}
+      return {error: {message: `${email} does not belong to ${domains.join(', ')}`}}
     }
 
     const user = await r
@@ -84,17 +84,17 @@ const loginSAML = {
       .run()
     if (user) {
       return {
-        authToken: encodeAuthToken(new AuthToken({sub: user.id, tms: user.tms}))
+        authToken: encodeAuthToken(new AuthToken({sub: user.id, tms: user.tms, rol: user.rol}))
       }
     }
 
-    const userId = `sso|${shortid.generate()}`
+    const userId = `sso|${generateUID()}`
     const newUser = new User({
       id: userId,
       email,
       preferredName: name,
       lastSeenAt: now,
-      tier: TierEnum.enterprise
+      tier: 'enterprise'
     })
 
     const authToken = await bootstrapNewUser(newUser, !isInvited)

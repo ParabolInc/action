@@ -1,8 +1,6 @@
 import React, {forwardRef} from 'react'
 import useSegmentTrack from '../../hooks/useSegmentTrack'
 import {ExternalLinks} from '../../types/constEnums'
-import {NewMeetingPhaseTypeEnum} from '../../types/graphql'
-import {DISCUSS} from '../../utils/constants'
 import {phaseLabelLookup} from '../../utils/meetings/lookups'
 import HelpMenuContent from './HelpMenuContent'
 import HelpMenuCopy from './HelpMenuCopy'
@@ -13,10 +11,10 @@ interface Props {}
 
 const DiscussHelpMenu = forwardRef((_props: Props, ref: any) => {
   const {closePortal} = ref
-  useSegmentTrack('HelpMenuOpen', {phase: NewMeetingPhaseTypeEnum.discuss})
+  useSegmentTrack('Help Menu Open', {phase: 'discuss'})
   return (
     <HelpMenuContent closePortal={closePortal}>
-      <HelpMenuHeader>{phaseLabelLookup[DISCUSS]}</HelpMenuHeader>
+      <HelpMenuHeader>{phaseLabelLookup.discuss}</HelpMenuHeader>
       <HelpMenuCopy>
         The goal of this phase is to identify next steps and capture them as task cards assigned to
         an owner.

@@ -1,4 +1,4 @@
-import shortid from 'shortid'
+import generateUID from '../../generateUID'
 
 interface Input {
   id?: string
@@ -15,9 +15,9 @@ export default class PushInvitation {
   denialCount: number
   lastDenialAt?: Date
 
-  constructor (input: Input) {
+  constructor(input: Input) {
     const {id, userId, teamId, denialCount, lastDenialAt} = input
-    this.id = id || shortid.generate()
+    this.id = id || generateUID()
     this.userId = userId
     this.teamId = teamId
     this.denialCount = denialCount || 0

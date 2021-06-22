@@ -1,7 +1,7 @@
-import {ReactableEnum} from 'parabol-client/types/graphql'
+import {ReactableEnum} from '../../database/types/Reactable'
 
-const getReactableType = (type: any) => {
-  return type.reflectionGroupId ? ReactableEnum.REFLECTION : ReactableEnum.COMMENT
+const getReactableType = (type: any): ReactableEnum => {
+  return type.reflectionGroupId ? 'REFLECTION' : 'COMMENT'
 }
 
 export default getReactableType

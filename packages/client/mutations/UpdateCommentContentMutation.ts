@@ -1,8 +1,10 @@
 import graphql from 'babel-plugin-relay/macro'
 import {commitMutation} from 'react-relay'
-import {IComment} from '~/types/graphql'
 import {StandardMutation} from '../types/relayMutations'
-import {UpdateCommentContentMutation as TUpdateCommentContentMutation} from '../__generated__/UpdateCommentContentMutation.graphql'
+import {
+  UpdateCommentContentMutation as TUpdateCommentContentMutation,
+  UpdateCommentContentMutationResponse
+} from '../__generated__/UpdateCommentContentMutation.graphql'
 
 graphql`
   fragment UpdateCommentContentMutation_meeting on UpdateCommentContentSuccess {
@@ -15,8 +17,8 @@ graphql`
 `
 
 const mutation = graphql`
-  mutation UpdateCommentContentMutation($commentId: ID!, $content: String!) {
-    updateCommentContent(commentId: $commentId, content: $content) {
+  mutation UpdateCommentContentMutation($commentId: ID!, $content: String!, $meetingId: ID!) {
+    updateCommentContent(commentId: $commentId, content: $content, meetingId: $meetingId) {
       ... on ErrorPayload {
         error {
           message
@@ -26,6 +28,8 @@ const mutation = graphql`
     }
   }
 `
+
+type Comment = NonNullable<UpdateCommentContentMutationResponse['updateCommentContent']>['comment']
 
 const UpdateCommentContentMutation: StandardMutation<TUpdateCommentContentMutation> = (
   atmosphere,
@@ -37,7 +41,7 @@ const UpdateCommentContentMutation: StandardMutation<TUpdateCommentContentMutati
     variables,
     optimisticUpdater: (store) => {
       const {commentId, content} = variables
-      const comment = store.get<IComment>(commentId)
+      const comment = store.get<Comment>(commentId)
       if (!comment) return
       const now = new Date().toJSON()
       comment.setValue(content, 'content')

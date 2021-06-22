@@ -15,7 +15,7 @@ module.exports = {
   extensions: ['js', 'ts', 'tsx'],
   noFutureProofEnums: true,
   schema: path.join(__dirname, 'schema.graphql'),
-  include: ['client/**', 'server/email/**'],
+  include: ['client/**'],
   exclude: [
     '**/lib/**',
     '**/node_modules/**',

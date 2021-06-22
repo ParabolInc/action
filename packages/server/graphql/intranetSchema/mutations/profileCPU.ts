@@ -7,7 +7,7 @@ import {GQLContext} from '../../graphql'
 let session: inspector.Session
 
 const enable = () => {
-  return new Promise((resolve) => {
+  return new Promise<void>((resolve) => {
     session.post('Profiler.enable', () => {
       resolve()
     })
@@ -15,7 +15,7 @@ const enable = () => {
 }
 
 const start = () => {
-  return new Promise((resolve) => {
+  return new Promise<void>((resolve) => {
     session.post('Profiler.start', () => {
       resolve()
     })

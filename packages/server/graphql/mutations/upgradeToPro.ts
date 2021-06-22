@@ -1,6 +1,5 @@
 import {GraphQLID, GraphQLNonNull} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import {OrgUserRole} from 'parabol-client/types/graphql'
 import getRethink from '../../database/rethinkDriver'
 import {getUserId} from '../../utils/authorization'
 import publish from '../../utils/publish'
@@ -63,7 +62,7 @@ export default {
       .table('OrganizationUser')
       .getAll(viewerId, {index: 'userId'})
       .filter({removedAt: null, orgId})
-      .update({role: OrgUserRole.BILLING_LEADER})
+      .update({role: 'BILLING_LEADER'})
       .run()
 
     const teams = await dataLoader.get('teamsByOrgId').load(orgId)

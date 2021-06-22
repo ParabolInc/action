@@ -1,4 +1,4 @@
-import {ThreadSourceEnum} from 'parabol-client/types/graphql'
+import {ThreadSourceEnum} from '../../database/types/ThreadSource'
 import {DataLoaderWorker} from '../graphql'
 
 const validateThreadableThreadSourceId = async (
@@ -7,7 +7,7 @@ const validateThreadableThreadSourceId = async (
   meetingId: string | null | undefined,
   dataLoader: DataLoaderWorker
 ) => {
-  if (threadId) {
+  if (threadId && threadSource && threadSource !== 'STORY') {
     const thread = await dataLoader
       .get('threadSources')
       .load({sourceId: threadId, type: threadSource})

@@ -3,13 +3,13 @@ import React from 'react'
 import LinkButton from '../LinkButton'
 import IconLabel from '../IconLabel'
 import styled from '@emotion/styled'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 
 const StyledLinkButton = styled(LinkButton)({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontWeight: 600,
   ':hover, :focus, :active': {
-    color: PALETTE.TEXT_MAIN
+    color: PALETTE.SLATE_700
   }
 })
 

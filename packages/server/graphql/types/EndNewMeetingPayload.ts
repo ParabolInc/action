@@ -7,6 +7,8 @@ import NewMeeting from './NewMeeting'
 import {GQLContext} from '../graphql'
 import {getUserId} from '../../utils/authorization'
 import isTaskPrivate from 'parabol-client/utils/isTaskPrivate'
+import TimelineEvent from './TimelineEvent'
+import errorFilter from '../errorFilter'
 
 const EndNewMeetingPayload = new GraphQLObjectType<any, GQLContext>({
   name: 'EndNewMeetingPayload',
@@ -35,6 +37,13 @@ const EndNewMeetingPayload = new GraphQLObjectType<any, GQLContext>({
     removedTaskIds: {
       type: new GraphQLList(new GraphQLNonNull(GraphQLID))
     },
+    timelineEvent: {
+      type: TimelineEvent,
+      description: 'An event that is important to the viewer, e.g. an ended meeting',
+      resolve: async ({timelineEventId}, _args, {dataLoader}) => {
+        return await dataLoader.get('timelineEvents').load(timelineEventId)
+      }
+    },
     updatedTaskIds: {
       type: new GraphQLList(new GraphQLNonNull(GraphQLID))
     },
@@ -44,7 +53,9 @@ const EndNewMeetingPayload = new GraphQLObjectType<any, GQLContext>({
       resolve: async ({updatedTaskIds}, _args, {authToken, dataLoader}) => {
         if (!updatedTaskIds) return []
         const viewerId = getUserId(authToken)
-        const allUpdatedTasks = await dataLoader.get('tasks').loadMany(updatedTaskIds)
+        const allUpdatedTasks = (await dataLoader.get('tasks').loadMany(updatedTaskIds)).filter(
+          errorFilter
+        )
         return allUpdatedTasks.filter((task) => {
           return isTaskPrivate(task.tags) ? task.userId === viewerId : true
         })

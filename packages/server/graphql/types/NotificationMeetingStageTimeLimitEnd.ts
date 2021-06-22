@@ -4,7 +4,7 @@ import TeamNotification from './TeamNotification'
 import NewMeeting from './NewMeeting'
 import {GQLContext} from '../graphql'
 
-const NotificationMeetingStageTimeLimitEnd = new GraphQLObjectType<any, GQLContext, any>({
+const NotificationMeetingStageTimeLimitEnd = new GraphQLObjectType<any, GQLContext>({
   name: 'NotificationMeetingStageTimeLimitEnd',
   description: 'A notification sent to a facilitator that the stage time limit has ended',
   interfaces: () => [Notification, TeamNotification],

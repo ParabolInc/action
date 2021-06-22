@@ -1,8 +1,8 @@
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import styled from '@emotion/styled'
 
 const Badge = styled('div')({
-  backgroundColor: PALETTE.BACKGROUND_ORANGE,
+  backgroundColor: PALETTE.TOMATO_500,
   borderRadius: 16,
   boxShadow: '1px 1px 2px rgba(0, 0, 0, .5)',
   color: '#FFFFFF',

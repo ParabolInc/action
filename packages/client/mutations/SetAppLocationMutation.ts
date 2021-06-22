@@ -6,7 +6,7 @@ graphql`
   fragment SetAppLocationMutation_meeting on SetAppLocationSuccess {
     user {
       id
-      lastSeenAtURL
+      lastSeenAtURLs
     }
   }
 `

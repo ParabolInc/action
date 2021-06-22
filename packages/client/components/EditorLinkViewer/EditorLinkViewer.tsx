@@ -5,7 +5,7 @@ import dontTellDraft from '../../utils/draftjs/dontTellDraft'
 import textOverflow from '../../styles/helpers/textOverflow'
 import {EditorState} from 'draft-js'
 import styled from '@emotion/styled'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import useMenu from '../../hooks/useMenu'
 import {MenuPosition} from '../../hooks/useCoords'
 import {BBox} from '../../types/animations'
@@ -13,7 +13,7 @@ import {BBox} from '../../types/animations'
 const UrlSpan = styled('span')({
   ...textOverflow,
   alignItems: 'center',
-  borderRight: `1px solid ${PALETTE.BORDER_MAIN}`,
+  borderRight: `1px solid ${PALETTE.GRAPE_700}`,
   display: 'flex',
   flexShrink: 2,
   fontSize: 14,
@@ -30,7 +30,7 @@ const LinkText = styled('a')({
 
 const MenuStyles = styled('div')({
   alignItems: 'center',
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   display: 'flex',
   fontSize: 20,
   padding: '0 8px'

@@ -1,6 +1,6 @@
 import React from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {ICON_SIZE} from '../styles/typographyV2'
 import Icon from './Icon'
 import getRallyLink from '../modules/userDashboard/helpers/getRallyLink'
@@ -20,7 +20,7 @@ const ThumbsUp = styled(Icon)({
 
 const RallyLink = styled('span')({
   fontWeight: 600,
-  color: PALETTE.LINK_BLUE
+  color: PALETTE.SKY_500
 })
 
 const TimelineNoTasks = () => {

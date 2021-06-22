@@ -1,14 +1,15 @@
 import graphQLSubscriptionType from '../graphQLSubscriptionType'
 import AddOrgPayload from './AddOrgPayload'
-import SetOrgUserRoleAddedPayload from './SetOrgUserRoleAddedPayload'
-import SetOrgUserRoleRemovedPayload from './SetOrgUserRoleRemovedPayload'
-import UpdateOrgPayload from './UpdateOrgPayload'
-import UpgradeToProPayload from './UpgradeToProPayload'
-import RemoveOrgUserPayload from './RemoveOrgUserPayload'
-import UpdateCreditCardPayload from './UpdateCreditCardPayload'
+import ArchiveOrganizationPayload from './ArchiveOrganizationPayload'
 import DowngradeToPersonalPayload from './DowngradeToPersonalPayload'
 import PayLaterPayload from './PayLaterPayload'
-import ArchiveOrganizationPayload from './ArchiveOrganizationPayload'
+import RemoveOrgUserPayload from './RemoveOrgUserPayload'
+import SetOrgUserRoleAddedPayload from './SetOrgUserRoleAddedPayload'
+import SetOrgUserRoleRemovedPayload from './SetOrgUserRoleRemovedPayload'
+import UpdateCreditCardPayload from './UpdateCreditCardPayload'
+import UpdateOrgPayload from './UpdateOrgPayload'
+import {UpdateTemplateScopeSuccess} from './UpdateTemplateScopePayload'
+import UpgradeToProPayload from './UpgradeToProPayload'
 
 const types = [
   AddOrgPayload,
@@ -20,7 +21,8 @@ const types = [
   SetOrgUserRoleRemovedPayload,
   UpdateCreditCardPayload,
   UpdateOrgPayload,
-  UpgradeToProPayload
+  UpgradeToProPayload,
+  UpdateTemplateScopeSuccess
 ]
 
 export default graphQLSubscriptionType('OrganizationSubscriptionPayload', types)

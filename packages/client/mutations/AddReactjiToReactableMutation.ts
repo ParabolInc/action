@@ -1,9 +1,11 @@
 import graphql from 'babel-plugin-relay/macro'
 import {commitMutation} from 'react-relay'
-import {IComment, IRetroReflection} from '~/types/graphql'
 import createProxyRecord from '~/utils/relay/createProxyRecord'
 import {StandardMutation} from '../types/relayMutations'
-import {AddReactjiToReactableMutation as TAddReactjiToReactableMutation} from '../__generated__/AddReactjiToReactableMutation.graphql'
+import {
+  AddReactjiToReactableMutation as TAddReactjiToReactableMutation,
+  AddReactjiToReactableMutationResponse
+} from '../__generated__/AddReactjiToReactableMutation.graphql'
 
 graphql`
   fragment AddReactjiToReactableMutation_meeting on AddReactjiToReactableSuccess {
@@ -23,12 +25,14 @@ const mutation = graphql`
     $reactableType: ReactableEnum!
     $reactji: String!
     $isRemove: Boolean
+    $meetingId: ID!
   ) {
     addReactjiToReactable(
       reactableId: $reactableId
       reactableType: $reactableType
       reactji: $reactji
       isRemove: $isRemove
+      meetingId: $meetingId
     ) {
       ... on ErrorPayload {
         error {
@@ -39,6 +43,10 @@ const mutation = graphql`
     }
   }
 `
+
+type Reactable = NonNullable<
+  AddReactjiToReactableMutationResponse['addReactjiToReactable']['reactable']
+>
 
 const AddReactjiToReactableMutation: StandardMutation<TAddReactjiToReactableMutation> = (
   atmosphere,
@@ -51,7 +59,7 @@ const AddReactjiToReactableMutation: StandardMutation<TAddReactjiToReactableMuta
     optimisticUpdater: (store) => {
       const {reactableId, reactji, isRemove} = variables
       const id = `${reactableId}:${reactji}`
-      const reactable = store.get<IRetroReflection | IComment>(reactableId)
+      const reactable = store.get<Reactable>(reactableId)
       if (!reactable) return
       const reactjis = reactable.getLinkedRecords('reactjis')
       const reactjiIdx = reactjis.findIndex((reactji) => reactji.getValue('id') === id)

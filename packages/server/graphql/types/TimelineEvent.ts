@@ -1,4 +1,4 @@
-import {GraphQLID, GraphQLInt, GraphQLInterfaceType, GraphQLNonNull, GraphQLBoolean} from 'graphql'
+import {GraphQLBoolean, GraphQLID, GraphQLInt, GraphQLInterfaceType, GraphQLNonNull} from 'graphql'
 import connectionDefinitions from '../connectionDefinitions'
 import GraphQLISO8601Type from './GraphQLISO8601Type'
 import Organization from './Organization'
@@ -19,6 +19,10 @@ export const timelineEventInterfaceFields = () => ({
   interactionCount: {
     type: new GraphQLNonNull(GraphQLInt),
     description: 'the number of times the user has interacted with (ie clicked) this event'
+  },
+  isActive: {
+    type: new GraphQLNonNull(GraphQLBoolean),
+    description: 'true if the timeline event is active, false if archived'
   },
   orgId: {
     type: GraphQLID,
@@ -60,10 +64,6 @@ export const timelineEventInterfaceFields = () => ({
     resolve: ({userId}, _args, {dataLoader}) => {
       return dataLoader.get('users').load(userId)
     }
-  },
-  isActive: {
-    type: new GraphQLNonNull(GraphQLBoolean),
-    description: 'true if the timeline event is active, false if arvhiced'
   }
 })
 

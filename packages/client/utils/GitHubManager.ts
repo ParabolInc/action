@@ -1,6 +1,5 @@
 import {DocumentNode} from 'graphql-typed'
 import {ICreateIssueInput} from '../types/githubGraphql'
-import {IGraphQLResponseError} from '../types/graphql'
 import createIssue from './githubQueries/createIssue.graphql'
 import getProfile from './githubQueries/getProfile.graphql'
 import getRepoInfo from './githubQueries/getRepoInfo.graphql'
@@ -8,7 +7,7 @@ import getRepos from './githubQueries/getRepos.graphql'
 
 export interface GQLResponse<TData> {
   data?: TData
-  errors?: IGraphQLResponseError[]
+  errors?: any[]
 }
 
 export interface GitHubCredentialError {

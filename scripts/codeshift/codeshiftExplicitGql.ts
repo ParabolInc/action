@@ -26,7 +26,8 @@ const transform: Transform = (fileInfo, api, options) => {
   })
   return root.toSource({
     objectCurlySpacing: false,
-    quote: 'single'
+    quote: 'single',
+    reuseWhitespace: false
   })
 }
 

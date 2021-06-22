@@ -1,7 +1,6 @@
-import shortid from 'shortid'
-import { TRIAL_EXPIRES_SOON } from 'parabol-client/utils/constants'
+import {TRIAL_EXPIRES_SOON} from 'parabol-client/utils/constants'
 import stripe from '../../billing/stripe'
-import { fromEpochSeconds } from '../../utils/epochTime'
+import {fromEpochSeconds} from '../../utils/epochTime'
 import ms from 'ms'
 
 const TRIAL_PERIOD_DAYS = 30
@@ -9,6 +8,7 @@ const TRIAL_EXPIRES_SOON_DELAY = ms('14d')
 /* eslint-disable max-len */
 
 exports.up = async (r) => {
+  let counter = 0
   const tables = [r.tableCreate('Organization').run(), r.tableCreate('Notification').run()]
   try {
     await Promise.all(tables)
@@ -20,7 +20,7 @@ exports.up = async (r) => {
     // r.table('Organization').indexCreate('periodEnd'),
     r
       .table('Organization')
-      .indexCreate('orgUsers', r.row('orgUsers')('id'), { multi: true })
+      .indexCreate('orgUsers', r.row('orgUsers')('id'), {multi: true})
       .run(),
     r
       .table('ProjectHistory')
@@ -36,12 +36,12 @@ exports.up = async (r) => {
       .run(),
     r
       .table('Notification')
-      .indexCreate('userIds', { multi: true })
+      .indexCreate('userIds', {multi: true})
       .run(),
     // r.table('User').indexCreate('email'),
     r
       .table('User')
-      .indexCreate('userOrgs', r.row('userOrgs')('id'), { multi: true })
+      .indexCreate('userOrgs', r.row('userOrgs')('id'), {multi: true})
       .run()
   ]
   try {
@@ -95,8 +95,8 @@ exports.up = async (r) => {
   const orgLookupByTeam = {}
   for (let i = 0; i < teamLeaders.length; i++) {
     const teamLeader = teamLeaders[i]
-    const { teamId, userId } = teamLeader
-    orgLookupByUserId[userId] = orgLookupByUserId[userId] || shortid.generate()
+    const {teamId, userId} = teamLeader
+    orgLookupByUserId[userId] = orgLookupByUserId[userId] || String(counter++)
     orgLookupByTeam[teamId] = orgLookupByUserId[userId]
   }
 
@@ -104,7 +104,7 @@ exports.up = async (r) => {
   const users = {}
   for (let i = 0; i < teamMembers.length; i++) {
     const teamMember = teamMembers[i]
-    const { isLead, preferredName, userId, teamId } = teamMember
+    const {isLead, preferredName, userId, teamId} = teamMember
     const orgId = orgLookupByTeam[teamId]
     teamMember.orgId = orgId
     orgs[orgId] = orgs[orgId] || {}
@@ -121,7 +121,7 @@ exports.up = async (r) => {
   }
   const orgIds = Object.keys(orgs)
   const stripeCustomers = await Promise.all(
-    orgIds.map((orgId) => stripe.customers.create({ metadata: { orgId } }))
+    orgIds.map((orgId) => stripe.customers.create({metadata: {orgId}}))
   )
   const subscriptions = await Promise.all(
     stripeCustomers.map((customer) => {
@@ -141,12 +141,12 @@ exports.up = async (r) => {
     const currentPeriodStart = subscription.current_period_start
     const currentPeriodEnd = subscription.current_period_end
     const {
-      metadata: { orgId },
+      metadata: {orgId},
       customer,
       id
     } = subscription
     const periodEnd = fromEpochSeconds(currentPeriodEnd)
-    const { leaderId, name, orgUserMap } = orgs[orgId]
+    const {leaderId, name, orgUserMap} = orgs[orgId]
     const orgUserIds = Object.keys(orgUserMap)
     const orgUsers = []
     for (let j = 0; j < orgUserIds.length; j++) {
@@ -170,7 +170,7 @@ exports.up = async (r) => {
       periodStart: fromEpochSeconds(currentPeriodStart)
     }
     notificationsForDB[i] = {
-      id: shortid.generate(),
+      id: String(counter++),
       type: TRIAL_EXPIRES_SOON,
       startAt: new Date(now.getTime() + TRIAL_EXPIRES_SOON_DELAY),
       userIds: [leaderId],
@@ -184,7 +184,7 @@ exports.up = async (r) => {
   for (let i = 0; i < userIds.length; i++) {
     const userId = userIds[i]
     const user = users[userId]
-    const { trialOrg, userOrgMap } = user
+    const {trialOrg, userOrgMap} = user
     const userOrgs = []
     const userOrgIds = Object.keys(userOrgMap)
     for (let j = 0; j < userOrgIds.length; j++) {
@@ -237,7 +237,7 @@ exports.up = async (r) => {
             trialOrg: user('trialOrg').default(null),
             userOrgs: user('userOrgs')
           },
-          { returnChanges: true }
+          {returnChanges: true}
         )
     )
     .run()

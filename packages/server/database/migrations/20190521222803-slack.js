@@ -1,7 +1,7 @@
-import shortid from 'shortid'
 
 // This deprecates the SlackIntegration table as well as all slack rows in the Provider table
 exports.up = async (r) => {
+  let counter = 555
   try {
     await Promise.all([r.tableCreate('SlackAuth').run(), r.tableCreate('SlackNotification').run()])
   } catch (e) {
@@ -65,7 +65,7 @@ exports.up = async (r) => {
     const slackAuth = slackAuths.find((auth) => auth.teamId === integration.teamId)
     if (!slackAuth) return
     const notifications = ['meetingStart', 'meetingEnd'].map((event) => ({
-      id: shortid.generate(),
+      id: String(counter++),
       channelId: integration.isActive ? integration.channelId : null,
       channelName: integration.channelName,
       teamId: integration.teamId,

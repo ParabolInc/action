@@ -1,8 +1,8 @@
 import React, {ReactNode} from 'react'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 
 const style = {
-  backgroundColor: PALETTE.BACKGROUND_USER_MENTION,
+  backgroundColor: PALETTE.GOLD_100,
   borderRadius: 2,
   fontWeight: 600
 }

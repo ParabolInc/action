@@ -1,6 +1,6 @@
 import {GraphQLBoolean, GraphQLNonNull, GraphQLString} from 'graphql'
-import {ISegmentEventTrackOnMutationArguments} from 'parabol-client/types/graphql'
 import getRethink from '../../database/rethinkDriver'
+import {NewMeetingPhaseTypeEnum} from '../../database/types/GenericMeetingPhase'
 import {getUserId, isTeamMember, isUserBillingLeader} from '../../utils/authorization'
 import segmentIo from '../../utils/segmentIo'
 import standardError from '../../utils/standardError'
@@ -8,7 +8,11 @@ import {DataLoaderWorker} from '../graphql'
 import SegmentEventTrackOptions from '../types/SegmentEventTrackOptions'
 
 const extraOptionsCreator = {
-  HelpMenuOpen: async (viewerId: string, _dataLoader: DataLoaderWorker, _options: object) => {
+  HelpMenuOpen: async (
+    viewerId: string,
+    _dataLoader: DataLoaderWorker,
+    _options: Record<string, unknown>
+  ) => {
     const r = await getRethink()
     const meetingCount = await r
       .table('MeetingMember')
@@ -21,10 +25,16 @@ const extraOptionsCreator = {
   }
 }
 
-const eventNameLookup = {
-  UserLogout: 'User Logout',
-  UserLogin: 'User Login',
-  HelpMenuOpen: 'Help Menu Open'
+type SegmentEventTrackOptions = {
+  teamId?: string | null
+  orgId?: string | null
+  phase?: NewMeetingPhaseTypeEnum | null
+  eventId?: number | null
+  actionType?: string | null
+}
+type SendClientSegmentEventMutationVariables = {
+  event: string
+  options?: SegmentEventTrackOptions | null
 }
 
 export default {
@@ -41,7 +51,7 @@ export default {
   },
   resolve: async (
     _source,
-    {event, options}: ISegmentEventTrackOnMutationArguments,
+    {event, options}: SendClientSegmentEventMutationVariables,
     {authToken, dataLoader}
   ) => {
     // AUTH
@@ -65,10 +75,9 @@ export default {
     // RESOLUTION
     const getExtraOptions = extraOptionsCreator[event]
     const extraOptions = getExtraOptions ? await getExtraOptions(viewerId, dataLoader, options) : {}
-    const eventName = eventNameLookup[event]
     segmentIo.track({
       userId: viewerId,
-      event: eventName,
+      event,
       properties: {
         ...options,
         ...extraOptions

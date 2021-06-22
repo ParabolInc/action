@@ -1,10 +1,11 @@
 import {VideoAvatar_teamMember} from '../../__generated__/VideoAvatar_teamMember.graphql'
-import React, {forwardRef, Ref, useEffect, useRef} from 'react'
+import React, {forwardRef, Ref, useRef} from 'react'
 import styled from '@emotion/styled'
 import {createFragmentContainer} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
-import {StreamUI} from '../../hooks/useSwarm'
-import MediaSwarm from '../../utils/swarm/MediaSwarm'
+import MediaRoom from '../../utils/mediaRoom/MediaRoom'
+import {ProducerState, ConsumerState} from '../../utils/mediaRoom/reducerMediaRoom'
+import useMedia from '../../hooks/useMedia'
 
 const AvatarStyle = styled('div')({
   height: '100%', // needed to not pancake in firefox
@@ -36,34 +37,24 @@ const Picture = styled('img')<StyleProps>(({isHidden}) => ({
 
 interface Props {
   teamMember: VideoAvatar_teamMember
-  streamUI: StreamUI | undefined
-  swarm: MediaSwarm | null
+  mediaRoom: MediaRoom | null
   onClick?: () => void
   onMouseEnter?: () => void
+  videoSource: ProducerState | ConsumerState | undefined
 }
 
 const VideoAvatar = forwardRef((props: Props, ref: Ref<HTMLDivElement>) => {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const {streamUI, teamMember, swarm} = props
-  const {isSelf, picture, userId} = teamMember
-  useEffect(() => {
-    if (!streamUI) return
-    const {hasVideo} = streamUI
-    if (hasVideo && swarm) {
-      const el = videoRef.current!
-      const stream = isSelf ? swarm.localStreams.cam.low : swarm.getStream('cam', userId)
-      console.log('hasVideo', stream, hasVideo)
-      if (el.srcObject !== stream) {
-        // conditional is required to remove flickering video on update
-        el.srcObject = stream
-      }
-    }
+  const {teamMember, /*mediaRoom,*/ videoSource} = props
+  const {isSelf, picture} = teamMember
+  const videoEnabled = useMedia({
+    mediaRef: videoRef,
+    mediaSource: videoSource
   })
-  const showVideo = streamUI ? streamUI.hasVideo : false
   return (
     <AvatarStyle ref={ref}>
-      <Picture src={picture} isHidden={showVideo} />
-      <Video ref={videoRef} isHidden={!showVideo} autoPlay muted={isSelf} />
+      <Picture src={picture} isHidden={videoEnabled} />
+      <Video ref={videoRef} isHidden={!videoEnabled} autoPlay muted={isSelf} />
     </AvatarStyle>
   )
 })
@@ -73,7 +64,6 @@ export default createFragmentContainer(VideoAvatar, {
     fragment VideoAvatar_teamMember on TeamMember {
       isSelf
       picture
-      userId
     }
   `
 })

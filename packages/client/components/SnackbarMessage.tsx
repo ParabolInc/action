@@ -3,7 +3,7 @@ import React, {useEffect} from 'react'
 import {TransitionStatus} from '../hooks/useTransition'
 import {DECELERATE} from '../styles/animation'
 import {snackbarShadow} from '../styles/elevation'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {Radius, ZIndex} from '../types/constEnums'
 import {SnackAction} from './Snackbar'
 import SnackbarMessageAction from './SnackbarMessageAction'
@@ -31,16 +31,15 @@ const Text = styled('div')({
 
 const MessageStyles = styled('div')<{status: TransitionStatus}>(({status}) => ({
   alignItems: 'center',
-  background: PALETTE.BACKGROUND_DARK,
+  background: PALETTE.SLATE_700,
   borderRadius: Radius.SNACKBAR,
   boxShadow: snackbarShadow,
   display: 'flex',
   padding: 8,
   transition: `all 300ms ${DECELERATE}`,
   opacity: status === TransitionStatus.MOUNTED || status === TransitionStatus.EXITING ? 0 : 1,
-  transform: `translateY(${
-    status === TransitionStatus.MOUNTED ? 20 : status === TransitionStatus.EXITING ? -20 : 0
-  }px)`,
+  transform: `translateY(${status === TransitionStatus.MOUNTED ? 20 : status === TransitionStatus.EXITING ? -20 : 0
+    }px)`,
   pointerEvents: 'auto',
   userSelect: 'none',
   zIndex: ZIndex.SNACKBAR

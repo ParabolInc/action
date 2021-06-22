@@ -18,25 +18,24 @@ distributed organization. We publish our company's [history and business metrics
 | ---------------------- | -------------------------------------------------------------- |
 | Server                 | [Node](https://nodejs.org/)                                    |
 | Server Framework       | [uWebSockts.js](https://github.com/uNetworking/uWebSockets.js) |
-| Database               | [RethinkDB](https://www.rethinkdb.com/)                        |
-| PubSub                 | [Redis](https://redis.io)                                      |
+| Database (Legacy)      | [RethinkDB](https://www.rethinkdb.com/)                        |
+| Database               | [PostgreSQL](https://www.postgresql.org/)                      |
+| PubSub & Cache         | [Redis](https://redis.io)                                      |
 | Data Transport         | [GraphQL](https://github.com/graphql/graphql-js)               |
 | Real-time Connectivity | [trebuchet](https://github.com/mattkrick/trebuchet-client)     |
 | Client Cache           | [Relay](https://facebook.github.io/relay/)                     |
 | UI Framework           | [React](https://facebook.github.io/react/)                     |
 | Styling                | [Emotion](https://emotion.sh/)                                 |
-| Unit Testing           | [jest](https://facebook.github.io/jest)                        |
 | Integration Testing    | [Cypress](https://cypress.io)                                  |
 
 ## Setup
 
 ### Prerequisites
 
-- Node
-- Redis
-- RethinkDB
-- Watchman (for Relay)
-- Yarn
+- [Node](https://nodejs.org/en/download/)
+- [Yarn](https://classic.yarnpkg.com/en/docs/cli/install/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- [Watchman](https://facebook.github.io/watchman/docs/install.html) (Development only)
 
 ### Installation
 
@@ -44,9 +43,13 @@ distributed organization. We publish our company's [history and business metrics
 $ git clone https://github.com/ParabolInc/parabol.git
 $ cd parabol
 $ cp .env.example .env # Add your own vars here
-$ rethinkdb & redis-server & # Or if you prefer docker: $ docker-compose up -d db
-$ yarn && yarn dev -i # -i is only needed the first time you clone the repo
+$ yarn
+$ yarn db:start
+$ yarn dev
 ```
+
+If `yarn db:start` failed and `localhost:5050` isn't working, a docker
+container, volume or image may be corrupted and need to be pruned.
 
 Build for production and start application:
 
@@ -54,10 +57,24 @@ Build for production and start application:
 $ yarn && yarn build && yarn start
 ```
 
-### Database
+### RethinkDB
 
 - Migrations are stored in `packages/server/database/migrations`
 - RethinkDB Dashboard is at [http://localhost:8080](http://localhost:8080)
+
+### PostgreSQL
+
+- pgadmin is at [http://localhost:5050](http://localhost:5050)
+- Connect using `PGADMIN_DEFAULT_EMAIL` and `PGADMIN_DEFAULT_PASSWORD`
+- Click "Add New Server" and fill out the forms with your `.env` values
+  - General.name = POSTGRES_DB
+  - Connection.host = 'postgres' (hardcoded from docker-compose dev.yml, not from .env!)
+  - Connection.username = POSTGRES_USER
+  - Connection.password = POSTGRES_PASSWORD
+  - Connection.maintenanceDatabase = POSTGRES_DB
+  - Connection.port = POSTGRES_PORT
+
+- Fill out the form with values from your `.env`. Set the host to `postgres`
 
 ## Getting Involved
 

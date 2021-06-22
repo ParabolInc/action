@@ -8,14 +8,15 @@ import {MenuPosition} from '../../../../hooks/useCoords'
 import useMenu from '../../../../hooks/useMenu'
 import {UseTaskChild} from '../../../../hooks/useTaskChildFocus'
 import textOverflow from '../../../../styles/helpers/textOverflow'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import avatarUser from '../../../../styles/theme/images/avatar-user.svg'
 import lazyPreload from '../../../../utils/lazyPreload'
 import {TaskFooterUserAssignee_task} from '../../../../__generated__/TaskFooterUserAssignee_task.graphql'
+import Icon from '../../../../components/Icon'
 
 const label = {
   ...textOverflow,
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   display: 'block',
   flex: 1,
   fontSize: 12,
@@ -39,24 +40,27 @@ const AvatarButton = styled(BaseButton)({
     boxShadow: 'none'
   },
   ':hover > div,:focus > div': {
-    borderColor: PALETTE.BORDER_DARK,
-    color: PALETTE.TEXT_MAIN_HOVER
+    borderColor: PALETTE.SLATE_700,
+    color: PALETTE.SLATE_700
   }
 })
 
-const Avatar = styled('div')<{cardIsActive: boolean}>(({cardIsActive}) => ({
-  backgroundColor: 'transparent',
-  border: '1px solid transparent',
-  borderColor: cardIsActive ? PALETTE.BORDER_MAIN_50 : undefined,
-  borderRadius: '100%',
-  height: 28,
-  marginLeft: -2,
-  marginRight: 4,
-  padding: 1,
-  position: 'relative',
-  top: -2,
-  width: 28
-}))
+const Avatar = styled('div')<{cardIsActive: boolean; isAssigned: boolean}>(
+  ({cardIsActive, isAssigned}) => ({
+    backgroundColor: isAssigned ? 'transparent' : PALETTE.SLATE_600,
+    color: isAssigned ? 'transparent' : undefined,
+    border: '1px solid transparent',
+    borderColor: cardIsActive ? PALETTE.SLATE_500 : undefined,
+    borderRadius: '100%',
+    height: 28,
+    marginLeft: -2,
+    marginRight: 4,
+    padding: 1,
+    position: 'relative',
+    top: -2,
+    width: 28
+  })
+)
 
 const AvatarImage = styled('img')({
   borderRadius: '100%',
@@ -67,12 +71,25 @@ const AvatarImage = styled('img')({
 
 const AvatarLabel = styled('div')({
   ...label,
+  color: PALETTE.SLATE_600,
   flex: 1,
   minWidth: 0
 })
 
 const TooltipToggle = styled('div')({
   display: 'inline-flex'
+})
+
+const StyledIcon = styled(Icon)({
+  alignContent: 'center',
+  alignItems: 'center',
+  color: PALETTE.WHITE,
+  cursor: 'pointer',
+  display: 'flex',
+  fontSize: 22,
+  justifyContent: 'center',
+  position: 'relative',
+  top: 1
 })
 
 interface Props {
@@ -92,6 +109,8 @@ const TaskFooterUserAssigneeMenuRoot = lazyPreload(() =>
 const TaskFooterUserAssignee = (props: Props) => {
   const {area, canAssign, cardIsActive, task, useTaskChild} = props
   const {user} = task
+  const userImage = user?.picture || avatarUser
+  const preferredName = user?.preferredName || 'Unassigned'
   const {togglePortal, originRef, menuPortal, menuProps} = useMenu(MenuPosition.UPPER_LEFT)
   const {tooltipPortal, openTooltip, closeTooltip, originRef: tipRef} = useTooltip<HTMLDivElement>(
     MenuPosition.UPPER_CENTER
@@ -110,10 +129,14 @@ const TaskFooterUserAssignee = (props: Props) => {
           onMouseEnter={TaskFooterUserAssigneeMenuRoot.preload}
           ref={originRef}
         >
-          <Avatar cardIsActive={cardIsActive}>
-            <AvatarImage alt={user.preferredName} src={user.picture || avatarUser} />
+          <Avatar cardIsActive={cardIsActive} isAssigned={!!user}>
+            {user ? (
+              <AvatarImage alt={preferredName} src={userImage} />
+            ) : (
+              <StyledIcon>{'assignment_ind'}</StyledIcon>
+            )}
           </Avatar>
-          <AvatarLabel>{user.preferredName}</AvatarLabel>
+          <AvatarLabel>{preferredName}</AvatarLabel>
         </AvatarButton>
       </TooltipToggle>
       {tooltipPortal(<div>{'Reassign Responsibility'}</div>)}

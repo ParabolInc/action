@@ -19,9 +19,6 @@ const AddCommentInput = new GraphQLInputObjectType({
       type: GraphQLBoolean,
       description: 'true if the comment should be anonymous'
     },
-    meetingId: {
-      type: GraphQLNonNull(GraphQLID)
-    },
     threadId: {
       type: GraphQLNonNull(GraphQLID),
       description: 'foreign key for the reflection group or agenda item this was created from'

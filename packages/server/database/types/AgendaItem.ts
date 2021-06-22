@@ -1,4 +1,4 @@
-import shortid from 'shortid'
+import generateUID from '../../generateUID'
 
 export interface AgendaItemInput {
   id?: string
@@ -45,7 +45,7 @@ export default class AgendaItem {
       pinnedParentId
     } = input
     const now = new Date()
-    this.id = id || shortid.generate()
+    this.id = id || generateUID()
     this.createdAt = createdAt || now
     this.isActive = isActive ?? true
     this.isComplete = isComplete ?? false

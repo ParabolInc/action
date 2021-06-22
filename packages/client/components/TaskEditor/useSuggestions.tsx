@@ -1,7 +1,7 @@
 import React, {lazy, Suspense, useState} from 'react'
 import getWordAt from './getWordAt'
 import resolvers from './resolvers'
-import completeEntity from '../../utils/draftjs/completeEnitity'
+import completeEntity from '../../utils/draftjs/completeEntity'
 import getDraftCoords from '../../utils/getDraftCoords'
 import getAnchorLocation from './getAnchorLocation'
 import {EditorProps, EditorState} from 'draft-js'

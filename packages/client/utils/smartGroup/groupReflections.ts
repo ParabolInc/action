@@ -1,14 +1,19 @@
-import Reflection from 'parabol-server/database/types/Reflection'
 import computeDistanceMatrix from './computeDistanceMatrix'
 import getAllLemmasFromReflections from './getAllLemmasFromReflections'
+import {ReflectionCard_reflection} from '~/__generated__/ReflectionCard_reflection.graphql'
 import getGroupMatrix from './getGroupMatrix'
 import getTitleFromComputedGroup from './getTitleFromComputedGroup'
 
 /*
  * Read each reflection, parse the content for entities (i.e. nouns), group the reflections based on common themes
  */
-const groupReflections = (reflections: Reflection[], groupingThreshold: number) => {
-  const allReflectionEntities = reflections.map(({entities}) => entities)
+
+interface Reflection {
+  entities: any[]
+  reflectionGroupId: string
+}
+const groupReflections = <T extends Reflection>(reflections: T[], groupingThreshold: number) => {
+  const allReflectionEntities = reflections.map(({entities}) => entities!)
   const oldReflectionGroupIds = reflections.map(({reflectionGroupId}) => reflectionGroupId)
 
   // create a unique array of all entity names mentioned in the meeting's reflect phase
@@ -20,7 +25,8 @@ const groupReflections = (reflections: Reflection[], groupingThreshold: number) 
     groupingThreshold
   )
   // replace the arrays with reflections
-  const updatedReflections = [] as Reflection[]
+  const updatedReflections = [] as Partial<ReflectionCard_reflection>[]
+  const reflectionGroupMapping = {} as Record<string, string>
   const updatedGroups = (groupedArrays as any[]).map((group) => {
     // look up the reflection by its vector, put them all in the same group
     let reflectionGroupId = ''
@@ -29,7 +35,8 @@ const groupReflections = (reflections: Reflection[], groupingThreshold: number) 
       const reflection = reflections[idx]
       reflectionGroupId = (reflectionGroupId || reflection.reflectionGroupId) as string
       return {
-        ...reflection,
+        entities: reflection.entities,
+        oldReflectionGroupId: reflection.reflectionGroupId,
         sortOrder,
         reflectionGroupId
       }
@@ -46,6 +53,11 @@ const groupReflections = (reflections: Reflection[], groupingThreshold: number) 
     )
 
     updatedReflections.push(...groupedReflections)
+
+    groupedReflections.forEach((groupedReflection) => {
+      reflectionGroupMapping[groupedReflection.oldReflectionGroupId] = reflectionGroupId
+    })
+
     return {
       id: reflectionGroupId,
       smartTitle,
@@ -63,6 +75,7 @@ const groupReflections = (reflections: Reflection[], groupingThreshold: number) 
     autoGroupThreshold: thresh,
     groups: updatedGroups,
     groupedReflections: updatedReflections,
+    reflectionGroupMapping,
     removedReflectionGroupIds,
     nextThresh
   }

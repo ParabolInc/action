@@ -15,7 +15,7 @@ import useAtmosphere from '../hooks/useAtmosphere'
 import useMutationProps from '../hooks/useMutationProps'
 import StyledError from './StyledError'
 import Icon from './Icon'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {MeetingLabels} from '../types/constEnums'
 
 interface Props {
@@ -44,7 +44,7 @@ const SetLimit = styled('div')({
 })
 
 const StyledIcon = styled(Icon)({
-  color: PALETTE.TEXT_GRAY
+  color: PALETTE.SLATE_600
 })
 
 const StyledButton = styled(SecondaryButton)({
@@ -107,7 +107,7 @@ const StageTimerModalTimeLimit = (props: Props) => {
       <StyledButton onClick={startTimer}>
         {scheduledEndTime ? 'Add Time' : `Start ${MeetingLabels.TIMER}`}
       </StyledButton>
-      {error && <StyledError>{error}</StyledError>}
+      {error && <StyledError>{error.message}</StyledError>}
     </SetLimit>
   )
 }

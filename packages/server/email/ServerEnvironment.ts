@@ -1,16 +1,15 @@
-import {ExecutionResult} from 'graphql'
+import {FormattedExecutionResult} from 'graphql'
 import {Environment, FetchFunction, Network, RecordSource, Store} from 'relay-runtime'
 import AuthToken from '../database/types/AuthToken'
 import executeGraphQL from '../graphql/executeGraphQL'
-import shortid from 'shortid'
 
 const noop = (): any => {
   /**/
 }
 
 export default class ServerEnvironment extends Environment {
-  requestCache: Promise<ExecutionResult>[] = []
-  results: ExecutionResult[] | undefined
+  requestCache: Promise<FormattedExecutionResult>[] = []
+  results: FormattedExecutionResult[] | undefined
   isFetched = false
   authToken: AuthToken
   dataLoaderId: string
@@ -32,19 +31,17 @@ export default class ServerEnvironment extends Environment {
     }
   }
 
-  // @ts-ignore
   fetch: FetchFunction = (request, variables) => {
     if (!this.isFetched) {
       this.requestCache.push(
         executeGraphQL({
-          jobId: shortid.generate(),
           authToken: this.authToken,
           docId: request.id!,
           variables,
           dataLoaderId: this.dataLoaderId
         })
       )
-      return undefined
+      return undefined as any
     } else {
       return this.results!.shift()
     }

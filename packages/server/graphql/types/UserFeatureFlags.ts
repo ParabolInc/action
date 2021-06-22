@@ -1,4 +1,4 @@
-import {GraphQLBoolean, GraphQLObjectType, GraphQLNonNull} from 'graphql'
+import {GraphQLBoolean, GraphQLNonNull, GraphQLObjectType} from 'graphql'
 import {GQLContext} from '../graphql'
 
 const UserFeatureFlags = new GraphQLObjectType<any, GQLContext>({
@@ -14,6 +14,11 @@ const UserFeatureFlags = new GraphQLObjectType<any, GQLContext>({
       type: new GraphQLNonNull(GraphQLBoolean),
       description: 'true if jira is allowed',
       resolve: ({jira}) => !!jira
+    },
+    poker: {
+      type: new GraphQLNonNull(GraphQLBoolean),
+      description: 'true if jira is allowed',
+      resolve: ({poker}) => !!poker
     }
   })
 })

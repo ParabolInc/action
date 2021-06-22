@@ -1,12 +1,12 @@
-import shortid from 'shortid'
 import ms from 'ms'
+import generateUID from '../../generateUID'
 
 const MAX_SYNC_STAGE_DURATION = ms('1h')
 
 // https://stackoverflow.com/a/20811670/3155110
 const filterOutliers = (someArray: number[]) => {
   const values = someArray.concat()
-  values.sort(function (a, b) {
+  values.sort(function(a, b) {
     return a - b
   })
   const q1 = values[Math.floor(values.length / 4)]
@@ -28,7 +28,7 @@ const getSuggestedDuration = (filteredDurations: number[], allDurations: number[
 }
 
 export default class GenericMeetingStage {
-  id = shortid.generate()
+  id = generateUID()
   isAsync: boolean | undefined | null
   isComplete = false
   isNavigable = false

@@ -1,9 +1,9 @@
 import styled from '@emotion/styled'
 import BaseTag from './BaseTag'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 
 const RoleTag = styled(BaseTag)({
-  backgroundColor: PALETTE.BACKGROUND_PRIMARY,
+  backgroundColor: PALETTE.GRAPE_700,
   color: '#FFFFFF'
 })
 

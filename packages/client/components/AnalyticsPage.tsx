@@ -9,6 +9,7 @@ import {LocalStorageKey} from '~/types/constEnums'
 import safeIdentify from '~/utils/safeIdentify'
 import {AnalyticsPageQuery} from '~/__generated__/AnalyticsPageQuery.graphql'
 import useScript from '../hooks/useScript'
+import getAnonymousId from '../utils/getAnonymousId'
 import makeHref from '../utils/makeHref'
 
 const query = graphql`
@@ -32,7 +33,10 @@ if (dsn) {
     dsn,
     environment: 'client',
     release: __APP_VERSION__,
-    ignoreErrors: ['Failed to update a ServiceWorker for scope']
+    ignoreErrors: [
+      'Failed to update a ServiceWorker for scope',
+      'ResizeObserver loop limit exceeded'
+    ]
   })
 }
 
@@ -92,8 +96,11 @@ const AnalyticsPage = () => {
         referrer: makeHref(prevPathname),
         title,
         path: pathname,
-        url: href
-      })
+        url: href,
+      },
+        // See: segmentIo.ts:28 for more information on the next line
+        {integrations: {'Google Analytics': {clientId: getAnonymousId()}}}
+      )
     }, TIME_TO_RENDER_TREE)
   }, [isSegmentLoaded, pathname])
   return null

@@ -1,8 +1,8 @@
-import GenericMeetingPhase from 'parabol-server/database/types/GenericMeetingPhase'
+import {NewMeetingPhaseTypeEnum} from '~/__generated__/ActionMeeting_meeting.graphql'
 
 const unlockAllStagesForPhase = (
-  phases: GenericMeetingPhase[],
-  phaseType: any,
+  phases: any[],
+  phaseType: NewMeetingPhaseTypeEnum,
   isForFacilitator: boolean,
   isUnlock = true
 ) => {

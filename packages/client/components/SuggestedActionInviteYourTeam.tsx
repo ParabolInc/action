@@ -3,7 +3,7 @@ import React, {lazy} from 'react'
 import styled from '@emotion/styled'
 import {createFragmentContainer} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import SuggestedActionButton from './SuggestedActionButton'
 import SuggestedActionCard from './SuggestedActionCard'
 import SuggestedActionCopy from './SuggestedActionCopy'
@@ -28,7 +28,7 @@ const SuggestedActionInviteYourTeam = (props: Props) => {
   const {togglePortal, modalPortal, closePortal} = useModal()
   return (
     <SuggestedActionCard
-      backgroundColor={PALETTE.BACKGROUND_BLUE}
+      backgroundColor={PALETTE.SKY_500}
       iconName='person_add'
       suggestedActionId={suggestedActionId}
     >

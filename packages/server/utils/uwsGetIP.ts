@@ -1,10 +1,10 @@
-import {HttpResponse, WebSocket, HttpRequest} from 'uWebSockets.js'
+import {HttpRequest, HttpResponse} from 'uWebSockets.js'
 
-const uwsGetIP = (res: HttpResponse | WebSocket, req: HttpRequest) => {
+const uwsGetIP = (res: HttpResponse, req: HttpRequest) => {
   const clientIp = req.getHeader('x-forwarded-for')
   if (clientIp) return clientIp
-  const ipBuffer = Buffer.from(res.getRemoteAddress())
-  return ipBuffer.byteLength === 16 ? ipBuffer.toString('hex') : ipBuffer.join('.')
+  // returns ipv6 e.g. '0000:0000:0000:0000:0000:ffff:ac11:0001'
+  return Buffer.from(res.getRemoteAddressAsText()).toString()
 }
 
 export default uwsGetIP

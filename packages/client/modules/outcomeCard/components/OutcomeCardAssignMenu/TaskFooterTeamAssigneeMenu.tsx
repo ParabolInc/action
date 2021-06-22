@@ -10,6 +10,7 @@ import useAtmosphere from '../../../../hooks/useAtmosphere'
 import {MenuProps} from '../../../../hooks/useMenu'
 import ChangeTaskTeamMutation from '../../../../mutations/ChangeTaskTeamMutation'
 import useMutationProps from '../../../../hooks/useMutationProps'
+import {useUserTaskFilters} from '~/utils/useUserTaskFilters'
 
 interface Props {
   menuProps: MenuProps
@@ -19,10 +20,23 @@ interface Props {
 
 const TaskFooterTeamAssigneeMenu = (props: Props) => {
   const {menuProps, task, viewer} = props
+  const {userIds, teamIds} = useUserTaskFilters(viewer.id)
   const {team, id: taskId} = task
   const {id: teamId} = team
   const {teams} = viewer
-  const assignableTeams = useMemo(() => teams.filter((team) => team.id !== teamId), [teamId, teams])
+  const assignableTeams = useMemo(() => {
+    const filteredTeams = userIds
+      ? teams.filter(({teamMembers}) => !!teamMembers.find(({userId}) => userIds.includes(userId)))
+      : teamIds
+      ? teams.filter(({id}) => teamIds.includes(id))
+      : teams
+    return filteredTeams
+  }, [teamIds, userIds])
+  const taskTeamIdx = useMemo(() => assignableTeams.map(({id}) => id).indexOf(teamId) + 1, [
+    teamId,
+    assignableTeams
+  ])
+
   const atmosphere = useAtmosphere()
   const {submitting, submitMutation, onError, onCompleted} = useMutationProps()
   const handleTaskUpdate = (newTeam) => () => {
@@ -33,7 +47,11 @@ const TaskFooterTeamAssigneeMenu = (props: Props) => {
   }
 
   return (
-    <Menu {...menuProps} ariaLabel={'Assign this task to another team'}>
+    <Menu
+      {...menuProps}
+      defaultActiveIdx={taskTeamIdx}
+      ariaLabel={'Assign this task to another team'}
+    >
       <DropdownMenuLabel>Move to:</DropdownMenuLabel>
       {assignableTeams.map((team) => {
         return <MenuItem key={team.id} label={team.name} onClick={handleTaskUpdate(team)} />
@@ -45,9 +63,14 @@ const TaskFooterTeamAssigneeMenu = (props: Props) => {
 export default createFragmentContainer(TaskFooterTeamAssigneeMenu, {
   viewer: graphql`
     fragment TaskFooterTeamAssigneeMenu_viewer on User {
+      id
       teams {
         id
         name
+        teamMembers(sortBy: "preferredName") {
+          userId
+          preferredName
+        }
       }
     }
   `,

@@ -1,6 +1,11 @@
-import {InvoiceLineItemEnum} from 'parabol-client/types/graphql'
+import generateUID from '../../generateUID'
 import InvoiceLineItemDetail from './InvoiceLineItemDetail'
-import shortid from 'shortid'
+
+export type InvoiceLineItemEnum =
+  | 'ADDED_USERS'
+  | 'INACTIVITY_ADJUSTMENTS'
+  | 'OTHER_ADJUSTMENTS'
+  | 'REMOVED_USERS'
 
 interface Input {
   id?: string
@@ -21,7 +26,7 @@ export default class InvoiceLineItem {
 
   constructor(input: Input) {
     const {quantity, amount, id, description, details, type} = input
-    this.id = id || shortid.generate()
+    this.id = id || generateUID()
     this.amount = amount
     this.description = description || null
     this.details = details || []

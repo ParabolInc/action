@@ -65,7 +65,6 @@ function replyTask(text: string, taskContent: string) {
     .type(text)
     .type('{enter}')
     .should('have.text', text)
-
 }
 
 function addComment(text) {
@@ -143,12 +142,13 @@ function goToPreviousTopic(idx) {
   cy.get('[data-cy=discussion-section')
     .find(`[data-cy=discuss-item-${idx}]`)
     .click()
-  cy.get('[data-cy=sidebar-toggle]').scrollIntoView().should('be.visible').click()
+  cy.get('[data-cy=sidebar-toggle]')
+    .scrollIntoView()
+    .should('be.visible')
+    .click()
 }
 
-
 describe('Test Discuss page Demo', () => {
-
   beforeEach(() => {
     cy.restoreLocalStorageCache()
   })
@@ -157,7 +157,7 @@ describe('Test Discuss page Demo', () => {
     cy.saveLocalStorageCache()
   })
 
-  before(function () {
+  before(function() {
     // runs before all tests in the block
     cy.visitReflect()
       .visitPhase('group')
@@ -166,49 +166,60 @@ describe('Test Discuss page Demo', () => {
       .wait(3000)
       .visitPhase('discuss', '/1')
       .wait(2000)
-
   })
 
   it('can create a new task', () => {
-    cy.get('[data-cy=sidebar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=sidebar-toggle]')
+      .should('be.visible')
+      .click({force: true})
     addTask('Have more one on ones instead of group meetings')
     cy.screenshot('parabol-retrospective-create-discuss-task-closed-sidebar')
-    cy.get('[data-cy=topbar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=topbar-toggle]')
+      .should('be.visible')
+      .click({force: true})
     cy.screenshot('parabol-retrospective-create-discuss-task-open-sidebar')
-
-
   })
 
   it('can edit a created task', () => {
-    editTask('Have more 1-on-1s instead of group meetings', 'Have more one on ones instead of group meetings')
+    editTask(
+      'Have more 1-on-1s instead of group meetings',
+      'Have more one on ones instead of group meetings'
+    )
   })
 
   it('can reply to a created task', () => {
-    replyComment('Also include timekeeping in meetings', 'Have more 1-on-1s instead of group meetings')
+    replyComment(
+      'Also include timekeeping in meetings',
+      'Have more 1-on-1s instead of group meetings'
+    )
     cy.screenshot('parabol-retrospective-reply-comment-discuss-task-open-sidebar')
-    cy.get('[data-cy=sidebar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=sidebar-toggle]')
+      .should('be.visible')
+      .click({force: true})
     cy.screenshot('parabol-retrospective-reply-comment-discuss-task-closed-sidebar')
-
-
   })
 
   it('can reply to a created task with a task', () => {
-    replyTask('Incorporate a stopwatch into meetings', 'Have more 1-on-1s instead of group meetings')
+    replyTask(
+      'Incorporate a stopwatch into meetings',
+      'Have more 1-on-1s instead of group meetings'
+    )
     cy.screenshot('parabol-retrospective-reply-task-discuss-task-closed-sidebar')
-    cy.get('[data-cy=topbar-toggle]').scrollIntoView().should('be.visible').click({force: true})
+    cy.get('[data-cy=topbar-toggle]')
+      .scrollIntoView()
+      .should('be.visible')
+      .click({force: true})
     cy.screenshot('parabol-retrospective-reply-task-discuss-task-open-sidebar')
-
-
-
   })
 
   it('can create a new comment in discussion board', () => {
     addComment('We should have meetings every other day.')
     cy.screenshot('parabol-retrospective-create-discuss-comment-open-sidebar')
-    cy.get('[data-cy=sidebar-toggle]').scrollIntoView().should('be.visible').click({force: true})
+    cy.get('[data-cy=sidebar-toggle]')
+      .scrollIntoView()
+      .should('be.visible')
+      .click({force: true})
     cy.screenshot('parabol-retrospective-create-discuss-comment-closed-sidebar')
-
-
   })
 
   it('can edit a created comment in discussion board', () => {
@@ -220,16 +231,15 @@ describe('Test Discuss page Demo', () => {
   })
 
   it('can "publish" a task to "JIRA" (this is simulated)', () => {
-
     addTask('Design a system to limit unnecessary meetings')
 
     publishToJira('Design a system to limit unnecessary meetings')
 
     cy.screenshot('parabol-retrospective-publish-to-jira-closed-sidebar')
-    cy.get('[data-cy=topbar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=topbar-toggle]')
+      .should('be.visible')
+      .click({force: true})
     cy.screenshot('parabol-retrospective-publish-to-jira-open-sidebar')
-
-
   })
 
   it('can advance to a new discussion item', () => {
@@ -258,7 +268,6 @@ describe('Test Discuss page Demo', () => {
     cy.screenshot('parabol-retrospective-meeting-summary-cropped', {capture: 'viewport'})
 
     cy.screenshot('parabol-retrospective-meeting-summary')
-
   })
 
   it('can click CTA', () => {
@@ -269,7 +278,5 @@ describe('Test Discuss page Demo', () => {
       .should('be.visible')
       .click()
     cy.screenshot('parabol-retrospective-cta-screen')
-
   })
-
 })

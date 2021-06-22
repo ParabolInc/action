@@ -7,7 +7,7 @@ import {MenuPosition} from '../../../../hooks/useCoords'
 import useMenu from '../../../../hooks/useMenu'
 import {MenuMutationProps} from '../../../../hooks/useMutationProps'
 import {UseTaskChild} from '../../../../hooks/useTaskChildFocus'
-import {AreaEnum} from '../../../../types/graphql'
+import {AreaEnum} from '~/__generated__/UpdateTaskMutation.graphql'
 import lazyPreload from '../../../../utils/lazyPreload'
 
 interface Props {

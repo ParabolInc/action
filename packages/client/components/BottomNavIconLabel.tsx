@@ -1,14 +1,14 @@
 import styled from '@emotion/styled'
 import React, {forwardRef, ReactNode, Ref} from 'react'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import Icon from './Icon'
 
 const paletteColors = {
-  warm: PALETTE.EMPHASIS_WARM,
-  midGray: PALETTE.TEXT_GRAY,
-  red: PALETTE.TEXT_RED,
-  green: PALETTE.TEXT_GREEN,
-  blue: PALETTE.TEXT_BLUE
+  warm: PALETTE.ROSE_500,
+  midGray: PALETTE.SLATE_600,
+  red: PALETTE.TOMATO_600,
+  green: PALETTE.JADE_400,
+  blue: PALETTE.SKY_500
 }
 
 interface Props {

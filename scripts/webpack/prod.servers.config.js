@@ -11,6 +11,7 @@ const PROJECT_ROOT = getProjectRoot()
 const CLIENT_ROOT = path.join(PROJECT_ROOT, 'packages', 'client')
 const SERVER_ROOT = path.join(PROJECT_ROOT, 'packages', 'server')
 const GQL_ROOT = path.join(PROJECT_ROOT, 'packages', 'gql-executor')
+const SFU_ROOT = path.join(PROJECT_ROOT, 'packages', 'sfu')
 const DOTENV = path.join(PROJECT_ROOT, 'scripts/webpack/utils/dotenv.js')
 const publicPath = getWebpackPublicPath()
 const distPath = path.join(PROJECT_ROOT, 'dist')
@@ -23,6 +24,7 @@ module.exports = ({isDeploy}) => ({
   entry: {
     web: [DOTENV, path.join(SERVER_ROOT, 'server.ts')],
     gqlExecutor: [DOTENV, path.join(GQL_ROOT, 'gqlExecutor.ts')],
+    sfu: [DOTENV, path.join(SFU_ROOT, 'server.ts')]
   },
   output: {
     filename: '[name].js',
@@ -44,12 +46,12 @@ module.exports = ({isDeploy}) => ({
   target: 'node',
   externals: [
     nodeExternals({
-      whitelist: [/parabol-client/, /parabol-server/]
+      allowlist: [/parabol-client/, /parabol-server/]
     })
   ],
   plugins: [
     new webpack.SourceMapDevToolPlugin({
-      filename: '[name]_[hash].js.map',
+      filename: '[name]_[contenthash].js.map',
       append: `\n//# sourceMappingURL=${publicPath}[url]`
     }),
     isDeploy &&
@@ -64,7 +66,7 @@ module.exports = ({isDeploy}) => ({
       },
       basePath: getS3BasePath(),
       directory: distPath
-    }),
+    })
   ].filter(Boolean),
   module: {
     rules: [

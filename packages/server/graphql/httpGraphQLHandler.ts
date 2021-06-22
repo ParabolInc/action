@@ -2,6 +2,7 @@ import {TrebuchetCloseReason} from 'parabol-client/types/constEnums'
 import {HttpRequest, HttpResponse} from 'uWebSockets.js'
 import AuthToken from '../database/types/AuthToken'
 import parseBody from '../parseBody'
+import parseFormBody from '../parseFormBody'
 import StatelessContext from '../socketHelpers/StatelessContext'
 import sseClients from '../sseClients'
 import {getUserId} from '../utils/authorization'
@@ -64,21 +65,30 @@ const httpGraphQLBodyHandler = async (
   })
 }
 
+const contentTypeBodyParserMap = {
+  'application/json': parseBody,
+  'multipart/form-data': parseFormBody
+}
+
 const httpGraphQLHandler = uWSAsyncHandler(async (res: HttpResponse, req: HttpRequest) => {
-  const contentType = req.getHeader('content-type')
   const connectionId = req.getHeader('x-correlation-id')
   const authToken = getReqAuth(req)
   const ip = uwsGetIP(res, req)
-  if (contentType.startsWith('application/json')) {
-    const body = await parseBody(res)
-    if (!body) {
-      res.writeStatus('422').end()
-      return
-    }
-    await httpGraphQLBodyHandler(res, body, authToken, connectionId, ip)
-  } else {
+  const contentTypeHeader = req.getHeader('content-type')
+  const shortCt = Object.keys(contentTypeBodyParserMap).find((key) =>
+    contentTypeHeader.startsWith(key)
+  )
+  if (!shortCt) {
     res.writeStatus('415').end()
+    return
   }
+  const parseFn = contentTypeBodyParserMap[shortCt]
+  const body = await parseFn({res, contentType: contentTypeHeader})
+  if (!body) {
+    res.writeStatus('422').end()
+    return
+  }
+  await httpGraphQLBodyHandler(res, body, authToken, connectionId, ip)
 })
 
 export default httpGraphQLHandler

@@ -3,7 +3,7 @@ import React from 'react'
 import styled from '@emotion/styled'
 import IconButton from '../IconButton'
 import IconLabel from '../IconLabel'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import {Radius} from '../../types/constEnums'
 
 const isOSX = UserAgent.isPlatform('Mac OS X')
@@ -11,7 +11,7 @@ const modKey = isOSX ? '⌘' : 'ctrl'
 
 const ModalHeader = styled('div')({
   alignItems: 'center',
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   display: 'flex',
   justifyContent: 'center',
   lineHeight: 1.5,
@@ -40,8 +40,8 @@ const CloseButton = styled(IconButton)({
 })
 
 const HelpList = styled('div')<{listIndex: number}>(({listIndex}) => ({
-  border: `1px solid ${PALETTE.BORDER_LIGHT}`,
-  color: PALETTE.TEXT_MAIN,
+  border: `1px solid ${PALETTE.SLATE_400}`,
+  color: PALETTE.SLATE_700,
   fontSize: 13,
   lineHeight: '18px',
   margin: listIndex === 0 ? '0 auto' : '16px auto 0',
@@ -51,7 +51,7 @@ const HelpList = styled('div')<{listIndex: number}>(({listIndex}) => ({
 
 const HelpRow = styled('div')<{shortcutIndex: number}>(({shortcutIndex}) => ({
   alignItems: 'center',
-  backgroundColor: shortcutIndex % 2 ? '#FFFFFF' : PALETTE.BACKGROUND_MAIN,
+  backgroundColor: shortcutIndex % 2 ? '#FFFFFF' : PALETTE.SLATE_200,
   display: 'flex',
   padding: '4px 0'
 }))
@@ -85,7 +85,7 @@ const HeaderLabelBlock = styled('div')({
 })
 
 const HeaderLabel = styled('div')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   fontSize: 13,
   fontWeight: 600,
   lineHeight: '18px',

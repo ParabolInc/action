@@ -14,5 +14,5 @@ export interface MailManagerOptions {
   tags?: string[]
 }
 export default abstract class MailManager {
-  abstract async sendEmail(options: MailManagerOptions): Promise<boolean>
+  abstract sendEmail(options: MailManagerOptions): Promise<boolean>
 }

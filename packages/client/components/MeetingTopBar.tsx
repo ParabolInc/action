@@ -6,6 +6,10 @@ import isDemoRoute from '../utils/isDemoRoute'
 import hasToken from '../utils/hasToken'
 import {meetingAvatarMediaQueries} from '../styles/meeting'
 import makeMinWidthMediaQuery from '../utils/makeMinWidthMediaQuery'
+import PlainButton from './PlainButton/PlainButton'
+import {PALETTE} from '~/styles/paletteV3'
+import Icon from './Icon'
+import {ICON_SIZE} from '~/styles/typographyV2'
 
 const localHeaderBreakpoint = makeMinWidthMediaQuery(600)
 
@@ -44,6 +48,7 @@ const PrimaryActionBlock = styled('div')({
 })
 
 const AvatarGroupBlock = styled('div')({
+  alignItems: 'center',
   display: 'flex',
   justifyContent: 'center',
   padding: '10px 0',
@@ -57,24 +62,109 @@ const ChildrenBlock = styled('div')({
   width: '100%'
 })
 
-const Toggle = styled(SidebarToggle)({
+const StyledSidebarToggle = styled(SidebarToggle)({
   marginRight: 16
+})
+
+const badgeSize = 10
+
+const Badge = styled('div')({
+  display: 'block',
+  height: badgeSize,
+  position: 'absolute',
+  width: badgeSize,
+  right: -1,
+  top: -1,
+  zIndex: 1,
+  [meetingAvatarMediaQueries[0]]: {
+    right: 2,
+    top: 2
+  },
+  [meetingAvatarMediaQueries[1]]: {
+    right: 3,
+    top: 3
+  }
+})
+
+const BadgeDot = styled('div')<{isCommentUnread: boolean}>(({isCommentUnread}) => ({
+  backgroundColor: PALETTE.TOMATO_500,
+  border: '1px solid rgba(255, 255, 255, .65)',
+  borderRadius: badgeSize,
+  display: isCommentUnread ? 'flex' : 'none',
+  height: badgeSize,
+  width: badgeSize
+}))
+
+const ButtonContainer = styled('div')({
+  alignItems: 'center',
+  alignContent: 'center',
+  display: 'flex',
+  height: 32,
+  marginLeft: 11,
+  position: 'relative',
+  [meetingAvatarMediaQueries[0]]: {
+    height: 48,
+    marginLeft: 10
+  },
+  [meetingAvatarMediaQueries[1]]: {
+    height: 56
+  }
+})
+
+const DiscussionButton = styled(PlainButton)({
+  alignItems: 'center',
+  backgroundColor: PALETTE.GRAPE_700,
+  borderRadius: '50%',
+  display: 'flex',
+  padding: 7,
+  [meetingAvatarMediaQueries[0]]: {
+    padding: 12
+  },
+  [meetingAvatarMediaQueries[1]]: {
+    padding: 10
+  }
+})
+
+const StyledIcon = styled(Icon)({
+  color: '#FFFF',
+  transform: 'scaleX(-1)',
+  fontSize: ICON_SIZE.MD18,
+  [meetingAvatarMediaQueries[0]]: {
+    fontSize: ICON_SIZE.MD24
+  },
+  [meetingAvatarMediaQueries[1]]: {
+    fontSize: ICON_SIZE.MD36
+  }
 })
 
 interface Props {
   avatarGroup: ReactElement
   children?: ReactNode
+  isCommentUnread?: boolean
   isMeetingSidebarCollapsed: boolean
+  isRightDrawerOpen?: boolean
   toggleSidebar: () => void
+  toggleDrawer?: () => void
 }
 
 const MeetingTopBar = (props: Props) => {
-  const {avatarGroup, children, isMeetingSidebarCollapsed, toggleSidebar} = props
+  const {
+    avatarGroup,
+    children,
+    isCommentUnread = false,
+    isMeetingSidebarCollapsed,
+    isRightDrawerOpen,
+    toggleDrawer,
+    toggleSidebar
+  } = props
   const showButton = isDemoRoute() && !hasToken()
+  const showDiscussionButton = toggleDrawer && !isRightDrawerOpen
   return (
     <MeetingTopBarStyles>
       <HeadingBlock isMeetingSidebarCollapsed={isMeetingSidebarCollapsed}>
-        {isMeetingSidebarCollapsed ? <Toggle dataCy={`topbar`} onClick={toggleSidebar} /> : null}
+        {isMeetingSidebarCollapsed && (
+          <StyledSidebarToggle dataCy='topbar' onClick={toggleSidebar} />
+        )}
         <ChildrenBlock>{children}</ChildrenBlock>
       </HeadingBlock>
       <AvatarGroupBlock>
@@ -84,6 +174,16 @@ const MeetingTopBar = (props: Props) => {
           </PrimaryActionBlock>
         )}
         {avatarGroup}
+        {showDiscussionButton && toggleDrawer && (
+          <ButtonContainer>
+            <Badge>
+              <BadgeDot isCommentUnread={isCommentUnread} />
+            </Badge>
+            <DiscussionButton onClick={toggleDrawer}>
+              <StyledIcon>comment</StyledIcon>
+            </DiscussionButton>
+          </ButtonContainer>
+        )}
       </AvatarGroupBlock>
     </MeetingTopBarStyles>
   )

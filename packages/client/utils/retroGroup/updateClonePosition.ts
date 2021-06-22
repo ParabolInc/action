@@ -48,6 +48,8 @@ const maybeUpdate = (
 ) => {
   if (timeRemaining <= 0) return
   const targetBBox = targetEl.getBoundingClientRect()
+  // adjusting column width removes target from the DOM
+  if (targetBBox.x === 0 && targetBBox.y === 0) return
   if (!targetBBox) {
     document.body.removeChild(clone)
     return

@@ -2,7 +2,7 @@ import React, {ReactNode} from 'react'
 import styled from '@emotion/styled'
 import CopyLink from '../../../../components/CopyLink'
 import Icon from '../../../../components/Icon'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 
 const CopyIcon = styled(Icon)({
   color: 'inherit',
@@ -18,7 +18,7 @@ const CopyLabel = styled('div')({
 
 const CopyBlock = styled('div')({
   alignItems: 'center',
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   display: 'flex',
   flexShrink: 0,
   fontSize: 'inherit',
@@ -26,7 +26,7 @@ const CopyBlock = styled('div')({
   userSelect: 'none',
   overflow: 'auto',
   '&:hover': {
-    color: PALETTE.TEXT_MAIN,
+    color: PALETTE.SLATE_700,
     cursor: 'pointer'
   }
 })

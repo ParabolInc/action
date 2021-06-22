@@ -6,8 +6,8 @@ import standardError from '../../utils/standardError'
 import RenameReflectTemplatePromptPayload from '../types/RenameReflectTemplatePromptPayload'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
 
-const renameReflectTemplate = {
-  description: 'Rename a reflect template',
+const renameReflectTemplatePrompt = {
+  description: 'Rename a reflect template prompt',
   type: RenameReflectTemplatePromptPayload,
   args: {
     promptId: {
@@ -23,13 +23,16 @@ const renameReflectTemplate = {
     const operationId = dataLoader.share()
     const subOptions = {operationId, mutatorId}
     const prompt = await r
-      .table('CustomPhaseItem')
+      .table('ReflectPrompt')
       .get(promptId)
       .run()
     const viewerId = getUserId(authToken)
 
     // AUTH
-    if (!prompt || !isTeamMember(authToken, prompt.teamId) || !prompt.isActive) {
+    if (!prompt || prompt.removedAt) {
+      return standardError(new Error('Prompt not found'), {userId: viewerId})
+    }
+    if (!isTeamMember(authToken, prompt.teamId)) {
       return standardError(new Error('Team not found'), {userId: viewerId})
     }
 
@@ -39,10 +42,10 @@ const renameReflectTemplate = {
     const normalizedQuestion = trimmedQuestion || 'Unnamed Prompt'
 
     const allPrompts = await r
-      .table('CustomPhaseItem')
+      .table('ReflectPrompt')
       .getAll(teamId, {index: 'teamId'})
       .filter({
-        isActive: true,
+        removedAt: null,
         templateId
       })
       .run()
@@ -52,7 +55,7 @@ const renameReflectTemplate = {
 
     // RESOLUTION
     await r
-      .table('CustomPhaseItem')
+      .table('ReflectPrompt')
       .get(promptId)
       .update({
         question: normalizedQuestion,
@@ -72,4 +75,4 @@ const renameReflectTemplate = {
   }
 }
 
-export default renameReflectTemplate
+export default renameReflectTemplatePrompt

@@ -1,7 +1,8 @@
 import {GraphQLObjectType} from 'graphql'
-import StandardMutationError from './StandardMutationError'
-import ReflectTemplate from './ReflectTemplate'
 import {GQLContext} from '../graphql'
+import ReflectPrompt from './ReflectPrompt'
+import ReflectTemplate from './ReflectTemplate'
+import StandardMutationError from './StandardMutationError'
 
 const RemoveReflectTemplatePromptPayload = new GraphQLObjectType<any, GQLContext>({
   name: 'RemoveReflectTemplatePromptPayload',
@@ -13,14 +14,14 @@ const RemoveReflectTemplatePromptPayload = new GraphQLObjectType<any, GQLContext
       type: ReflectTemplate,
       resolve: ({templateId}, _args, {dataLoader}) => {
         if (!templateId) return null
-        return dataLoader.get('reflectTemplates').load(templateId)
+        return dataLoader.get('meetingTemplates').load(templateId)
       }
     },
     prompt: {
-      type: ReflectTemplate,
+      type: ReflectPrompt,
       resolve: ({promptId}, _args, {dataLoader}) => {
         if (!promptId) return null
-        return dataLoader.get('customPhaseItems').load(promptId)
+        return dataLoader.get('reflectPrompts').load(promptId)
       }
     }
   })

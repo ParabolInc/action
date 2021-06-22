@@ -4,7 +4,7 @@ import RetrospectiveMeeting from './RetrospectiveMeeting'
 import {resolveNewMeeting} from '../resolvers'
 import {GQLContext} from '../graphql'
 
-const GroupPhaseCompletePayload = new GraphQLObjectType<any, GQLContext, any>({
+const GroupPhaseCompletePayload = new GraphQLObjectType<any, GQLContext>({
   name: 'GroupPhaseCompletePayload',
   fields: () => ({
     emptyReflectionGroupIds: {

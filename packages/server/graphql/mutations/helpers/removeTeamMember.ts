@@ -9,6 +9,8 @@ import archiveTasksForDB from '../../../safeMutations/archiveTasksForDB'
 import {DataLoaderWorker} from '../../graphql'
 import removeStagesFromMeetings from './removeStagesFromMeetings'
 import removeUserFromMeetingStages from './removeUserFromMeetingStages'
+import removeUserTms from '../../../postgres/queries/removeUserTms'
+import updateTeamByTeamId from '../../../postgres/queries/updateTeamByTeamId'
 
 interface Options {
   evictorUserId?: string
@@ -38,11 +40,14 @@ const removeTeamMember = async (
 
   if (activeTeamMembers.length === 1) {
     // archive single-person teams
-    await r
-      .table('Team')
-      .get(teamId)
-      .update({isArchived: true})
-      .run()
+    await Promise.all([
+      r
+        .table('Team')
+        .get(teamId)
+        .update({isArchived: true})
+        .run(),
+      updateTeamByTeamId({isArchived: true}, teamId)
+    ])
   } else if (isLead) {
     // assign new leader, remove old leader flag
     await r({
@@ -103,26 +108,17 @@ const removeTeamMember = async (
         },
         {returnChanges: true}
       )('changes')('new_val')
-      .default([]) as unknown) as Task[],
-    // not adjusting atlassian, if they join the team again, they'll be ready to go
-    changedProviders: r
-      .table('Provider')
-      .getAll(teamId, {index: 'teamId'})
-      .filter({userId, isActive: true})
-      .update(
-        {
-          isActive: false
-        },
-        {returnChanges: true}
-      )('changes')('new_val')
-      .default([])
+      .default([]) as unknown) as Task[]
   }).run()
 
   const reqlUpdater = (user) => ({
     tms: user('tms').difference([teamId])
   })
 
-  const user = await db.write('User', userId, reqlUpdater)
+  const [user] = await Promise.all([
+    db.write('User', userId, reqlUpdater),
+    removeUserTms(teamId, userId)
+  ])
   let notificationId
   if (evictorUserId) {
     const notification = new NotificationKickedOut({teamId, userId, evictorUserId})

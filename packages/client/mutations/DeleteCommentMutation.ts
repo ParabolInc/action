@@ -1,6 +1,5 @@
 import graphql from 'babel-plugin-relay/macro'
 import {commitMutation} from 'react-relay'
-import {IComment} from '~/types/graphql'
 import convertToTaskContent from '~/utils/draftjs/convertToTaskContent'
 import safeRemoveNodeFromConn from '~/utils/relay/safeRemoveNodeFromConn'
 import {DeleteCommentMutation_meeting} from '~/__generated__/DeleteCommentMutation_meeting.graphql'
@@ -24,8 +23,8 @@ graphql`
 `
 
 const mutation = graphql`
-  mutation DeleteCommentMutation($commentId: ID!) {
-    deleteComment(commentId: $commentId) {
+  mutation DeleteCommentMutation($commentId: ID!, $meetingId: ID!) {
+    deleteComment(commentId: $commentId, meetingId: $meetingId) {
       ... on ErrorPayload {
         error {
           message
@@ -93,7 +92,7 @@ const DeleteCommentMutation: SimpleMutation<TDeleteCommentMutation> = (atmospher
     },
     optimisticUpdater: (store) => {
       const {commentId} = variables
-      const comment = store.get<IComment>(commentId)
+      const comment = store.get(commentId)
       if (!comment) return
       handleDeleteComment(comment, store)
     }

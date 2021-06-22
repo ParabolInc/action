@@ -45,8 +45,8 @@ import {TargetBBox} from '../../components/ReflectionGroup/DraggableReflectionCa
 // increasing this increases the probability that the targetId is not the nearest
 const SWITCHING_COST = 50
 
-// if it's clear they aren't near a card, don't try to force a relative position
-const MAX_DIST = ElementWidth.REFLECTION_CARD
+  // if it's clear they aren't near a card, don't try to force a relative position
+  const MAX_DIST = ElementWidth.REFLECTION_CARD
 
 const getTargetReference = (
   cursorX: number,

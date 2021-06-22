@@ -2,7 +2,7 @@ import {ContentState, convertToRaw} from 'draft-js'
 import Atmosphere from '../../Atmosphere'
 import UpdateTaskMutation from '../../mutations/UpdateTaskMutation'
 import addTagToTask from './addTagToTask'
-import {AreaEnum} from '../../types/graphql'
+import {AreaEnum} from '~/__generated__/UpdateTaskMutation.graphql'
 
 const addContentTag = (
   tag: string,
@@ -17,7 +17,7 @@ const addContentTag = (
     id: taskId,
     content: rawContentStr
   }
-  UpdateTaskMutation(atmosphere, {updatedTask, area})
+  UpdateTaskMutation(atmosphere, {updatedTask, area}, {})
 }
 
 export default addContentTag

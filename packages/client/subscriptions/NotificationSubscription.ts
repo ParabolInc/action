@@ -3,6 +3,8 @@ import {RouterProps} from 'react-router'
 import {requestSubscription, Variables} from 'relay-runtime'
 import {RecordSourceSelectorProxy} from 'relay-runtime/lib/store/RelayStoreTypes'
 import {archiveTimelineEventNotificationUpdater} from '~/mutations/ArchiveTimelineEventMutation'
+import {endCheckInNotificationUpdater} from '~/mutations/EndCheckInMutation'
+import {endRetrospectiveNotificationUpdater} from '~/mutations/EndRetrospectiveMutation'
 import {InvalidateSessionsMutation_notification} from '~/__generated__/InvalidateSessionsMutation_notification.graphql'
 import {NotificationSubscription_meetingStageTimeLimitEnd} from '~/__generated__/NotificationSubscription_meetingStageTimeLimitEnd.graphql'
 import {NotificationSubscription_paymentRejected} from '~/__generated__/NotificationSubscription_paymentRejected.graphql'
@@ -14,7 +16,6 @@ import {
   createTaskNotificationOnNext,
   createTaskNotificationUpdater
 } from '../mutations/CreateTaskMutation'
-import {endNewMeetingNotificationUpdater} from '../mutations/EndNewMeetingMutation'
 import handleAddNotifications from '../mutations/handlers/handleAddNotifications'
 import {
   inviteToTeamNotificationOnNext,
@@ -66,10 +67,13 @@ const subscription = graphql`
       ...ArchiveTimelineEventMutation_notification @relay(mask: false)
       ...SetNotificationStatusMutation_notification @relay(mask: false)
       ...CreateTaskMutation_notification @relay(mask: false)
-      ...EndNewMeetingMutation_notification @relay(mask: false)
+      ...EndCheckInMutation_notification @relay(mask: false)
+      ...EndRetrospectiveMutation_notification @relay(mask: false)
       ...InviteToTeamMutation_notification @relay(mask: false)
       ...RemoveOrgUserMutation_notification @relay(mask: false)
       ...InvalidateSessionsMutation_notification @relay(mask: false)
+      ...PersistJiraSearchQueryMutation_notification @relay(mask: false)
+
       ... on AuthTokenPayload {
         id
       }
@@ -247,8 +251,11 @@ const NotificationSubscription = (
           break
         case 'DisconnectSocketPayload':
           break
-        case 'EndNewMeetingPayload':
-          endNewMeetingNotificationUpdater(payload, context)
+        case 'EndCheckInSuccess':
+          endCheckInNotificationUpdater(payload, context)
+          break
+        case 'EndRetrospectiveSuccess':
+          endRetrospectiveNotificationUpdater(payload, context)
           break
         case 'InviteToTeamPayload':
           inviteToTeamNotificationUpdater(payload, context)
@@ -285,5 +292,5 @@ const NotificationSubscription = (
     }
   })
 }
-
+NotificationSubscription.key = 'notification'
 export default NotificationSubscription

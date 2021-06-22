@@ -34,10 +34,19 @@ function getCachedRecord(
   for (let ss = 0; ss < sources.length; ss++) {
     const source = sources[ss]
     const records = source._records
-    const keys = Object.keys(records)
+    // relay again does something silly & nests their source in a source because they can't figure out optmistic updating
+    let optimisticRecords
+    if (!records) {
+      optimisticRecords = {
+        ...source._base._records,
+        ...source._sink._records
+      }
+    }
+    const allRecords = records || optimisticRecords
+    const keys = Object.keys(allRecords)
     for (let ii = 0; ii < keys.length; ii++) {
       const key = keys[ii]
-      const record = records[key]
+      const record = allRecords[key]
       if (filterFn(record)) {
         if (!options.isPlural) return record
         filteredRecords.push(record)

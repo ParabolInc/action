@@ -1,29 +1,14 @@
 import getPubSub from './getPubSub'
-import {
-  MeetingSubscriptionPayload,
-  NotificationSubscriptionPayload,
-  OrganizationSubscriptionPayload,
-  TaskSubscriptionPayload,
-  TeamSubscriptionPayload
-} from 'parabol-client/types/graphql'
 
 export interface SubOptions {
   mutatorId?: string
   operationId?: string | null
 }
 
-interface SubTable {
-  notification: NotificationSubscriptionPayload['__typename']
-  organization: OrganizationSubscriptionPayload['__typename']
-  meeting: MeetingSubscriptionPayload['__typename']
-  task: TaskSubscriptionPayload['__typename']
-  team: TeamSubscriptionPayload['__typename']
-}
-
-const publish = <T extends keyof SubTable>(
+const publish = <T>(
   topic: T,
   channel: string,
-  type: SubTable[T],
+  type: any,
   payload: {[key: string]: any},
   subOptions: SubOptions = {}
 ) => {

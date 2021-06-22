@@ -1,9 +1,9 @@
 import {GraphQLNonNull} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
 import makeAgendaItemSchema from 'parabol-client/validation/makeAgendaItemSchema'
-import shortid from 'shortid'
 import getRethink from '../../database/rethinkDriver'
 import AgendaItem from '../../database/types/AgendaItem'
+import generateUID from '../../generateUID'
 import {getUserId, isTeamMember} from '../../utils/authorization'
 import publish from '../../utils/publish'
 import segmentIo from '../../utils/segmentIo'
@@ -39,7 +39,7 @@ export default {
     }
 
     // RESOLUTION
-    const agendaItemId = `${teamId}::${shortid.generate()}`
+    const agendaItemId = `${teamId}::${generateUID()}`
     await r
       .table('AgendaItem')
       .insert(

@@ -2,7 +2,7 @@ import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
 import {createFragmentContainer} from 'react-relay'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import {ICON_SIZE} from '~/styles/typographyV2'
 import {AppBar} from '~/types/constEnums'
 import Icon from './Icon'
@@ -18,7 +18,7 @@ interface Props {
 }
 
 const Wrapper = styled('header')({
-  backgroundColor: PALETTE.PRIMARY_MAIN,
+  backgroundColor: PALETTE.GRAPE_700,
   display: 'flex',
   height: AppBar.HEIGHT,
   maxWidth: '100%'
@@ -32,7 +32,7 @@ const LeftNavToggle = styled(PlainButton)({
 
 const LeftNavHeader = styled('div')({
   alignItems: 'center',
-  color: PALETTE.TEXT_LIGHT,
+  color: PALETTE.SLATE_200,
   display: 'flex',
   flex: 1,
   minWidth: 0
@@ -40,7 +40,7 @@ const LeftNavHeader = styled('div')({
 
 const TopBarIcons = styled('div')({
   alignItems: 'center',
-  color: PALETTE.TEXT_LIGHT,
+  color: PALETTE.SLATE_200,
   display: 'flex',
   justifyContent: 'flex-end',
   maxWidth: 560,

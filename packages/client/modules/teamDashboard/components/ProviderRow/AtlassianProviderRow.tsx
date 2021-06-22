@@ -1,7 +1,6 @@
 import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
 import jwtDecode from 'jwt-decode'
-import AuthToken from 'parabol-server/database/types/AuthToken'
 import React, {useEffect} from 'react'
 import {createFragmentContainer} from 'react-relay'
 import {RouteComponentProps, withRouter} from 'react-router-dom'
@@ -14,25 +13,24 @@ import ProviderActions from '../../../../components/ProviderActions'
 import ProviderCard from '../../../../components/ProviderCard'
 import RowInfo from '../../../../components/Row/RowInfo'
 import RowInfoCopy from '../../../../components/Row/RowInfoCopy'
-import withAtmosphere, {
-  WithAtmosphereProps
-} from '../../../../decorators/withAtmosphere/withAtmosphere'
+import withAtmosphere, {WithAtmosphereProps} from '../../../../decorators/withAtmosphere/withAtmosphere'
 import useAtlassianSites from '../../../../hooks/useAtlassianSites'
 import useBreakpoint from '../../../../hooks/useBreakpoint'
 import {MenuPosition} from '../../../../hooks/useCoords'
 import useMenu from '../../../../hooks/useMenu'
 import {MenuMutationProps} from '../../../../hooks/useMutationProps'
 import {DECELERATE, fadeIn} from '../../../../styles/animation'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import {ICON_SIZE} from '../../../../styles/typographyV2'
+import {AuthToken} from '../../../../types/AuthToken'
 import {Breakpoint, Providers} from '../../../../types/constEnums'
 import AtlassianClientManager from '../../../../utils/AtlassianClientManager'
 import withMutationProps, {WithMutationProps} from '../../../../utils/relay/withMutationProps'
 import {AtlassianProviderRow_viewer} from '../../../../__generated__/AtlassianProviderRow_viewer.graphql'
 
 const StyledButton = styled(FlatButton)({
-  borderColor: PALETTE.BORDER_LIGHT,
-  color: PALETTE.TEXT_MAIN,
+  borderColor: PALETTE.SLATE_400,
+  color: PALETTE.SLATE_700,
   fontSize: 14,
   fontWeight: 600,
   minWidth: 36,
@@ -63,7 +61,7 @@ const useFreshToken = (accessToken: string | undefined, retry: () => void) => {
 }
 
 const MenuButton = styled(FlatButton)({
-  color: PALETTE.PRIMARY_MAIN,
+  color: PALETTE.GRAPE_700,
   fontSize: ICON_SIZE.MD18,
   height: 24,
   userSelect: 'none',
@@ -98,7 +96,7 @@ const SiteAvatar = styled('img')<{idx: number}>(({idx}) => ({
 }))
 
 const ProviderName = styled('div')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   fontSize: 16,
   fontWeight: 600,
   lineHeight: '24px',
@@ -120,8 +118,10 @@ const AtlassianProviderRow = (props: Props) => {
     onCompleted
   } = props
   const mutationProps = {submitting, submitMutation, onError, onCompleted} as MenuMutationProps
-  const {atlassianAuth} = viewer
-  const accessToken = (atlassianAuth && atlassianAuth.accessToken) || undefined
+  const {teamMember} = viewer
+  const {integrations} = teamMember!
+  const {atlassian} = integrations
+  const accessToken = atlassian?.accessToken ?? undefined
   useFreshToken(accessToken, retry)
 
   const openOAuth = () => {
@@ -180,10 +180,8 @@ const AtlassianProviderRow = (props: Props) => {
 }
 
 graphql`
-  fragment AtlassianProviderRowViewer on User {
-    atlassianAuth(teamId: $teamId) {
-      accessToken
-    }
+  fragment AtlassianProviderRowAtlassianIntegration on AtlassianIntegration {
+    accessToken
   }
 `
 
@@ -192,7 +190,13 @@ export default createFragmentContainer(
   {
     viewer: graphql`
       fragment AtlassianProviderRow_viewer on User {
-        ...AtlassianProviderRowViewer @relay(mask: false)
+        teamMember(teamId: $teamId) {
+          integrations {
+            atlassian {
+              ...AtlassianProviderRowAtlassianIntegration @relay(mask: false)
+            }
+          }
+        }
       }
     `
   }

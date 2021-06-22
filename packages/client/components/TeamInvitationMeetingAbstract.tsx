@@ -1,12 +1,12 @@
 import React, {ReactNode} from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import makeMinWidthMediaQuery from '../utils/makeMinWidthMediaQuery'
 
 const PageContainer = styled('div')({
   alignItems: 'center',
-  backgroundColor: PALETTE.BACKGROUND_MAIN,
-  color: PALETTE.TEXT_MAIN,
+  backgroundColor: PALETTE.SLATE_200,
+  color: PALETTE.SLATE_700,
   display: 'flex',
   flexDirection: 'column',
   maxWidth: '100%',
@@ -27,7 +27,7 @@ const CenteredBlock = styled('div')({
 })
 
 const Backdrop = styled('div')({
-  backgroundColor: PALETTE.BACKGROUND_BACKDROP,
+  backgroundColor: PALETTE.SLATE_700_30,
   height: '100vh',
   left: 0,
   position: 'absolute',
@@ -59,7 +59,7 @@ const AbstractSidebar = styled('div')({
 })
 
 const AbstractSidebarHeading = styled('div')({
-  backgroundColor: PALETTE.TEXT_MAIN,
+  backgroundColor: PALETTE.SLATE_700,
   borderRadius: 14,
   height: 14,
   margin: '21px 0 35px 60px',
@@ -67,7 +67,7 @@ const AbstractSidebarHeading = styled('div')({
 })
 
 const AbstractSidebarLabel = styled('div')({
-  backgroundColor: '#BAB8CA',
+  backgroundColor: PALETTE.SLATE_400,
   borderRadius: 8,
   height: 8,
   marginLeft: 60,
@@ -83,7 +83,7 @@ const AbstractSidebarNavItem = styled('div')({
 })
 
 const AbstractSidebarNavItemBullet = styled('div')({
-  backgroundColor: PALETTE.TEXT_PURPLE,
+  backgroundColor: PALETTE.GRAPE_700,
   borderRadius: 24,
   height: 24,
   marginRight: 12,
@@ -91,7 +91,7 @@ const AbstractSidebarNavItemBullet = styled('div')({
 })
 
 const AbstractSidebarNavItemLabel = styled('div')({
-  backgroundColor: PALETTE.TEXT_GRAY,
+  backgroundColor: PALETTE.SLATE_600,
   borderRadius: 14,
   height: 14,
   width: 120
@@ -115,7 +115,7 @@ const AbstractAvatarGroup = styled('div')({
 })
 
 const AbstractAvatar = styled('div')({
-  backgroundColor: PALETTE.BACKGROUND_YELLOW,
+  backgroundColor: PALETTE.GOLD_300,
   borderRadius: 32,
   marginLeft: 8,
   height: 32,

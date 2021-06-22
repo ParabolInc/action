@@ -1,10 +1,10 @@
 import styled from '@emotion/styled'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import {Layout} from '../../types/constEnums'
 
 const Row = styled('div')({
   alignItems: 'center',
-  borderTop: `1px solid ${PALETTE.BORDER_LIGHTER}`,
+  borderTop: `1px solid ${PALETTE.SLATE_300}`,
   display: 'flex',
   flexWrap: 'wrap',
   justifyContent: 'space-between',

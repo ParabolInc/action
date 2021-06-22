@@ -1,8 +1,7 @@
 import graphql from 'babel-plugin-relay/macro'
-import React, {useRef} from 'react'
+import React from 'react'
 import {createFragmentContainer} from 'react-relay'
 import {RetroVotePhase_meeting} from '~/__generated__/RetroVotePhase_meeting.graphql'
-import {NewMeetingPhaseTypeEnum} from '../types/graphql'
 import {phaseLabelLookup} from '../utils/meetings/lookups'
 import GroupingKanban from './GroupingKanban'
 import MeetingContent from './MeetingContent'
@@ -13,8 +12,9 @@ import PhaseHeaderDescription from './PhaseHeaderDescription'
 import PhaseHeaderTitle from './PhaseHeaderTitle'
 import PhaseWrapper from './PhaseWrapper'
 import {RetroMeetingPhaseProps} from './RetroMeeting'
-import StageTimerDisplay from './RetroReflectPhase/StageTimerDisplay'
 import RetroVoteMetaHeader from './RetroVoteMetaHeader'
+import StageTimerDisplay from './StageTimerDisplay'
+import useCallbackRef from '../hooks/useCallbackRef'
 
 interface Props extends RetroMeetingPhaseProps {
   meeting: RetroVotePhase_meeting
@@ -22,17 +22,18 @@ interface Props extends RetroMeetingPhaseProps {
 
 const RetroVotePhase = (props: Props) => {
   const {avatarGroup, toggleSidebar, meeting} = props
-  const phaseRef = useRef<HTMLDivElement>(null)
+  const [callbackRef, phaseRef] = useCallbackRef()
   const {endedAt, showSidebar} = meeting
+
   return (
-    <MeetingContent ref={phaseRef}>
+    <MeetingContent ref={callbackRef}>
       <MeetingHeaderAndPhase hideBottomBar={!!endedAt}>
         <MeetingTopBar
           avatarGroup={avatarGroup}
           isMeetingSidebarCollapsed={!showSidebar}
           toggleSidebar={toggleSidebar}
         >
-          <PhaseHeaderTitle>{phaseLabelLookup[NewMeetingPhaseTypeEnum.vote]}</PhaseHeaderTitle>
+          <PhaseHeaderTitle>{phaseLabelLookup.vote}</PhaseHeaderTitle>
           <PhaseHeaderDescription>
             {'Vote on the topics you want to discuss'}
           </PhaseHeaderDescription>

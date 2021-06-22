@@ -1,6 +1,5 @@
 import {GraphQLBoolean, GraphQLID, GraphQLNonNull} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import {NewMeetingPhaseTypeEnum} from 'parabol-client/types/graphql'
 import {VOTE} from 'parabol-client/utils/constants'
 import isPhaseComplete from 'parabol-client/utils/meetings/isPhaseComplete'
 import unlockAllStagesForPhase from 'parabol-client/utils/unlockAllStagesForPhase'
@@ -100,9 +99,7 @@ export default {
     let unlockedStageIds
 
     if (!isUnvote) {
-      const discussPhase = phases.find(
-        (phase) => phase.phaseType === NewMeetingPhaseTypeEnum.discuss
-      )!
+      const discussPhase = phases.find((phase) => phase.phaseType === 'discuss')!
       const {stages} = discussPhase
       const [firstStage] = stages
       const {isNavigableByFacilitator} = firstStage
@@ -115,12 +112,7 @@ export default {
       isUnlock = false
     }
     if (isUnlock !== undefined) {
-      unlockedStageIds = unlockAllStagesForPhase(
-        phases,
-        NewMeetingPhaseTypeEnum.discuss,
-        true,
-        isUnlock
-      )
+      unlockedStageIds = unlockAllStagesForPhase(phases, 'discuss', true, isUnlock)
       await r
         .table('NewMeeting')
         .get(meetingId)

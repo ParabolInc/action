@@ -1,19 +1,20 @@
-import {AgendaList_team} from '../../../../__generated__/AgendaList_team.graphql'
+import graphql from 'babel-plugin-relay/macro'
 import React, {useMemo} from 'react'
 import {DragDropContext, Draggable, Droppable} from 'react-beautiful-dnd'
+import {createFragmentContainer} from 'react-relay'
+import {AgendaList_meeting} from '~/__generated__/AgendaList_meeting.graphql'
 // import SexyScrollbar from 'universal/components/Dashboard/SexyScrollbar'
 import styled from '@emotion/styled'
-import {createFragmentContainer} from 'react-relay'
-import graphql from 'babel-plugin-relay/macro'
 import useAtmosphere from '../../../../hooks/useAtmosphere'
-import AgendaItem from '../AgendaItem/AgendaItem'
-import AgendaListEmptyState from './AgendaListEmptyState'
+import useEventCallback from '../../../../hooks/useEventCallback'
+import useGotoStageId from '../../../../hooks/useGotoStageId'
 import UpdateAgendaItemMutation from '../../../../mutations/UpdateAgendaItemMutation'
 import {navItemRaised} from '../../../../styles/elevation'
 import {AGENDA_ITEM, SORT_STEP} from '../../../../utils/constants'
 import dndNoise from '../../../../utils/dndNoise'
-import useEventCallback from '../../../../hooks/useEventCallback'
-import useGotoStageId from '../../../../hooks/useGotoStageId'
+import AgendaItem from '../AgendaItem/AgendaItem'
+import AgendaListEmptyState from './AgendaListEmptyState'
+import {AgendaList_agendaItems} from '~/__generated__/AgendaList_agendaItems.graphql'
 
 const AgendaListRoot = styled('div')({
   display: 'flex',
@@ -32,16 +33,17 @@ const DraggableAgendaItem = styled('div')<{isDragging: boolean}>(({isDragging}) 
 }))
 
 interface Props {
+  agendaItems: AgendaList_agendaItems
   dashSearch?: string
   gotoStageId: ReturnType<typeof useGotoStageId> | undefined
-  meetingId?: string | null
-  team: AgendaList_team
+  meeting: AgendaList_meeting | null
 }
 
 const AgendaList = (props: Props) => {
   const atmosphere = useAtmosphere()
-  const {dashSearch, gotoStageId, meetingId, team} = props
-  const {activeMeetings, agendaItems} = team
+  const {agendaItems, meeting, dashSearch, gotoStageId} = props
+  const meetingId = meeting?.id
+  const endedAt = meeting?.endedAt
   const filteredAgendaItems = useMemo(() => {
     return dashSearch
       ? agendaItems.filter(({content}) => content && content.match(dashSearch))
@@ -79,8 +81,8 @@ const AgendaList = (props: Props) => {
     )
   })
 
-  if (filteredAgendaItems.length === 0) {
-    return <AgendaListEmptyState isDashboard={!meetingId} />
+  if (!filteredAgendaItems || filteredAgendaItems.length === 0) {
+    return <AgendaListEmptyState isComplete={!!endedAt} isDashboard={!meetingId} />
   }
 
   return (
@@ -91,7 +93,12 @@ const AgendaList = (props: Props) => {
             <AgendaListRoot ref={provided.innerRef}>
               {filteredAgendaItems.map((item, idx) => {
                 return (
-                  <Draggable key={item.id} draggableId={item.id} index={idx}>
+                  <Draggable
+                    key={item.id}
+                    draggableId={item.id}
+                    index={idx}
+                    isDragDisabled={!!endedAt}
+                  >
                     {(dragProvided, dragSnapshot) => {
                       return (
                         <DraggableAgendaItem
@@ -102,11 +109,10 @@ const AgendaList = (props: Props) => {
                         >
                           <AgendaItem
                             key={item.id}
-                            activeMeetings={activeMeetings}
                             agendaItem={item}
                             gotoStageId={gotoStageId}
                             isDragging={dragSnapshot.isDragging}
-                            meetingId={meetingId}
+                            meeting={meeting}
                           />
                         </DraggableAgendaItem>
                       )
@@ -124,19 +130,19 @@ const AgendaList = (props: Props) => {
 }
 
 export default createFragmentContainer(AgendaList, {
-  team: graphql`
-    fragment AgendaList_team on Team {
-      agendaItems {
-        id
-        content
-        # need this for the DnD
-        sortOrder
-        ...AgendaItem_agendaItem
-      }
-      activeMeetings {
-        ...AgendaItem_activeMeetings
-        id
-      }
+  meeting: graphql`
+    fragment AgendaList_meeting on ActionMeeting {
+      id
+      endedAt
+      ...AgendaItem_meeting
+    }
+  `,
+  agendaItems: graphql`
+    fragment AgendaList_agendaItems on AgendaItem @relay(plural: true) {
+      id
+      content
+      sortOrder
+      ...AgendaItem_agendaItem
     }
   `
 })

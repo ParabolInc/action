@@ -1,6 +1,4 @@
-import {IAtlassianAuth, INewFeatureBroadcast} from 'parabol-client/types/graphql'
 import {r} from 'rethinkdb-ts'
-import MeetingMember from '../database/types/MeetingMember'
 import Organization from '../database/types/Organization'
 import SlackAuth from '../database/types/SlackAuth'
 import SlackNotification from '../database/types/SlackNotification'
@@ -8,16 +6,21 @@ import TeamInvitation from '../database/types/TeamInvitation'
 import TeamMember from '../database/types/TeamMember'
 import getRethinkConfig from './getRethinkConfig'
 import {R} from './stricterR'
+import ActionMeetingMember from './types/ActionMeetingMember'
 import AgendaItem from './types/AgendaItem'
+import AtlassianAuth from './types/AtlassianAuth'
 import Comment from './types/Comment'
 import FailedAuthRequest from './types/FailedAuthRequest'
 import Invoice from './types/Invoice'
 import InvoiceItemHook from './types/InvoiceItemHook'
 import MassInvitation from './types/MassInvitation'
 import MeetingAction from './types/MeetingAction'
+import MeetingPoker from './types/MeetingPoker'
 import MeetingRetrospective from './types/MeetingRetrospective'
 import MeetingSettingsAction from './types/MeetingSettingsAction'
+import MeetingSettingsPoker from './types/MeetingSettingsPoker'
 import MeetingSettingsRetrospective from './types/MeetingSettingsRetrospective'
+import MeetingTemplate from './types/MeetingTemplate'
 import NotificationKickedOut from './types/NotificationKickedOut'
 import NotificationMeetingStageTimeLimitEnd from './types/NotificationMeetingStageTimeLimitEnd'
 import NotificationPaymentRejected from './types/NotificationPaymentRejected'
@@ -27,10 +30,11 @@ import NotificationTeamArchived from './types/NotificationTeamArchived'
 import NotificationTeamInvitation from './types/NotificationTeamInvitation'
 import OrganizationUser from './types/OrganizationUser'
 import PasswordResetRequest from './types/PasswordResetRequest'
+import PokerMeetingMember from './types/PokerMeetingMember'
 import PushInvitation from './types/PushInvitation'
 import Reflection from './types/Reflection'
 import ReflectionGroup from './types/ReflectionGroup'
-import ReflectTemplate from './types/ReflectTemplate'
+import RetroMeetingMember from './types/RetroMeetingMember'
 import RetrospectivePrompt from './types/RetrospectivePrompt'
 import SAML from './types/SAML'
 import ScheduledJob from './types/ScheduledJob'
@@ -39,6 +43,8 @@ import SuggestedActionInviteYourTeam from './types/SuggestedActionInviteYourTeam
 import SuggestedActionTryTheDemo from './types/SuggestedActionTryTheDemo'
 import Task from './types/Task'
 import Team from './types/Team'
+import TemplateDimension from './types/TemplateDimension'
+import TemplateScale from './types/TemplateScale'
 import TimelineEvent from './types/TimelineEvent'
 import User from './types/User'
 
@@ -48,16 +54,16 @@ export type RethinkSchema = {
     index: 'teamId' | 'meetingId'
   }
   AtlassianAuth: {
-    type: IAtlassianAuth
+    type: AtlassianAuth
     index: 'atlassianUserId' | 'userId' | 'teamId'
   }
   Comment: {
     type: Comment
     index: 'threadId'
   }
-  CustomPhaseItem: {
+  ReflectPrompt: {
     type: RetrospectivePrompt
-    index: 'teamId'
+    index: 'teamId' | 'templateId'
   }
   EmailVerification: {
     type: any
@@ -84,19 +90,19 @@ export type RethinkSchema = {
     index: 'teamMemberId'
   }
   MeetingSettings: {
-    type: MeetingSettingsRetrospective | MeetingSettingsAction
+    type: MeetingSettingsRetrospective | MeetingSettingsAction | MeetingSettingsPoker
     index: 'teamId'
   }
   MeetingMember: {
-    type: MeetingMember
+    type: PokerMeetingMember | RetroMeetingMember | ActionMeetingMember
     index: 'meetingId' | 'teamId' | 'userId'
   }
   NewMeeting: {
-    type: MeetingRetrospective | MeetingAction
-    index: 'facilitatorUserId' | 'teamId'
+    type: MeetingRetrospective | MeetingAction | MeetingPoker
+    index: 'facilitatorUserId' | 'teamId' | 'templateId'
   }
   NewFeature: {
-    type: INewFeatureBroadcast
+    type: any
     index: ''
   }
   Notification: {
@@ -122,10 +128,6 @@ export type RethinkSchema = {
     type: PasswordResetRequest
     index: 'email' | 'ip' | 'token'
   }
-  Provider: {
-    type: any
-    index: 'providerUserId' | 'teamId'
-  }
   PushInvitation: {
     type: PushInvitation
     index: 'userId'
@@ -134,9 +136,9 @@ export type RethinkSchema = {
     type: any
     index: ''
   }
-  ReflectTemplate: {
-    type: ReflectTemplate
-    index: 'teamId'
+  MeetingTemplate: {
+    type: MeetingTemplate
+    index: 'teamId' | 'orgId'
   }
   RetroReflectionGroup: {
     type: ReflectionGroup
@@ -148,7 +150,7 @@ export type RethinkSchema = {
   }
   SAML: {
     type: SAML
-    index: 'domain'
+    index: 'domains'
   }
   ScheduledJob: {
     type: ScheduledJob
@@ -192,6 +194,14 @@ export type RethinkSchema = {
     type: TeamMember
     index: 'teamId' | 'userId'
   }
+  TemplateDimension: {
+    type: TemplateDimension
+    index: 'teamId' | 'templateId'
+  }
+  TemplateScale: {
+    type: TemplateScale
+    index: 'teamId'
+  }
   TimelineEvent: {
     type: TimelineEvent
     index: 'userIdCreatedAt' | 'meetingId'
@@ -207,7 +217,6 @@ export type DBType = {
 }
 
 type ParabolR = R<RethinkSchema>
-
 const config = getRethinkConfig()
 let isLoading = false
 let isLoaded = false
@@ -221,6 +230,8 @@ const getRethink = async () => {
     await promise
     isLoaded = true
   }
+  // this is important because pm2 will restart the process & for whatever reason r isn't always healthy
+  await r.waitForHealthy()
   return (r as unknown) as ParabolR
 }
 

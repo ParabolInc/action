@@ -10,8 +10,8 @@ export default async function sendNewMeetingSummary(newMeeting: Meeting, context
   const now = new Date()
   const r = await getRethink()
   const {dataLoader} = context
-  const [meetingMembers, team] = await Promise.all([
-    dataLoader.get('meetingMembersByMeetingId').load(meetingId),
+  const [teamMembers, team] = await Promise.all([
+    dataLoader.get('teamMembersByTeamId').load(teamId),
     dataLoader.get('teams').load(teamId),
     r
       .table('NewMeeting')
@@ -20,7 +20,7 @@ export default async function sendNewMeetingSummary(newMeeting: Meeting, context
       .run()
   ])
   const {name: teamName, orgId} = team
-  const userIds = meetingMembers.map(({userId}) => userId)
+  const userIds = teamMembers.map(({userId}) => userId)
   const [content, users, organization] = await Promise.all([
     newMeetingSummaryEmailCreator({meetingId, context}),
     dataLoader.get('users').loadMany(userIds),

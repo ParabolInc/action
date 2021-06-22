@@ -1,5 +1,4 @@
 import Notification from './Notification'
-import {NotificationEnum} from 'parabol-client/types/graphql'
 
 interface Input {
   orgId: string
@@ -11,7 +10,7 @@ export default class NotificationPromoteToBillingLeader extends Notification {
 
   constructor(input: Input) {
     const {orgId, userId} = input
-    super({userId, type: NotificationEnum.PROMOTE_TO_BILLING_LEADER})
+    super({userId, type: 'PROMOTE_TO_BILLING_LEADER'})
     this.orgId = orgId
   }
 }

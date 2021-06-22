@@ -11,7 +11,7 @@ import useMutationProps from '../../../../hooks/useMutationProps'
 import AddAgendaItemMutation from '../../../../mutations/AddAgendaItemMutation'
 import makeFieldColorPalette from '../../../../styles/helpers/makeFieldColorPalette'
 import makePlaceholderStyles from '../../../../styles/helpers/makePlaceholderStyles'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import ui from '../../../../styles/ui'
 import getNextSortOrder from '../../../../utils/getNextSortOrder'
 import toTeamMemberId from '../../../../utils/relay/toTeamMemberId'
@@ -35,7 +35,7 @@ const InputForm = styled('form')<{disabled: boolean}>(({disabled}) => ({
   }
 }))
 
-const inputPlaceholderStyles = makePlaceholderStyles(PALETTE.TEXT_BLUE)
+const inputPlaceholderStyles = makePlaceholderStyles(PALETTE.SKY_500)
 
 const InputField = styled('input')<{disabled: boolean}>(
   {
@@ -43,7 +43,7 @@ const InputField = styled('input')<{disabled: boolean}>(
     ...ui.fieldSizeStyles.medium,
     borderRadius: 4,
     boxShadow: 'none',
-    color: PALETTE.TEXT_BLUE,
+    color: PALETTE.SKY_500,
     cursor: 'not-allowed',
     display: 'block',
     fontSize: 14,
@@ -69,7 +69,7 @@ const InputField = styled('input')<{disabled: boolean}>(
 )
 
 const StyledIcon = styled(Icon)({
-  color: PALETTE.TEXT_BLUE,
+  color: PALETTE.SKY_500,
   display: 'block',
   left: 16,
   pointerEvents: 'none',

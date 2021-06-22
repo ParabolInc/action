@@ -1,68 +1,60 @@
-import React, {Component} from 'react'
-import styled from '@emotion/styled'
-import FlatButton from '../../../components/FlatButton'
-import withAtmosphere, {
-  WithAtmosphereProps
-} from '../../../decorators/withAtmosphere/withAtmosphere'
+import graphql from 'babel-plugin-relay/macro'
+import React from 'react'
+import {createFragmentContainer} from 'react-relay'
+import DetailAction from '../../../components/DetailAction'
+import useAtmosphere from '../../../hooks/useAtmosphere'
+import useMutationProps from '../../../hooks/useMutationProps'
 import RemoveReflectTemplateMutation from '../../../mutations/RemoveReflectTemplateMutation'
-import withMutationProps, {WithMutationProps} from '../../../utils/relay/withMutationProps'
-import {PALETTE} from '../../../styles/paletteV2'
-import Icon from '../../../components/Icon'
-import {ICON_SIZE} from '../../../styles/typographyV2'
+import {RemoveTemplate_teamTemplates} from '../../../__generated__/RemoveTemplate_teamTemplates.graphql'
+import {MeetingTypeEnum} from '~/__generated__/NewMeeting_viewer.graphql'
+import {SprintPokerDefaults} from '../../../types/constEnums'
+import RemovePokerTemplateMutation from '../../../mutations/RemovePokerTemplateMutation'
+import {setActiveTemplate} from '../../../utils/relay/setActiveTemplate'
 
-const Button = styled(FlatButton)<{canDelete: boolean}>(({canDelete}) => ({
-  alignItems: 'center',
-  display: !canDelete ? 'none' : 'flex',
-  color: PALETTE.TEXT_GRAY,
-  height: '2.125rem',
-  justifyContent: 'center',
-  paddingLeft: 0,
-  paddingRight: 0,
-  width: '2.125rem'
-}))
-
-const DeleteIcon = styled(Icon)({
-  fontSize: ICON_SIZE.MD18
-})
-
-interface Props extends WithAtmosphereProps, WithMutationProps {
-  templateCount: number
-  templateId
+interface Props {
+  gotoPublicTemplates: () => void
+  teamTemplates: RemoveTemplate_teamTemplates
+  templateId: string
+  teamId: string
+  type: MeetingTypeEnum
 }
 
-class RemoveTemplate extends Component<Props> {
-  removeTemplate = () => {
-    const {
-      onError,
-      onCompleted,
-      submitting,
-      submitMutation,
-      atmosphere,
-      templateCount,
-      templateId
-    } = this.props
+const RemoveTemplate = (props: Props) => {
+  const {gotoPublicTemplates, templateId, teamId, teamTemplates, type} = props
+  const atmosphere = useAtmosphere()
+  const {onError, onCompleted, submitting, submitMutation} = useMutationProps()
+
+  const removeTemplate = () => {
     if (submitting) return
-    if (templateCount <= 1) {
-      onError('You must have at least 1 template')
-      return
-    }
     submitMutation()
-    RemoveReflectTemplateMutation(atmosphere, {templateId}, {}, onError, onCompleted)
+    const templateIds = teamTemplates.map(({id}) => id)
+    const templateIdx = templateIds.indexOf(templateId)
+    templateIds.splice(templateIdx, 1)
+    // use the same index as the previous item. if the item was last in the list, grab the new last
+    const nextTemplateId = templateIds[templateIdx] || templateIds[templateIds.length - 1]
+    const meetingType = type === 'retrospective' ? 'retrospective' : 'poker'
+    if (nextTemplateId) {
+      setActiveTemplate(atmosphere, teamId, nextTemplateId, meetingType)
+    } else {
+      const defaultTemplateId =
+        meetingType === 'retrospective'
+          ? 'workingStuckTemplate'
+          : SprintPokerDefaults.DEFAULT_TEMPLATE_ID
+      setActiveTemplate(atmosphere, teamId, defaultTemplateId, meetingType)
+      gotoPublicTemplates()
+    }
+    meetingType === 'retrospective'
+      ? RemoveReflectTemplateMutation(atmosphere, {templateId}, {onError, onCompleted})
+      : RemovePokerTemplateMutation(atmosphere, {templateId}, {onError, onCompleted})
   }
 
-  render() {
-    const {submitting, templateCount} = this.props
-    return (
-      <Button
-        canDelete={templateCount > 1}
-        onClick={this.removeTemplate}
-        size='small'
-        waiting={submitting}
-      >
-        <DeleteIcon>delete</DeleteIcon>
-      </Button>
-    )
-  }
+  return <DetailAction icon={'delete'} tooltip={'Delete template'} onClick={removeTemplate} />
 }
-
-export default withAtmosphere(withMutationProps(RemoveTemplate))
+export default createFragmentContainer(RemoveTemplate, {
+  teamTemplates: graphql`
+    fragment RemoveTemplate_teamTemplates on MeetingTemplate @relay(plural: true) {
+      id
+      type
+    }
+  `
+})

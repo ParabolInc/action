@@ -7,6 +7,7 @@ import sendGQLMessage from '../socketHelpers/sendGQLMessage'
 import sendToSentry from '../utils/sendToSentry'
 import handleSignal from '../wrtc/signalServer/handleSignal'
 import validateInit from '../wrtc/signalServer/validateInit'
+import handleReliableMessage from '../utils/handleReliableMessage'
 
 interface WRTCMessage {
   type: 'WRTC_SIGNAL'
@@ -29,17 +30,26 @@ const handleParsedMessage = async (
     const response = await handleGraphQLTrebuchetRequest(msg, connectionContext)
     if (response) {
       const {type, id: opId, payload} = response
-      sendGQLMessage(socket, type, payload, opId)
+      sendGQLMessage(connectionContext, type, false, payload, opId)
     }
   })
 }
 
 const PONG = 65
-const isPong = (message) => message.byteLength === 1 && Buffer.from(message)[0] === PONG
-const handleMessage = (websocket: WebSocket, message: ArrayBuffer) => {
+const isPong = (messageBuffer: Buffer) => messageBuffer.length === 1 && messageBuffer[0] === PONG
+
+const handleMessage = (
+  websocket: WebSocket | {connectionContext: ConnectionContext},
+  message: ArrayBuffer
+) => {
   const {connectionContext} = websocket
-  if (isPong(message)) {
+  const messageBuffer = Buffer.from(message)
+  if (isPong(messageBuffer)) {
     keepAlive(connectionContext)
+    return
+  }
+  if (messageBuffer.length == 4) {
+    handleReliableMessage(messageBuffer, connectionContext)
     return
   }
   let parsedMessage

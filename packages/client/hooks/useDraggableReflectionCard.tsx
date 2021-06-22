@@ -1,6 +1,5 @@
 import React, {useContext, useEffect} from 'react'
 import {commitLocalUpdate} from 'relay-runtime'
-import shortid from 'shortid'
 import {PortalContext, SetPortal} from '../components/AtmosphereProvider/PortalProvider'
 import {SwipeColumn} from '../components/GroupingKanban'
 import {ReflectionDragState} from '../components/ReflectionGroup/DraggableReflectionCard'
@@ -8,17 +7,18 @@ import RemoteReflection from '../components/ReflectionGroup/RemoteReflection'
 import StartDraggingReflectionMutation from '../mutations/StartDraggingReflectionMutation'
 import UpdateDragLocationMutation from '../mutations/UpdateDragLocationMutation'
 import {Times} from '../types/constEnums'
-import {DragReflectionDropTargetTypeEnum} from '../types/graphql'
 import findDropZoneFromEvent from '../utils/findDropZoneFromEvent'
 import maybeStartReflectionScroll from '../utils/maybeStartReflectionScroll'
 import measureDroppableReflections from '../utils/measureDroppableReflections'
 import getTargetReference from '../utils/multiplayerMasonry/getTargetReference'
+import clientTempId from '../utils/relay/clientTempId'
 import cloneReflection from '../utils/retroGroup/cloneReflection'
 import getIsDrag from '../utils/retroGroup/getIsDrag'
 import getTargetGroupId from '../utils/retroGroup/getTargetGroupId'
 import handleDrop from '../utils/retroGroup/handleDrop'
 import updateClonePosition, {getDroppingStyles} from '../utils/retroGroup/updateClonePosition'
 import {DraggableReflectionCard_reflection} from '../__generated__/DraggableReflectionCard_reflection.graphql'
+import {DragReflectionDropTargetTypeEnum} from '~/__generated__/EndDraggingReflectionMutation_meeting.graphql'
 import useAtmosphere from './useAtmosphere'
 import useEventCallback from './useEventCallback'
 
@@ -92,7 +92,9 @@ const useLocalDrag = (
   // handle drag conflicts
   useEffect(() => {
     if (!isViewerDragging && !isDropping && drag.clone) {
-      document.body.removeChild(drag.clone)
+      if (document.body.contains(drag.clone)) {
+        document.body.removeChild(drag.clone)
+      }
       drag.clone = null
       const el = drag.ref!
       el.removeEventListener('touchmove', onMouseMove)
@@ -140,7 +142,9 @@ const useDroppingDrag = (
           () => {
             if (drag.clone) {
               // local
-              document.body.removeChild(drag.clone!)
+              if (document.body.contains(drag.clone)) {
+                document.body.removeChild(drag.clone!)
+              }
               drag.clone = null
             } else {
               //remote
@@ -188,11 +192,11 @@ const useDragAndDrop = (
     drag.targets.length = 0
     drag.prevTargetId = ''
     const targetGroupId = getTargetGroupId(e)
-    const targetType =
+    const targetType: DragReflectionDropTargetTypeEnum | null =
       targetGroupId && reflectionGroupId !== targetGroupId
-        ? DragReflectionDropTargetTypeEnum.REFLECTION_GROUP
+        ? 'REFLECTION_GROUP'
         : !targetGroupId && reflectionCount > 0
-        ? DragReflectionDropTargetTypeEnum.REFLECTION_GRID
+        ? 'REFLECTION_GRID'
         : null
     handleDrop(atmosphere, reflectionId, drag, targetType, targetGroupId)
   })
@@ -251,7 +255,7 @@ const useDragAndDrop = (
       drag.cardOffsetX = Math.min(clientX - bbox.left, bbox.width)
       drag.cardOffsetY = Math.min(clientY - bbox.top, bbox.height)
       drag.clone = cloneReflection(drag.ref, reflectionId)
-      drag.id = shortid.generate()
+      drag.id = clientTempId()
       StartDraggingReflectionMutation(atmosphere, {reflectionId, dragId: drag.id})
     }
     if (!drag.clone) return

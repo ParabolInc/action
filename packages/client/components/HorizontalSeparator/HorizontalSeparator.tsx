@@ -6,7 +6,7 @@
 
 import React, {Fragment} from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import LabelHeading from '../LabelHeading/LabelHeading'
 
 const SeparatorContainer = styled(LabelHeading)<{margin: string | number | undefined}>(
@@ -21,7 +21,7 @@ const SeparatorContainer = styled(LabelHeading)<{margin: string | number | undef
 )
 
 const separatorLineStyles = {
-  borderBottom: `1px solid ${PALETTE.BORDER_LIGHTER}`,
+  borderBottom: `1px solid ${PALETTE.SLATE_300}`,
   flex: 1,
   margin: 'auto'
 }

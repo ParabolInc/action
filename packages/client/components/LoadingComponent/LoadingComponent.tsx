@@ -2,7 +2,7 @@ import React, {forwardRef, useEffect} from 'react'
 import styled from '@emotion/styled'
 import {LoadingDelayRef} from '../../hooks/useLoadingDelay'
 import Spinner from '../../modules/spinner/components/Spinner/Spinner'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import {LoaderSize, Times} from '../../types/constEnums'
 import useTimeout from '../../hooks/useTimeout'
 
@@ -60,7 +60,7 @@ const LoadingComponent = forwardRef((props: Props, ref: any) => {
     <LoadingWrapper ref={ref} height={height} width={width}>
       <Spinner
         delay={delay}
-        fill={timedOut ? PALETTE.ERROR_MAIN : PALETTE.BACKGROUND_TEAL}
+        fill={timedOut ? PALETTE.TOMATO_500 : PALETTE.AQUA_400}
         width={spinnerSize}
       />
     </LoadingWrapper>

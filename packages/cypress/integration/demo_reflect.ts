@@ -10,7 +10,6 @@ function addCard(column, text) {
     .type(text)
     .should('have.text', text)
     .type('{enter}')
-
 }
 
 function editCard(column, oldText, newText) {
@@ -37,15 +36,10 @@ function deleteCard(column) {
   cy.get('@reflection-card-delete').should('not.exist')
 }
 
-const click = ($el) => {
-  return $el.click()
-}
-
 describe('Test Reflect page Demo', () => {
-  before(function () {
+  before(function() {
     // runs before all tests in the block
     cy.visitReflect()
-
   })
 
   it('Test help menu toggle', () => {
@@ -57,63 +51,70 @@ describe('Test Reflect page Demo', () => {
 
     cy.get('[data-cy=help-menu-close]')
       .should('be.visible')
-      .pipe(click)
+      .pipe(($el) => $el.click())
       .should('not.exist')
-
   })
 
   it('Test adding reflections', () => {
-    cy.get('[data-cy=sidebar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=sidebar-toggle]')
+      .should('be.visible')
+      .click({force: true})
 
     addCard('Start', 'Start testing code before merging')
 
     cy.wait(500)
     cy.screenshot('parabol-retrospective-add-start-column-reflection-closed-sidebar')
-    cy.get('[data-cy=topbar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=topbar-toggle]')
+      .should('be.visible')
+      .click({force: true})
     cy.screenshot('parabol-retrospective-add-start-column-reflection-open-sidebar')
 
     addCard('Stop', 'Stop pushing directly to master')
 
     cy.wait(500)
     cy.screenshot('parabol-retrospective-add-stop-column-reflection-open-sidebar')
-    cy.get('[data-cy=sidebar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=sidebar-toggle]')
+      .should('be.visible')
+      .click({force: true})
     cy.screenshot('parabol-retrospective-add-stop-column-reflection-closed-sidebar')
 
     addCard('Continue', 'Continue using code linters')
 
-
     cy.wait(500)
     cy.screenshot('parabol-retrospective-add-continue-column-reflection-closed-sidebar')
-    cy.get('[data-cy=topbar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=topbar-toggle]')
+      .should('be.visible')
+      .click({force: true})
     cy.screenshot('parabol-retrospective-add-continue-column-reflection-open-sidebar')
-
   })
 
   it('Test editing reflections', () => {
-
     editCard('Start', 'Start testing code before merging', 'Start having daily standups')
 
     cy.screenshot('parabol-retrospective-edit-start-column-reflection-open-sidebar')
-    cy.get('[data-cy=sidebar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=sidebar-toggle]')
+      .should('be.visible')
+      .click({force: true})
     cy.screenshot('parabol-retrospective-edit-start-column-reflection-closed-sidebar')
-
 
     editCard('Stop', 'Stop pushing directly to master', 'Stop creating merge conflicts')
 
     cy.screenshot('parabol-retrospective-edit-stop-column-reflection-closed-sidebar')
-    cy.get('[data-cy=topbar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=topbar-toggle]')
+      .should('be.visible')
+      .click({force: true})
     cy.screenshot('parabol-retrospective-edit-stop-column-reflection-open-sidebar')
-
 
     editCard('Continue', 'Continue using code linters', 'Continue using best practices')
 
     cy.screenshot('parabol-retrospective-edit-continue-column-reflection-open-sidebar')
-    cy.get('[data-cy=sidebar-toggle]').should('be.visible').click({force: true})
+    cy.get('[data-cy=sidebar-toggle]')
+      .should('be.visible')
+      .click({force: true})
     cy.screenshot('parabol-retrospective-edit-continue-column-reflection-closed-sidebar')
   })
 
   it('Test deleting reflections', () => {
-
     deleteCard('Start')
 
     deleteCard('Stop')

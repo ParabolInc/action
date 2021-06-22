@@ -8,7 +8,6 @@ import Panel from '../../../../components/Panel/Panel'
 import PrimaryButton from '../../../../components/PrimaryButton'
 import UpgradeBenefits from '../../../../components/UpgradeBenefits'
 import useModal from '../../../../hooks/useModal'
-import {TierEnum} from '../../../../types/graphql'
 import CreditCardModal from '../CreditCardModal/CreditCardModal'
 import OrgBillingReassuranceQuote from './OrgBillingReassuranceQuote'
 
@@ -59,7 +58,7 @@ const OrgBillingUpgrade = (props: Props) => {
           activeUserCount={activeUserCount}
         />
       )}
-      {tier === TierEnum.personal && (
+      {tier === 'personal' && (
         <Panel>
           <Inner>
             <Title>Upgrade to Pro</Title>

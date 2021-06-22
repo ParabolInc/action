@@ -3,7 +3,7 @@ import FloatingActionButton from './FloatingActionButton'
 import styled from '@emotion/styled'
 import Icon from './Icon'
 import {ICON_SIZE} from '../styles/typographyV2'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {Breakpoint, ZIndex} from '../types/constEnums'
 import useBreakpoint from '../hooks/useBreakpoint'
 import PlainButton from './PlainButton/PlainButton'
@@ -21,7 +21,7 @@ const BackButtonMobile = styled(PlainButton)({
 
 const BackButtonDesktop = styled(FloatingActionButton)({
   alignSelf: 'flex-start',
-  background: PALETTE.BACKGROUND_MAIN,
+  background: PALETTE.SLATE_200,
   height: ICON_SIZE.MD40,
   justifySelf: 'flex-start',
   margin: '24px 32px 16px',

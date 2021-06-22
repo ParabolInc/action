@@ -1,8 +1,7 @@
 import React, {forwardRef} from 'react'
 import useSegmentTrack from '../../hooks/useSegmentTrack'
 import {ExternalLinks} from '../../types/constEnums'
-import {MeetingTypeEnum, NewMeetingPhaseTypeEnum} from '../../types/graphql'
-import {CHECKIN} from '../../utils/constants'
+import {MeetingTypeEnum} from '~/__generated__/NewMeeting_viewer.graphql'
 import {phaseLabelLookup} from '../../utils/meetings/lookups'
 import HelpMenuContent from './HelpMenuContent'
 import HelpMenuCopy from './HelpMenuCopy'
@@ -10,21 +9,21 @@ import HelpMenuHeader from './HelpMenuHeader'
 import HelpMenuLink from './HelpMenuLink'
 
 const linkLookup = {
-  [MeetingTypeEnum.action]: `${ExternalLinks.GETTING_STARTED_CHECK_INS}#icebreaker`,
-  [MeetingTypeEnum.retrospective]: `${ExternalLinks.GETTING_STARTED_RETROS}#icebreaker`
-}
+  action: `${ExternalLinks.GETTING_STARTED_CHECK_INS}#icebreaker`,
+  retrospective: `${ExternalLinks.GETTING_STARTED_RETROS}#icebreaker`
+} as Record<MeetingTypeEnum, string>
 
 interface Props {
-  meetingType: string
+  meetingType: MeetingTypeEnum
 }
 
 const CheckInHelpMenu = forwardRef((props: Props, ref: any) => {
   const {closePortal} = ref
   const {meetingType} = props
-  useSegmentTrack('HelpMenuOpen', {phase: NewMeetingPhaseTypeEnum.checkin})
+  useSegmentTrack('Help Menu Open', {phase: 'checkin'})
   return (
     <HelpMenuContent closePortal={closePortal}>
-      <HelpMenuHeader>{phaseLabelLookup[CHECKIN]}</HelpMenuHeader>
+      <HelpMenuHeader>{phaseLabelLookup.checkin}</HelpMenuHeader>
       <HelpMenuCopy>
         {'The Icebreaker is an opportunity to quickly share some personal context with your team.'}
       </HelpMenuCopy>

@@ -1,8 +1,10 @@
+// DEPRECATED! We can now use the native Promise.allSettled
 /*
  * Promise.all fails fast, which means if promsie 2 of 100 fails, it aborts on 2
  * Sometimes, we want all the results & replace the errors with some generic value like null
  * This does that, and does it quickly, assuming that the first promise in the array will resolve first
  */
+
 
 import {NotVoid} from '../types/generics'
 

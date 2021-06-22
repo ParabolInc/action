@@ -1,10 +1,10 @@
 import {GraphQLID, GraphQLNonNull} from 'graphql'
+import {Threshold} from '../../../client/types/constEnums'
 import generateUpcomingInvoice from '../../billing/helpers/generateUpcomingInvoice'
 import getRethink from '../../database/rethinkDriver'
-import Invoice from '../types/Invoice'
 import {getUserId, isUserBillingLeader} from '../../utils/authorization'
-import {UPCOMING_INVOICE_TIME_VALID} from '../../utils/serverConstants'
 import standardError from '../../utils/standardError'
+import Invoice from '../types/Invoice'
 
 export default {
   type: Invoice,
@@ -21,11 +21,7 @@ export default {
     // AUTH
     const viewerId = getUserId(authToken)
     const isUpcoming = invoiceId.startsWith('upcoming_')
-    const currentInvoice = await r
-      .table('Invoice')
-      .get(invoiceId)
-      .default(null)
-      .run()
+    const currentInvoice = await r.table('Invoice').get(invoiceId).default(null).run()
     const orgId = (currentInvoice && currentInvoice.orgId) || invoiceId.substring(9) // remove 'upcoming_'
     if (!(await isUserBillingLeader(viewerId, orgId, dataLoader))) {
       standardError(new Error('Not organization lead'), {userId: viewerId})
@@ -36,10 +32,10 @@ export default {
     if (
       !isUpcoming ||
       (currentInvoice &&
-        new Date(currentInvoice.createdAt.getTime() + UPCOMING_INVOICE_TIME_VALID) > now)
+        new Date(currentInvoice.createdAt.getTime() + Threshold.UPCOMING_INVOICE_TIME_VALID) > now)
     ) {
       return currentInvoice
     }
     return generateUpcomingInvoice(orgId)
   }
-}
+} as any

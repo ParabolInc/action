@@ -1,35 +1,43 @@
-import React from 'react'
-import {ExternalLinks} from '../types/constEnums'
-import IconLabel from './IconLabel'
 import styled from '@emotion/styled'
-import LinkButton from './LinkButton'
+import React from 'react'
+import {PALETTE} from '../styles/paletteV3'
+import {ExternalLinks} from '../types/constEnums'
+import {MeetingTypeEnum} from '~/__generated__/NewMeeting_viewer.graphql'
 import HowToStepItem from './HowToStepItem'
-import {PALETTE} from '../styles/paletteV2'
-import {MeetingTypeEnum} from '../types/graphql'
+import IconLabel from './IconLabel'
+import LinkButton from './LinkButton'
 
 const STEPS = {
-  [MeetingTypeEnum.retrospective]: [
+  retrospective: [
     'Write anonymous reflection cards',
     'Drag cards to group common themes',
     'Vote on topics you want to discuss',
     'Create takeaway tasks to make improvements'
   ],
-  [MeetingTypeEnum.action]: [
+  action: [
     'Add agenda items throughout the week',
     'Update your team on work in progress',
     'Discuss agenda items with your team',
     'Create takeaway tasks to accomplish'
+  ],
+  poker: [
+    'Select stories from your backlog',
+    'Invite your team to vote on effort/value',
+    'Discuss differences in scores',
+    'Export final score to your tracker'
   ]
 }
 
 const LINKS = {
-  [MeetingTypeEnum.retrospective]: ExternalLinks.GETTING_STARTED_RETROS,
-  [MeetingTypeEnum.action]: ExternalLinks.GETTING_STARTED_CHECK_INS
+  retrospective: ExternalLinks.GETTING_STARTED_RETROS,
+  action: ExternalLinks.GETTING_STARTED_CHECK_INS,
+  poker: ExternalLinks.GETTING_STARTED_SPRINT_POKER
 }
 
 const TITLES = {
-  [MeetingTypeEnum.retrospective]: 'How to Run a Retro Meeting',
-  [MeetingTypeEnum.action]: 'How to Run a Check-in Meeting'
+  retrospective: 'How to Run a Retro Meeting',
+  action: 'How to Run a Check-in Meeting',
+  poker: 'How to Run Sprint Poker'
 }
 
 const LearnMoreLink = styled(LinkButton)({
@@ -47,7 +55,7 @@ const HowToBlock = styled('div')({
 })
 
 const HowToTitle = styled('div')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   gridColumnStart: 2,
   fontSize: 24,
   fontWeight: 600,

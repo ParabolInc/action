@@ -2,12 +2,12 @@ import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
 import React, {RefObject, useMemo, useState} from 'react'
 import {createFragmentContainer} from 'react-relay'
+import useCallbackRef from '~/hooks/useCallbackRef'
 import {GroupingKanban_meeting} from '~/__generated__/GroupingKanban_meeting.graphql'
 import useBreakpoint from '../hooks/useBreakpoint'
 import useHideBodyScroll from '../hooks/useHideBodyScroll'
 import useThrottledEvent from '../hooks/useThrottledEvent'
 import {Breakpoint, Times} from '../types/constEnums'
-import {NewMeetingPhaseTypeEnum} from '../types/graphql'
 import PortalProvider from './AtmosphereProvider/PortalProvider'
 import GroupingKanbanColumn from './GroupingKanbanColumn'
 import ReflectWrapperMobile from './RetroReflectPhase/ReflectionWrapperMobile'
@@ -36,22 +36,24 @@ export type SwipeColumn = (offset: number) => void
 const GroupingKanban = (props: Props) => {
   const {meeting, phaseRef} = props
   const {reflectionGroups, phases} = meeting
-  const reflectPhase = phases.find((phase) => phase.phaseType === NewMeetingPhaseTypeEnum.reflect)!
+  const reflectPhase = phases.find((phase) => phase.phaseType === 'reflect')!
   const reflectPrompts = reflectPhase.reflectPrompts!
+  const reflectPromptsCount = reflectPrompts.length
+  const [callbackRef, columnsRef] = useCallbackRef()
   useHideBodyScroll()
-  const {groupsByPhaseItem, isAnyEditing} = useMemo(() => {
-    const container = {} as {[phaseItemId: string]: typeof reflectionGroups[0][]}
+  const {groupsByPrompt, isAnyEditing} = useMemo(() => {
+    const container = {} as {[promptId: string]: typeof reflectionGroups[0][]}
     let isEditing = false
     for (let i = 0; i < reflectionGroups.length; i++) {
       const group = reflectionGroups[i]
-      const {reflections, retroPhaseItemId} = group
-      container[retroPhaseItemId] = container[retroPhaseItemId] || []
-      container[retroPhaseItemId].push(group)
+      const {reflections, promptId} = group
+      container[promptId] = container[promptId] || []
+      container[promptId].push(group)
       if (!isEditing && reflections.some((reflection) => reflection.isEditing)) {
         isEditing = true
       }
     }
-    return {groupsByPhaseItem: container, isAnyEditing: isEditing}
+    return {groupsByPrompt: container, isAnyEditing: isEditing}
   }, [reflectionGroups])
   const isDesktop = useBreakpoint(Breakpoint.SINGLE_REFLECTION_COLUMN)
   const [activeIdx, setActiveIdx] = useState(0)
@@ -64,9 +66,10 @@ const GroupingKanban = (props: Props) => {
         )
   }, [isDesktop, reflectionGroups])
   const swipeColumn: SwipeColumn = useThrottledEvent((offset: number) => {
-    const nextIdx = Math.min(reflectPrompts.length - 1, Math.max(0, activeIdx + offset))
+    const nextIdx = Math.min(reflectPromptsCount - 1, Math.max(0, activeIdx + offset))
     setActiveIdx(nextIdx)
   }, Times.REFLECTION_COLUMN_SWIPE_THRESH)
+  if (!phaseRef.current) return null
   return (
     <PortalProvider>
       <ColumnsBlock isDesktop={isDesktop}>
@@ -74,16 +77,19 @@ const GroupingKanban = (props: Props) => {
           setActiveIdx={setActiveIdx}
           activeIdx={activeIdx}
           disabled={isViewerDragging}
+          ref={isDesktop ? callbackRef : undefined}
         >
           {reflectPrompts.map((prompt) => (
             <GroupingKanbanColumn
+              columnsRef={columnsRef}
               isAnyEditing={isAnyEditing}
               isDesktop={isDesktop}
               key={prompt.id}
               meeting={meeting}
               phaseRef={phaseRef}
               prompt={prompt}
-              reflectionGroups={groupsByPhaseItem[prompt.id] || []}
+              reflectionGroups={groupsByPrompt[prompt.id] || []}
+              reflectPromptsCount={reflectPromptsCount}
               swipeColumn={swipeColumn}
             />
           ))}
@@ -109,7 +115,7 @@ export default createFragmentContainer(GroupingKanban, {
       reflectionGroups {
         ...GroupingKanbanColumn_reflectionGroups
         id
-        retroPhaseItemId
+        promptId
         reflections {
           isViewerDragging
           isEditing

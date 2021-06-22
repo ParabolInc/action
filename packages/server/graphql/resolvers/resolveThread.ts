@@ -34,7 +34,7 @@ const resovleThread = async ({id: threadSourceId}, _args, {dataLoader}) => {
     filteredThreadables.push(threadable)
     if (replies) {
       replies.sort((a, b) => (a.threadSortOrder < b.threadSortOrder ? -1 : 1))
-        ; (threadable as any).replies = replies
+      ;(threadable as any).replies = replies
     }
   })
 

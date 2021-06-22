@@ -17,12 +17,18 @@ module.exports = {
       'parabol-client': CLIENT_ROOT,
     },
     unsafeCache: true,
+    fallback: {
+      //   os: false,
+      crypto: 'crypto-browserify',
+      util: require.resolve('util'),
+      stream: 'stream-browserify'
+    },
   },
   module: {
     rules: [
       {
         test: /\.tsx?$/,
-        include: [CYPRESS_ROOT, SERVER_ROOT],
+        include: [CYPRESS_ROOT, SERVER_ROOT, CLIENT_ROOT],
         use: {
           loader: '@sucrase/webpack-loader',
           options: {

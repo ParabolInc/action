@@ -1,4 +1,3 @@
-import shortid from 'shortid'
 import {HttpRequest, HttpResponse} from 'uWebSockets.js'
 import parseBody from '../parseBody'
 import {isAuthenticated, isSuperUser} from '../utils/authorization'
@@ -9,7 +8,7 @@ import uWSAsyncHandler from './uWSAsyncHandler'
 
 interface IntranetPayload {
   query: string
-  variables: object
+  variables: Record<string, unknown>
   isPrivate?: boolean
 }
 const intranetHttpGraphQLHandler = uWSAsyncHandler(async (res: HttpResponse, req: HttpRequest) => {
@@ -24,7 +23,7 @@ const intranetHttpGraphQLHandler = uWSAsyncHandler(async (res: HttpResponse, req
     res.writeStatus('415').end()
     return
   }
-  const body = await parseBody(res)
+  const body = await parseBody({res})
   if (!body) {
     res.writeStatus('422').end()
     return
@@ -32,7 +31,6 @@ const intranetHttpGraphQLHandler = uWSAsyncHandler(async (res: HttpResponse, req
   const {query, variables, isPrivate} = (body as any) as IntranetPayload
   try {
     const result = await getGraphQLExecutor().publish({
-      jobId: shortid.generate(),
       authToken,
       ip,
       query,

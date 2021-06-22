@@ -1,15 +1,15 @@
-import {useAllIntegrationsQueryResponse} from '../__generated__/useAllIntegrationsQuery.graphql'
-import {useEffect, useMemo, useRef, useState} from 'react'
 import graphql from 'babel-plugin-relay/macro'
-import Atmosphere from '../Atmosphere'
-import useFilteredItems from './useFilteredItems'
+import {useEffect, useMemo, useRef, useState} from 'react'
 import {fetchQuery} from 'relay-runtime'
+import Atmosphere from '../Atmosphere'
+import {useAllIntegrationsQueryResponse} from '../__generated__/useAllIntegrationsQuery.graphql'
+import useFilteredItems from './useFilteredItems'
 
 const gqlQuery = graphql`
   query useAllIntegrationsQuery($teamId: ID!, $userId: ID!) {
     viewer {
-      userOnTeam(userId: $userId) {
-        allAvailableIntegrations(teamId: $teamId) {
+      teamMember(userId: $userId, teamId: $teamId) {
+        allAvailableIntegrations {
           ...TaskFooterIntegrateMenuListItem @relay(mask: false)
         }
       }
@@ -17,13 +17,15 @@ const gqlQuery = graphql`
   }
 `
 
+const getValue = (item: any) => (item.projectName || item.nameWithOwner).toLowerCase()
+
 const useAllIntegrations = (
   atmosphere: Atmosphere,
   query: string,
   suggestedItems: readonly any[],
   hasMore: boolean,
   teamId: string,
-  userId: string
+  userId: string | null
 ) => {
   const [fetchedItems, setFetchedItems] = useState<readonly any[]>([])
   const [status, setStatus] = useState<null | 'loading' | 'loaded' | 'error'>(null)
@@ -37,14 +39,14 @@ const useAllIntegrations = (
         teamId,
         userId
       })) as useAllIntegrationsQueryResponse
-      if (!viewer || !viewer.userOnTeam) {
+      if (!viewer || !viewer.teamMember) {
         if (isMountedRef.current) {
           setStatus('error')
         }
         return
       }
-      const userOnTeam = viewer.userOnTeam
-      const {allAvailableIntegrations} = userOnTeam
+      const {teamMember} = viewer
+      const {allAvailableIntegrations} = teamMember
       if (isMountedRef.current) {
         setFetchedItems(allAvailableIntegrations)
         setStatus('loaded')
@@ -59,7 +61,7 @@ const useAllIntegrations = (
     }
   }, [atmosphere, hasMore, status, teamId, userId, query])
 
-  const dupedItems = useFilteredItems(query, fetchedItems)
+  const dupedItems = useFilteredItems(query, fetchedItems, getValue)
   const allItems = useMemo(() => {
     const idSet = new Set(suggestedItems.map((item) => item.id))
     const uniqueItems = dupedItems.filter((item) => !idSet.has(item.id))

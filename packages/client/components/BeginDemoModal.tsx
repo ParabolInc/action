@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from '@emotion/styled'
 import Icon from './Icon'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {ICON_SIZE} from '../styles/typographyV2'
 import DialogContainer from './DialogContainer'
 import PrimaryButton from './PrimaryButton'
@@ -25,7 +25,7 @@ const StyledCopy = styled('p')({
 })
 
 const StyledIcon = styled(Icon)({
-  color: PALETTE.TEXT_BLUE,
+  color: PALETTE.SKY_500,
   fontSize: ICON_SIZE.MD48
 })
 

@@ -6,7 +6,7 @@ import graphql from 'babel-plugin-relay/macro'
 import {DiscussPhaseSqueeze_organization} from '~/__generated__/DiscussPhaseSqueeze_organization.graphql'
 import useAtmosphere from '../hooks/useAtmosphere'
 import WaitingForFacilitatorToPay from './WaitingForFacilitatorToPay'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {DiscussPhaseSqueeze_meeting} from '~/__generated__/DiscussPhaseSqueeze_meeting.graphql'
 
 interface Props {
@@ -25,7 +25,7 @@ const DiscussPhaseSqueeze = (props: Props) => {
   const {activeUserCount} = orgUserCount
   const {modalPortal, closePortal, openPortal} = useModal({
     noClose: true,
-    background: PALETTE.BACKGROUND_FORCED_BACKDROP
+    background: PALETTE.SLATE_900_32
   })
 
   useEffect(() => {

@@ -1,6 +1,5 @@
 import {GraphQLID, GraphQLNonNull} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import {TierEnum} from 'parabol-client/types/graphql'
 import getRethink from '../../database/rethinkDriver'
 import {getUserId, isSuperUser, isUserBillingLeader} from '../../utils/authorization'
 import publish from '../../utils/publish'
@@ -36,7 +35,7 @@ export default {
       .get(orgId)
       .run()
 
-    if (tier === TierEnum.personal) {
+    if (tier === 'personal') {
       return standardError(new Error('Already on free tier'), {userId: viewerId})
     }
 

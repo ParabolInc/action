@@ -6,7 +6,7 @@ import ModalError from '../components/ModalError'
 import {LoadingDelayRef} from './useLoadingDelay'
 import usePortal, {PortalStatus} from './usePortal'
 import {DECELERATE} from '../styles/animation'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {Duration, ZIndex} from '../types/constEnums'
 
 const ModalBlock = styled('div')({
@@ -112,7 +112,7 @@ const useModalPortal = (
         <BlurredScrim backdropFilter={backdropFilter}>
           <Scrim
             onClick={closePortal}
-            background={background || PALETTE.BACKGROUND_BACKDROP}
+            background={background || PALETTE.SLATE_700_30}
             portalStatus={portalStatus}
           />
         </BlurredScrim>

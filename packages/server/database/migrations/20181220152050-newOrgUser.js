@@ -1,6 +1,6 @@
-import shortid from 'shortid'
 
 exports.up = async (r) => {
+  let counter = 256
   try {
     await r.tableCreate('OrganizationUser').run()
   } catch (e) {
@@ -17,7 +17,7 @@ exports.up = async (r) => {
         .indexCreate('orgId')
         .run()
     })
-  } catch (e) {}
+  } catch (e) { }
   try {
     const orgs = await r
       .table('Organization')
@@ -27,7 +27,7 @@ exports.up = async (r) => {
     orgs.forEach((org) => {
       org.orgUsers.forEach((orgUser) => {
         organizationUsers.push({
-          id: shortid.generate(),
+          id: String(counter++),
           inactive: orgUser.inactive || false,
           joinedAt: org.createdAt,
           newUserUntil: org.createdAt,
@@ -60,7 +60,7 @@ exports.up = async (r) => {
         .indexDrop('orgUsers')
         .run()
     })
-  } catch (e) {}
+  } catch (e) { }
 }
 
 exports.down = async (r) => {

@@ -3,16 +3,16 @@ import React from 'react'
 import Icon from '~/components/Icon'
 import PlainButton from '~/components/PlainButton/PlainButton'
 import useRouter from '~/hooks/useRouter'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import {ICON_SIZE} from '~/styles/typographyV2'
 import {Breakpoint, NavSidebar} from '~/types/constEnums'
 import makeMinWidthMediaQuery from '~/utils/makeMinWidthMediaQuery'
 
 const NavItem = styled(PlainButton)<{isActive: boolean}>(({isActive}) => ({
   alignItems: 'center',
-  backgroundColor: isActive ? PALETTE.BACKGROUND_TOGGLE_ACTIVE : undefined,
+  backgroundColor: isActive ? PALETTE.SLATE_300 : undefined,
   borderRadius: 4,
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   display: 'flex',
   fontSize: NavSidebar.FONT_SIZE,
   fontWeight: 600,
@@ -28,12 +28,12 @@ const NavItem = styled(PlainButton)<{isActive: boolean}>(({isActive}) => ({
     borderRadius: '0 4px 4px 0'
   },
   ':hover,:focus': {
-    backgroundColor: PALETTE.BACKGROUND_TOGGLE_ACTIVE
+    backgroundColor: PALETTE.SLATE_300
   }
 }))
 
 const StyledIcon = styled(Icon)({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   fontSize: ICON_SIZE.MD24,
   marginRight: 16,
   opacity: 0.5

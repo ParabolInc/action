@@ -1,24 +1,28 @@
 import {GraphQLID, GraphQLList, GraphQLNonNull, GraphQLString} from 'graphql'
 import {InvoiceItemType} from 'parabol-client/types/constEnums'
-import {ITeam, OrgUserRole} from 'parabol-client/types/graphql'
 import adjustUserCount from '../../billing/helpers/adjustUserCount'
 import getRethink from '../../database/rethinkDriver'
 import Notification from '../../database/types/Notification'
 import Organization from '../../database/types/Organization'
+import Team from '../../database/types/Team'
 import db from '../../db'
 import safeArchiveEmptyPersonalOrganization from '../../safeMutations/safeArchiveEmptyPersonalOrganization'
 import {getUserId, isSuperUser} from '../../utils/authorization'
 import standardError from '../../utils/standardError'
+import updateTeamByTeamId from '../../postgres/queries/updateTeamByTeamId'
+import getTeamByTeamId from '../../postgres/queries/getTeamByTeamId'
 
 const moveToOrg = async (teamId: string, orgId: string, authToken: any) => {
   const r = await getRethink()
   // AUTH
   const su = isSuperUser(authToken)
   // VALIDATION
-  const {team, org} = await r({
-    team: (r.table('Team').get(teamId) as unknown) as ITeam,
-    org: (r.table('Organization').get(orgId) as unknown) as Organization
-  }).run()
+  const [{org}, team] = await Promise.all([
+    r({
+      org: (r.table('Organization').get(orgId) as unknown) as Organization
+    }).run(),
+    getTeamByTeamId(teamId)
+  ])
   const {orgId: currentOrgId} = team
   if (!su) {
     const userId = getUserId(authToken)
@@ -35,7 +39,7 @@ const moveToOrg = async (teamId: string, orgId: string, authToken: any) => {
     if (!newOrganizationUser) {
       return standardError(new Error('Not on organization'), {userId})
     }
-    const isBillingLeaderForOrg = newOrganizationUser.role === OrgUserRole.BILLING_LEADER
+    const isBillingLeaderForOrg = newOrganizationUser.role === 'BILLING_LEADER'
     if (!isBillingLeaderForOrg) {
       return standardError(new Error('Not organization leader'), {userId})
     }
@@ -45,7 +49,7 @@ const moveToOrg = async (teamId: string, orgId: string, authToken: any) => {
       .filter({orgId: currentOrgId, removedAt: null})
       .nth(0)
       .run()
-    const isBillingLeaderForTeam = oldOrganizationUser.role === OrgUserRole.BILLING_LEADER
+    const isBillingLeaderForTeam = oldOrganizationUser.role === 'BILLING_LEADER'
     if (!isBillingLeaderForTeam) {
       return standardError(new Error('Not organization leader'), {userId})
     }
@@ -56,38 +60,55 @@ const moveToOrg = async (teamId: string, orgId: string, authToken: any) => {
   }
 
   // RESOLUTION
-  const {newToOrgUserIds} = await r({
-    notifications: (r
-      .table('Notification')
-      .filter({teamId})
-      .filter((notification) =>
-        notification('orgId')
-          .default(null)
-          .ne(null)
-      )
-      .update({orgId}) as unknown) as Notification[],
-    team: (r
-      .table('Team')
-      .get(teamId)
-      .update({
+  const [rethinkResult] = await Promise.all([
+    r({
+      notifications: (r
+        .table('Notification')
+        .filter({teamId})
+        .filter((notification) =>
+          notification('orgId')
+            .default(null)
+            .ne(null)
+        )
+        .update({orgId}) as unknown) as Notification[],
+      templates: r
+        .table('MeetingTemplate')
+        .getAll(currentOrgId, {index: 'orgId'})
+        .update({
+          orgId
+        }),
+      team: (r
+        .table('Team')
+        .get(teamId)
+        .update({
+          orgId,
+          isPaid: Boolean(org.stripeSubscriptionId),
+          tier: org.tier
+        }) as unknown) as Team,
+      newToOrgUserIds: (r
+        .table('TeamMember')
+        .getAll(teamId, {index: 'teamId'})
+        .filter({isNotRemoved: true})
+        .filter((teamMember) => {
+          return r
+            .table('OrganizationUser')
+            .getAll(teamMember('userId'), {index: 'userId'})
+            .filter({orgId, removedAt: null})
+            .count()
+            .eq(0)
+        })('userId')
+        .coerceTo('array') as unknown) as string[]
+    }).run(),
+    updateTeamByTeamId(
+      {
         orgId,
         isPaid: Boolean(org.stripeSubscriptionId),
         tier: org.tier
-      }) as unknown) as ITeam,
-    newToOrgUserIds: (r
-      .table('TeamMember')
-      .getAll(teamId, {index: 'teamId'})
-      .filter({isNotRemoved: true})
-      .filter((teamMember) => {
-        return r
-          .table('OrganizationUser')
-          .getAll(teamMember('userId'), {index: 'userId'})
-          .filter({orgId, removedAt: null})
-          .count()
-          .eq(0)
-      })('userId')
-      .coerceTo('array') as unknown) as string[]
-  }).run()
+      },
+      teamId
+    )
+  ])
+  const {newToOrgUserIds} = rethinkResult
 
   // if no teams remain on the org, remove it
   await safeArchiveEmptyPersonalOrganization(currentOrgId)
@@ -124,8 +145,7 @@ export default {
     }
   },
   async resolve(_source, {teamIds, orgId}, {authToken}) {
-    console.log('teamIds', teamIds)
-    const results = [] as (string | object)[]
+    const results = [] as (string | any)[]
     for (let i = 0; i < teamIds.length; i++) {
       const teamId = teamIds[i]
       const result = await moveToOrg(teamId, orgId, authToken)

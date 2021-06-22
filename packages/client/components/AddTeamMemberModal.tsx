@@ -1,23 +1,24 @@
-import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
 import React, {useState} from 'react'
 import {createFragmentContainer} from 'react-relay'
 import useAtmosphere from '~/hooks/useAtmosphere'
 import useMutationProps from '~/hooks/useMutationProps'
+import {PALETTE} from '~/styles/paletteV3'
+import {ICON_SIZE} from '~/styles/typographyV2'
+import styled from '@emotion/styled'
+import {AddTeamMemberModal_teamMembers} from '../__generated__/AddTeamMemberModal_teamMembers.graphql'
 import useBreakpoint from '../hooks/useBreakpoint'
 import InviteToTeamMutation from '../mutations/InviteToTeamMutation'
 import parseEmailAddressList from '../utils/parseEmailAddressList'
 import plural from '../utils/plural'
-import {AddTeamMemberModal_teamMembers} from '../__generated__/AddTeamMemberModal_teamMembers.graphql'
 import AddTeamMemberModalSuccess from './AddTeamMemberModalSuccess'
 import DialogContainer from './DialogContainer'
 import DialogContent from './DialogContent'
 import DialogTitle from './DialogTitle'
+import Icon from './Icon'
 import BasicTextArea from './InputField/BasicTextArea'
-import LabelHeading from './LabelHeading/LabelHeading'
 import MassInvitationTokenLinkRoot from './MassInvitationTokenLinkRoot'
 import PrimaryButton from './PrimaryButton'
-import StyledError from './StyledError'
 
 interface Props {
   closePortal: () => void
@@ -74,18 +75,40 @@ const ButtonGroup = styled('div')({
   justifyContent: 'flex-end'
 })
 
-const ErrorMessage = styled(StyledError)({
-  fontSize: '.8125rem',
-  marginTop: '.5rem'
-})
-
-const StyledLabelHeading = styled(LabelHeading)({
+const StyledHeading = styled('h2')({
   alignItems: 'center',
   display: 'flex',
   fontSize: 15,
   lineHeight: '21px',
-  padding: '0 0 16px',
-  textTransform: 'none'
+  margin: 0,
+  padding: '0 0 3px'
+})
+
+const StyledTip = styled('p')({
+  fontSize: 13,
+  lineHeight: '16px',
+  margin: 0,
+  padding: '0 0 16px'
+})
+
+const ErrorWrapper = styled('div')<{isWarning: boolean}>(({isWarning}) => ({
+  alignItems: 'center',
+  color: isWarning ? PALETTE.GOLD_500 : PALETTE.TOMATO_500,
+  display: 'flex',
+  padding: 8,
+  marginTop: 8,
+  width: '100%'
+}))
+
+const StyledIcon = styled(Icon)<{isWarning: boolean}>(({isWarning}) => ({
+  color: isWarning ? PALETTE.GOLD_500 : PALETTE.TOMATO_500,
+  fontSize: ICON_SIZE.MD24,
+  marginRight: 8
+}))
+
+const Label = styled('div')({
+  fontSize: 14,
+  fontWeight: 600
 })
 
 const IllustrationBlock = () => {
@@ -98,27 +121,51 @@ const AddTeamMemberModal = (props: Props) => {
   const {closePortal, meetingId, teamMembers, teamId} = props
   const [pendingSuccessfulInvitations, setPendingSuccessfulInvitations] = useState([] as string[])
   const [successfulInvitations, setSuccessfulInvitations] = useState<string[] | null>(null)
+  const [isSubmitted, setIsSubmitted] = useState(false)
   const [rawInvitees, setRawInvitees] = useState('')
   const [invitees, setInvitees] = useState([] as string[])
   const {error, onCompleted, onError, submitMutation, submitting} = useMutationProps()
   const atmosphere = useAtmosphere()
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    if (isSubmitted) setIsSubmitted(false)
     const nextValue = e.target.value
     if (rawInvitees === nextValue) return
-    const parsedInvitees = parseEmailAddressList(nextValue)
+    const {parsedInvitees, invalidEmailExists} = parseEmailAddressList(nextValue)
     const allInvitees = parsedInvitees
       ? (parsedInvitees.map((invitee) => (invitee as any).address) as string[])
-      : invitees
+      : []
     const teamEmailSet = new Set(teamMembers.map(({email}) => email))
     const uniqueInvitees = Array.from(new Set(allInvitees))
+    if (invalidEmailExists) {
+      const lastValidEmail = uniqueInvitees[uniqueInvitees.length - 1]
+      lastValidEmail
+        ? onError(new Error(`Invalid email(s) after ${lastValidEmail}`))
+        : onError(new Error(`Invalid email(s)`))
+    } else {
+      onCompleted()
+    }
     const offTeamInvitees = uniqueInvitees.filter((email) => !teamEmailSet.has(email))
-    const alreadyInvitedEmail = uniqueInvitees.find((email) => teamEmailSet.has(email))
+    const alreadyInvitedEmails = uniqueInvitees.filter((email) => teamEmailSet.has(email))
+
     setRawInvitees(nextValue)
     setInvitees(offTeamInvitees)
-    if (alreadyInvitedEmail) {
-      onError(new Error(`${alreadyInvitedEmail} is already on the team`))
-    } else if (error) {
-      onCompleted()
+    if (!invalidEmailExists) {
+      if (alreadyInvitedEmails.length === 1) {
+        onError(new Error(`${alreadyInvitedEmails} is already on the team`))
+      } else if (alreadyInvitedEmails.length === 2) {
+        onError(
+          new Error(
+            `${alreadyInvitedEmails[0]} and ${alreadyInvitedEmails[1]} are already on the team`
+          )
+        )
+      } else if (alreadyInvitedEmails.length > 2) {
+        onError(
+          new Error(
+            `${alreadyInvitedEmails[0]} and ${alreadyInvitedEmails.length -
+            1} other emails are already on the team`
+          )
+        )
+      }
     }
   }
 
@@ -126,6 +173,7 @@ const AddTeamMemberModal = (props: Props) => {
     if (invitees.length === 0) return
     submitMutation()
     const handleCompleted = (res) => {
+      setIsSubmitted(true)
       onCompleted()
       if (res) {
         const {inviteToTeam} = res
@@ -134,8 +182,8 @@ const AddTeamMemberModal = (props: Props) => {
         } else {
           // there was a problem with at least 1 email
           const goodInvitees = invitees.filter((invitee) => inviteToTeam.invitees.includes(invitee))
-
           const badInvitees = invitees.filter((invitee) => !inviteToTeam.invitees.includes(invitee))
+
           onError(
             new Error(
               `Could not send an invitation to the above ${plural(badInvitees.length, 'email')}`
@@ -166,13 +214,15 @@ const AddTeamMemberModal = (props: Props) => {
   const title = invitees.length <= 1 ? 'Send Invitation' : `Send ${invitees.length} Invitations`
   return (
     <StyledDialogContainer>
-      <StyledDialogTitle>Invite to Team</StyledDialogTitle>
+      <StyledDialogTitle>{'Invite to Team'}</StyledDialogTitle>
       <StyledDialogContent>
         <Fields>
-          <StyledLabelHeading>{'Share this link'}</StyledLabelHeading>
+          <StyledHeading>{'Share this link'}</StyledHeading>
+          <StyledTip>{'This link expires in 30 days.'}</StyledTip>
           <MassInvitationTokenLinkRoot meetingId={meetingId} teamId={teamId} />
 
-          <StyledLabelHeading>{'Or, send invites by email'}</StyledLabelHeading>
+          <StyledHeading>{'Or, send invites by email'}</StyledHeading>
+          <StyledTip>{'Email invitations expire in 30 days.'}</StyledTip>
           <BasicTextArea
             autoFocus
             name='rawInvitees'
@@ -180,7 +230,14 @@ const AddTeamMemberModal = (props: Props) => {
             placeholder='email@example.co, another@example.co'
             value={rawInvitees}
           />
-          {error && <ErrorMessage>{error.message}</ErrorMessage>}
+          {error && (
+            <ErrorWrapper isWarning={!isSubmitted}>
+              <StyledIcon isWarning={!isSubmitted}>
+                <Icon>{isSubmitted ? 'error' : 'warning'}</Icon>
+              </StyledIcon>
+              <Label>{error.message}</Label>
+            </ErrorWrapper>
+          )}
           <ButtonGroup>
             <PrimaryButton
               onClick={sendInvitations}

@@ -2,7 +2,7 @@ import {GraphQLID, GraphQLObjectType} from 'graphql'
 import {GQLContext} from '../graphql'
 import StandardMutationError from './StandardMutationError'
 
-const InvalidateSessionsPayload = new GraphQLObjectType<any, GQLContext, any>({
+const InvalidateSessionsPayload = new GraphQLObjectType<any, GQLContext>({
   name: 'InvalidateSessionsPayload',
   fields: () => ({
     error: {

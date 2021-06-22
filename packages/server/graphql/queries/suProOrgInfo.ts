@@ -2,7 +2,6 @@ import {GraphQLBoolean, GraphQLList, GraphQLNonNull} from 'graphql'
 import getRethink from '../../database/rethinkDriver'
 import {requireSU} from '../../utils/authorization'
 import Organization from '../types/Organization'
-import {TierEnum} from 'parabol-client/types/graphql'
 
 export default {
   type: new GraphQLList(new GraphQLNonNull(Organization)),
@@ -22,7 +21,7 @@ export default {
     // RESOLUTION
     return r
       .table('Organization')
-      .getAll(TierEnum.pro, {index: 'tier'})
+      .getAll('pro', {index: 'tier'})
       .merge((organization) => ({
         users: r
           .table('OrganizationUser')

@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import ms from 'ms'
 import {AuthenticationError, Threshold} from 'parabol-client/types/constEnums'
-import {AuthIdentityTypeEnum} from 'parabol-client/types/graphql'
+import {AuthIdentityTypeEnum} from '../../../../client/types/constEnums'
 import sleep from 'parabol-client/utils/sleep'
 import getRethink from '../../../database/rethinkDriver'
 import AuthIdentityLocal from '../../../database/types/AuthIdentityLocal'

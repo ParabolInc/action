@@ -1,71 +1,82 @@
-import {AddNewReflectTemplate_reflectTemplates} from '../../../__generated__/AddNewReflectTemplate_reflectTemplates.graphql'
-import React, {Component} from 'react'
 import styled from '@emotion/styled'
-import {createFragmentContainer} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
-import RaisedButton from '../../../components/RaisedButton'
-import withAtmosphere, {
-  WithAtmosphereProps
-} from '../../../decorators/withAtmosphere/withAtmosphere'
+import React, {useEffect, useRef} from 'react'
+import {createFragmentContainer} from 'react-relay'
+import LinkButton from '../../../components/LinkButton'
+import TooltipStyled from '../../../components/TooltipStyled'
+import useAtmosphere from '../../../hooks/useAtmosphere'
+import useMutationProps from '../../../hooks/useMutationProps'
 import AddReflectTemplateMutation from '../../../mutations/AddReflectTemplateMutation'
-import withMutationProps, {WithMutationProps} from '../../../utils/relay/withMutationProps'
-import {PALETTE} from '../../../styles/paletteV2'
+import {Threshold} from '../../../types/constEnums'
+import {AddNewReflectTemplate_reflectTemplates} from '../../../__generated__/AddNewReflectTemplate_reflectTemplates.graphql'
 
-const Error = styled('span')({
-  color: PALETTE.ERROR_MAIN,
-  display: 'block',
-  fontSize: 12,
+const ErrorLine = styled(TooltipStyled)({
   margin: '0 0 8px'
 })
 
-const Button = styled(RaisedButton)({
-  display: 'block',
+const AddRetroTemplateLink = styled(LinkButton)({
+  alignItems: 'center',
+  display: 'flex',
+  justifyContent: 'flex-start',
+  fontSize: 16,
+  fontWeight: 600,
+  lineHeight: '24px',
+  outline: 'none',
+  padding: '20px 16px',
   width: '100%'
 })
 
-interface Props extends WithAtmosphereProps, WithMutationProps {
+interface Props {
+  gotoTeamTemplates: () => void
   reflectTemplates: AddNewReflectTemplate_reflectTemplates
   teamId: string
 }
 
-class AddNewReflectTemplate extends Component<Props> {
-  addNewTemplate = () => {
-    const {
-      atmosphere,
-      onError,
-      onCompleted,
-      submitMutation,
-      submitting,
-      teamId,
-      reflectTemplates
-    } = this.props
+const AddNewReflectTemplate = (props: Props) => {
+  const {gotoTeamTemplates, teamId, reflectTemplates} = props
+  const atmosphere = useAtmosphere()
+  const {onError, onCompleted, submitMutation, submitting, error} = useMutationProps()
+  const errorTimerId = useRef<undefined | number>()
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(errorTimerId.current)
+    }
+  }, [])
+  const addNewTemplate = () => {
     if (submitting) return
-    if (reflectTemplates.length >= 20) {
-      onError('You may only have 20 templates per team. Please remove one first.')
+    if (reflectTemplates.length >= Threshold.MAX_RETRO_TEAM_TEMPLATES) {
+      onError(new Error('You may only have 20 templates per team. Please remove one first.'))
+      errorTimerId.current = window.setTimeout(() => {
+        onCompleted()
+      }, 8000)
       return
     }
     if (reflectTemplates.find((template) => template.name === '*New Template')) {
-      onError('You already have a new template. Try renaming that one first.')
+      onError(new Error('You already have a new template. Try renaming that one first.'))
+      errorTimerId.current = window.setTimeout(() => {
+        onCompleted()
+      }, 8000)
       return
     }
     submitMutation()
-    AddReflectTemplateMutation(atmosphere, {teamId}, {}, onError, onCompleted)
+    AddReflectTemplateMutation(atmosphere, {teamId}, {onError, onCompleted})
+    gotoTeamTemplates()
   }
 
-  render() {
-    const {error, submitting} = this.props
-    return (
-      <React.Fragment>
-        {error && <Error>{error}</Error>}
-        <Button onClick={this.addNewTemplate} palette='blue' waiting={submitting}>
-          + Add new template
-        </Button>
-      </React.Fragment>
-    )
-  }
+  const containsNewTemplate = reflectTemplates.find((template) => template.name === '*New Template')
+
+  if (reflectTemplates.length > Threshold.MAX_RETRO_TEAM_TEMPLATES || containsNewTemplate) return null
+  return (
+    <div>
+      {error && <ErrorLine>{error.message}</ErrorLine>}
+      <AddRetroTemplateLink palette='blue' onClick={addNewTemplate} waiting={submitting}>
+        {'Create New Template'}
+      </AddRetroTemplateLink>
+    </div>
+  )
 }
 
-export default createFragmentContainer(withMutationProps(withAtmosphere(AddNewReflectTemplate)), {
+export default createFragmentContainer(AddNewReflectTemplate, {
   reflectTemplates: graphql`
     fragment AddNewReflectTemplate_reflectTemplates on ReflectTemplate @relay(plural: true) {
       name

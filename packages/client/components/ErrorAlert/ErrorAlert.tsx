@@ -6,7 +6,7 @@
  */
 import React from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import {Radius} from '../../types/constEnums'
 import Icon from '../Icon'
 import {ICON_SIZE} from '../../styles/typographyV2'
@@ -16,7 +16,7 @@ interface Props {
 }
 
 const ErrorAlertWrapper = styled('div')({
-  backgroundColor: PALETTE.BACKGROUND_ERROR_20A,
+  backgroundColor: PALETTE.TOMATO_100,
   borderRadius: Radius.TOOLTIP,
   display: 'flex',
   alignItems: 'center',

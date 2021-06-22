@@ -1,13 +1,14 @@
 import {GraphQLEnumType} from 'graphql'
-import {ACTION, RETROSPECTIVE} from 'parabol-client/utils/constants'
+import {MeetingTypeEnum as TMeetingTypeEnum} from '../../database/types/Meeting'
 
 const MeetingTypeEnum = new GraphQLEnumType({
   name: 'MeetingTypeEnum',
   description: 'The type of meeting',
   values: {
-    [ACTION]: {},
-    [RETROSPECTIVE]: {}
-  }
+    action: {},
+    retrospective: {},
+    poker: {}
+  } as {[P in TMeetingTypeEnum]: any}
 })
 
 export default MeetingTypeEnum

@@ -1,14 +1,14 @@
 import React, {ReactNode} from 'react'
 import styled from '@emotion/styled'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {Radius} from '../types/constEnums'
 import BaseButton, {BaseButtonProps} from './BaseButton'
 
 const paletteColors = {
-  warm: PALETTE.TEXT_ORANGE,
-  mid: PALETTE.TEXT_PURPLE,
-  dark: PALETTE.TEXT_MAIN,
-  blue: PALETTE.TEXT_BLUE
+  warm: PALETTE.GOLD_500,
+  mid: PALETTE.GRAPE_700,
+  dark: PALETTE.SLATE_700,
+  blue: PALETTE.SKY_500
 }
 
 export interface FlatButtonProps extends BaseButtonProps {
@@ -31,7 +31,7 @@ const FlatButton = styled(BaseButton)<FlatButtonProps>((props) => {
     color: paletteColors[palette],
     outline: 0,
     ':hover,:focus,:active': {
-      backgroundColor: !visuallyDisabled ? PALETTE.BACKGROUND_MAIN : undefined,
+      backgroundColor: !visuallyDisabled ? PALETTE.SLATE_200 : undefined,
       boxShadow: 'none'
     }
   }

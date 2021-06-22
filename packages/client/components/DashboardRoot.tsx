@@ -1,14 +1,14 @@
-import React from 'react'
 import graphql from 'babel-plugin-relay/macro'
-import {RouteComponentProps, withRouter} from 'react-router-dom'
+import React from 'react'
 import {QueryRenderer} from 'react-relay'
+import {RouteComponentProps, withRouter} from 'react-router-dom'
 import withAtmosphere, {WithAtmosphereProps} from '../decorators/withAtmosphere/withAtmosphere'
+import useSubscription from '../hooks/useSubscription'
 import NotificationSubscription from '../subscriptions/NotificationSubscription'
 import OrganizationSubscription from '../subscriptions/OrganizationSubscription'
 import TaskSubscription from '../subscriptions/TaskSubscription'
 import TeamSubscription from '../subscriptions/TeamSubscription'
 import Dashboard from './Dashboard'
-import useSubscription from '../hooks/useSubscription'
 
 const query = graphql`
   query DashboardRootQuery($first: Int!, $after: DateTime) {
@@ -21,10 +21,10 @@ const query = graphql`
 interface Props extends WithAtmosphereProps, RouteComponentProps<{}> {}
 
 const DashboardRoot = ({atmosphere}: Props) => {
-  useSubscription(DashboardRoot.name, NotificationSubscription)
-  useSubscription(DashboardRoot.name, OrganizationSubscription)
-  useSubscription(DashboardRoot.name, TaskSubscription)
-  useSubscription(DashboardRoot.name, TeamSubscription)
+  useSubscription('DashboardRoot', NotificationSubscription)
+  useSubscription('DashboardRoot', OrganizationSubscription)
+  useSubscription('DashboardRoot', TaskSubscription)
+  useSubscription('DashboardRoot', TeamSubscription)
   return (
     <QueryRenderer
       environment={atmosphere}

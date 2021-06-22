@@ -16,9 +16,9 @@ const CreateReflectionInput = new GraphQLInputObjectType({
     meetingId: {
       type: new GraphQLNonNull(GraphQLID)
     },
-    retroPhaseItemId: {
-      type: new GraphQLNonNull(GraphQLID),
-      description: 'The phase item the reflection belongs to'
+    promptId: {
+      type: GraphQLID,
+      description: 'The prompt the reflection belongs to'
     },
     sortOrder: {
       type: new GraphQLNonNull(GraphQLFloat)

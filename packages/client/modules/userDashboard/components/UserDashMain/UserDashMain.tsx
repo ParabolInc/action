@@ -6,9 +6,9 @@ import {LoaderSize} from '../../../../types/constEnums'
 
 interface Props extends RouteComponentProps<{}> {}
 
-const MyDashboardTasksRoot = lazy(() =>
+const UserTaskViewRoot = lazy(() =>
   import(
-    /* webpackChunkName: 'MyDashboardTasksRoot' */ '../../../../components/MyDashboardTasksRoot'
+    /* webpackChunkName: 'MyDashboardTasksRoot' */ '../../../../components/UserTaskViewRoot'
   )
 )
 const MyDashboardTimelineRoot = lazy(() =>
@@ -23,7 +23,7 @@ const UserDashMain = (props: Props) => {
     <DashContent>
       <Suspense fallback={<LoadingComponent spinnerSize={LoaderSize.PANEL} />}>
         <Switch>
-          <Route path={`${match.url}/tasks`} component={MyDashboardTasksRoot} />
+          <Route path={`${match.url}/tasks`} component={UserTaskViewRoot} />
           <Route path={match.url} component={MyDashboardTimelineRoot} />
         </Switch>
       </Suspense>

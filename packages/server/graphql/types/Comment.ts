@@ -19,7 +19,7 @@ import convertToTaskContent from 'parabol-client/utils/draftjs/convertToTaskCont
 
 const TOMBSTONE = convertToTaskContent('[deleted]')
 
-const Comment = new GraphQLObjectType<any, GQLContext, any>({
+const Comment = new GraphQLObjectType<any, GQLContext>({
   name: 'Comment',
   description: 'A comment on a thread',
   interfaces: () => [Reactable, Threadable],

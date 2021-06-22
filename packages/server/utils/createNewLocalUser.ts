@@ -1,4 +1,4 @@
-import {AuthIdentityTypeEnum} from 'parabol-client/types/graphql'
+import {AuthIdentityTypeEnum} from '../../client/types/constEnums'
 import AuthIdentityLocal from '../database/types/AuthIdentityLocal'
 import User from '../database/types/User'
 

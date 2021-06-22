@@ -4,8 +4,8 @@ import React from 'react'
 import {createFragmentContainer} from 'react-relay'
 import {MenuPosition} from '~/hooks/useCoords'
 import useTooltip from '~/hooks/useTooltip'
-import {NewMeetingPhaseTypeEnum} from '~/types/graphql'
 import {ColorBadge_reflection} from '~/__generated__/ColorBadge_reflection.graphql'
+import {NewMeetingPhaseTypeEnum} from '~/__generated__/ActionMeeting_meeting.graphql'
 
 const DROP_SIZE = 32
 const DROP_SIZE_HALF = DROP_SIZE / 2
@@ -38,15 +38,15 @@ interface Props {
 
 const ColorBadge = (props: Props) => {
   const {reflection, phaseType} = props
-  const {phaseItem} = reflection
-  const {question, groupColor} = phaseItem
+  const {prompt} = reflection
+  const {question, groupColor} = prompt
   const {tooltipPortal, openTooltip, closeTooltip, originRef} = useTooltip<HTMLDivElement>(
     MenuPosition.LOWER_LEFT,
     {
-      disabled: phaseType !== NewMeetingPhaseTypeEnum.discuss
+      disabled: phaseType !== 'discuss'
     }
   )
-  if (phaseType === NewMeetingPhaseTypeEnum.reflect) return null
+  if (phaseType === 'reflect') return null
   return (
     <>
       <BadgeWrapper onMouseEnter={openTooltip} onMouseLeave={closeTooltip} ref={originRef}>
@@ -60,7 +60,7 @@ const ColorBadge = (props: Props) => {
 export default createFragmentContainer(ColorBadge, {
   reflection: graphql`
     fragment ColorBadge_reflection on RetroReflection {
-      phaseItem {
+      prompt {
         question
         groupColor
       }

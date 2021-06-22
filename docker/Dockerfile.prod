@@ -1,0 +1,19 @@
+FROM node:14.10.0 as base
+
+ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
+
+RUN mkdir -p /parabol/node_modules && mkdir -p /home/node/.npm-global
+
+WORKDIR /parabol/
+ADD package.json .
+ADD yarn.lock .
+COPY . .
+
+FROM base as prod
+RUN yarn install
+RUN yarn build
+RUN cp docker/entrypoint.prod.sh /bin/entrypoint
+RUN chmod +x /bin/entrypoint
+EXPOSE 80
+ENTRYPOINT [ "entrypoint" ]
+CMD ["yarn", "start"]

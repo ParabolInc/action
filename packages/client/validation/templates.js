@@ -1,11 +1,12 @@
-import {APP_MAX_AVATAR_FILE_SIZE, TASK_MAX_CHARS} from '../utils/constants'
-import {compositeIdRegex, emailRegex, idRegex, urlRegex} from './regex'
+import {TASK_MAX_CHARS} from '../utils/constants'
+import {compositeIdRegex, emailRegex, idRegex} from './regex'
+import linkify from '../utils/linkify'
 
 export const avatar = {
   size: (value) =>
     value.int('Hey! Don’t monkey with that!').test((raw) => {
-      if (raw > APP_MAX_AVATAR_FILE_SIZE) {
-        return `File too large! It must be <${APP_MAX_AVATAR_FILE_SIZE / 1024}kB`
+      if (raw > 1024 * 1024) {
+        return `File too large! It must be <${1024}kB`
       }
       return undefined
     }),
@@ -43,6 +44,7 @@ export const orgName = (value) =>
     .required('Your new org needs a name!')
     .min(2, 'C’mon, you call that an organization?')
     .max(100, 'Maybe just the legal name?')
+    .test((val) => (linkify.match(val) ? 'Try using a name, not a link!' : undefined))
 
 export const preferredName = (value) =>
   value
@@ -63,6 +65,7 @@ export const teamName = (value) =>
     .required('“The nameless wonder” is better than nothing')
     .min(2, 'The “A Team” had a longer name than that')
     .max(50, 'That isn’t very memorable. Maybe shorten it up?')
+    .test((val) => (linkify.match(val) ? 'Try using a name, not a link!' : undefined))
 
 export const makeTeamNameSchema = (teamNames) => (value) =>
   value
@@ -71,5 +74,18 @@ export const makeTeamNameSchema = (teamNames) => (value) =>
     .min(2, 'The “A Team” had a longer name than that')
     .max(50, 'That isn’t very memorable. Maybe shorten it up?')
     .test((val) => teamNames.includes(val) && 'That name is already taken')
+    .test((val) => (linkify.match(val) ? 'Try using a name, not a link!' : undefined))
 
-export const url = (value) => value.matches(urlRegex)
+export const optionalUrl = (value) =>
+  value
+    .trim()
+    .test((value) => {
+      if (value) {
+        try {
+          new URL(value)
+        } catch (e) {
+          return e.message
+        }
+      }
+    }, 'that url doesn’t look quite right')
+    .max(2000, 'please use a shorter url')

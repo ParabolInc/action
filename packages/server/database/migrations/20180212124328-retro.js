@@ -1,7 +1,7 @@
-import { RETRO_PHASE_ITEM } from 'parabol-client/utils/constants'
-import shortid from 'shortid'
+import {RETRO_PHASE_ITEM} from 'parabol-client/utils/constants'
 
 exports.up = async (r) => {
+  let counter = 0
   try {
     await Promise.all([
       r.tableCreate('CustomPhaseItem').run(),
@@ -47,7 +47,7 @@ exports.up = async (r) => {
     teamIds.forEach((teamId) => {
       inserts.push(
         {
-          id: shortid.generate(),
+          id: String(counter++),
           type: RETRO_PHASE_ITEM,
           isActive: true,
           teamId,
@@ -55,7 +55,7 @@ exports.up = async (r) => {
           question: 'What’s working?'
         },
         {
-          id: shortid.generate(),
+          id: String(counter++),
           type: RETRO_PHASE_ITEM,
           isActive: true,
           teamId,
@@ -63,7 +63,7 @@ exports.up = async (r) => {
           question: 'Where did you get stuck?'
         },
         {
-          id: shortid.generate(),
+          id: String(counter++),
           type: RETRO_PHASE_ITEM,
           isActive: true,
           teamId,

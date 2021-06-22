@@ -1,39 +1,31 @@
-import React, {Component} from 'react'
 import styled from '@emotion/styled'
+import React from 'react'
 import EditableText from '../../../components/EditableText'
-import withAtmosphere, {
-  WithAtmosphereProps
-} from '../../../decorators/withAtmosphere/withAtmosphere'
+import useAtmosphere from '../../../hooks/useAtmosphere'
+import useMutationProps from '../../../hooks/useMutationProps'
 import ReflectTemplatePromptUpdateDescriptionMutation from '../../../mutations/ReflectTemplatePromptUpdateDescriptionMutation'
-import withMutationProps, {WithMutationProps} from '../../../utils/relay/withMutationProps'
 import Legitity from '../../../validation/Legitity'
 
-interface Props extends WithAtmosphereProps, WithMutationProps {
+interface Props {
+  isOwner: boolean
   description: string
   promptId: string
   onEditingChange: (isEditing: boolean) => void
 }
 
 const EditableSubText = styled(EditableText)({
-  fontSize: 14,
-  lineHeight: 1,
-  marginBottom: 8
+  fontSize: 12,
+  lineHeight: '24px'
 })
 
-class EditableTemplateDescription extends Component<Props> {
-  handleSubmit = (rawQuestion) => {
-    const {
-      atmosphere,
-      promptId,
-      onError,
-      onCompleted,
-      setDirty,
-      submitMutation,
-      submitting
-    } = this.props
+const EditableTemplateDescription = (props: Props) => {
+  const {isOwner, description, promptId, onEditingChange} = props
+  const atmosphere = useAtmosphere()
+  const {onError, error, onCompleted, submitMutation, submitting} = useMutationProps()
+
+  const handleSubmit = (rawQuestion) => {
     if (submitting) return
-    setDirty()
-    const {error, value: description = ''} = this.validate(rawQuestion)
+    const {error, value: description = ''} = validate(rawQuestion)
     if (error) return
     submitMutation()
     ReflectTemplatePromptUpdateDescriptionMutation(
@@ -43,41 +35,37 @@ class EditableTemplateDescription extends Component<Props> {
     )
   }
 
-  legitify(value: string) {
+  const legitify = (value: string) => {
     return new Legitity(value).trim().max(256, 'That description is probably long enough')
   }
 
-  validate = (rawValue: string) => {
-    const {error, onError} = this.props
-    const res = this.legitify(rawValue)
+  const validate = (rawValue: string) => {
+    const res = legitify(rawValue)
     if (res.error) {
-      onError(res.error)
-    } else if (error) {
-      onError()
+      onError(new Error(res.error))
+    } else {
+      onCompleted()
     }
     return res
   }
 
-  onEditChange = (isEditing: boolean) => {
-    const {onEditingChange} = this.props
+  const onEditChange = (isEditing: boolean) => {
     onEditingChange && onEditingChange(isEditing)
   }
 
-  render() {
-    const {error, description} = this.props
-    return (
-      <EditableSubText
-        error={error as string}
-        hideIcon
-        handleSubmit={this.handleSubmit}
-        initialValue={description}
-        maxLength={256}
-        validate={this.validate}
-        placeholder={'Description'}
-        onEditingChange={this.onEditChange}
-      />
-    )
-  }
+  return (
+    <EditableSubText
+      disabled={!isOwner}
+      error={error?.message}
+      hideIcon
+      handleSubmit={handleSubmit}
+      initialValue={description}
+      maxLength={256}
+      validate={validate}
+      placeholder={'Description'}
+      onEditingChange={onEditChange}
+    />
+  )
 }
 
-export default withAtmosphere(withMutationProps(EditableTemplateDescription))
+export default EditableTemplateDescription

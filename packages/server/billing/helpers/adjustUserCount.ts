@@ -1,5 +1,4 @@
 import {InvoiceItemType} from 'parabol-client/types/constEnums'
-import {TierEnum} from 'parabol-client/types/graphql'
 import getRethink from '../../database/rethinkDriver'
 import InvoiceItemHook from '../../database/types/InvoiceItemHook'
 import Organization from '../../database/types/Organization'
@@ -12,6 +11,9 @@ import isCompanyDomain from '../../utils/isCompanyDomain'
 import segmentIo from '../../utils/segmentIo'
 import handleEnterpriseOrgQuantityChanges from './handleEnterpriseOrgQuantityChanges'
 import processInvoiceItemHook from './processInvoiceItemHook'
+import insertOrgUserAudit from '../../postgres/helpers/insertOrgUserAudit'
+import {OrganizationUserAuditEventTypeEnum} from '../../postgres/queries/generated/insertOrgUserAuditQuery'
+import updateUser from '../../postgres/queries/updateUser'
 
 const maybeUpdateOrganizationActiveDomain = async (orgId: string, userId: string) => {
   const r = await getRethink()
@@ -49,6 +51,7 @@ const changePause = (inactive: boolean) => async (_orgIds: string[], userId: str
     event: inactive ? 'Account Paused' : 'Account Unpaused'
   })
   return Promise.all([
+    updateUser({inactive}, userId),
     db.write('User', userId, {inactive}),
     r
       .table('OrganizationUser')
@@ -72,6 +75,7 @@ const addUser = async (orgIds: string[], userId: string) => {
       .getAll(r.args(orgIds))
       .coerceTo('array') as unknown) as Organization[]
   }).run()
+
   const docs = orgIds.map((orgId) => {
     const oldOrganizationUser = organizationUsers.find(
       (organizationUser) => organizationUser.orgId === orgId
@@ -84,10 +88,12 @@ const addUser = async (orgIds: string[], userId: string) => {
       new Date()
     return new OrganizationUser({orgId, userId, newUserUntil, tier: organization.tier})
   })
+
   await r
     .table('OrganizationUser')
     .insert(docs)
     .run()
+
   await Promise.all(
     orgIds.map((orgId) => {
       return maybeUpdateOrganizationActiveDomain(orgId, userId)
@@ -107,13 +113,21 @@ const deleteUser = async (orgIds: string[], userId: string) => {
     .run()
 }
 
-const typeLookup = {
+const dbActionTypeLookup = {
   [InvoiceItemType.ADD_USER]: addUser,
   [InvoiceItemType.AUTO_PAUSE_USER]: changePause(true),
   [InvoiceItemType.PAUSE_USER]: changePause(true),
   [InvoiceItemType.REMOVE_USER]: deleteUser,
   [InvoiceItemType.UNPAUSE_USER]: changePause(false)
 }
+
+const auditEventTypeLookup = {
+  [InvoiceItemType.ADD_USER]: 'added',
+  [InvoiceItemType.AUTO_PAUSE_USER]: 'inactivated',
+  [InvoiceItemType.PAUSE_USER]: 'inactivated',
+  [InvoiceItemType.REMOVE_USER]: 'removed',
+  [InvoiceItemType.UNPAUSE_USER]: 'activated'
+} as {[key: string]: OrganizationUserAuditEventTypeEnum}
 
 interface Options {
   prorationDate?: Date
@@ -127,8 +141,13 @@ export default async function adjustUserCount(
 ) {
   const r = await getRethink()
   const orgIds = Array.isArray(orgInput) ? orgInput : [orgInput]
-  const dbAction = typeLookup[type]
+
+  const dbAction = dbActionTypeLookup[type]
   await dbAction(orgIds, userId)
+
+  const auditEventType = auditEventTypeLookup[type]
+  await insertOrgUserAudit(orgIds, userId, auditEventType)
+
   const paidOrgs = await r
     .table('Organization')
     .getAll(r.args(orgIds), {index: 'id'})
@@ -139,7 +158,7 @@ export default async function adjustUserCount(
     )
     .run()
 
-  const proOrgs = paidOrgs.filter((org) => org.tier === TierEnum.pro)
+  const proOrgs = paidOrgs.filter((org) => org.tier === 'pro')
   handleEnterpriseOrgQuantityChanges(paidOrgs).catch()
   // personal & enterprise tiers do not follow the per-seat model
   if (proOrgs.length === 0) return
@@ -155,7 +174,7 @@ export default async function adjustUserCount(
   const hooks = proOrgs.map((org) => {
     return new InvoiceItemHook({
       stripeSubscriptionId: org.stripeSubscriptionId!,
-      isProrated: org.tier !== TierEnum.enterprise,
+      isProrated: org.tier !== 'enterprise',
       orgId: org.id,
       prorationDate,
       type,

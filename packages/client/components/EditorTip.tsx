@@ -1,11 +1,11 @@
 import React from 'react'
 import styled from '@emotion/styled'
 import {Elevation} from '../styles/elevation'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 
 const TipBlock = styled('div')({
   alignItems: 'center',
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   display: 'flex',
   fontSize: 12,
   lineHeight: '24px'

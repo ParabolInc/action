@@ -1,6 +1,6 @@
 import styled from '@emotion/styled'
 import React, {forwardRef, Ref} from 'react'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import {Breakpoint, Card, ElementHeight, ElementWidth, Gutters} from '../../types/constEnums'
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 
 const PlaceholderCard = styled('div')({
   alignItems: 'center',
-  border: `1px ${PALETTE.BORDER_PLACEHOLDER} dashed`,
+  border: `1px ${PALETTE.SLATE_500} dashed`,
   borderRadius: Card.BORDER_RADIUS,
   display: 'flex',
   justifyContent: 'center',
@@ -22,7 +22,7 @@ const PlaceholderCard = styled('div')({
 })
 
 const Tip = styled('div')({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: 13,
   padding: 16,
   textAlign: 'center',

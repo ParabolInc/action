@@ -1,8 +1,8 @@
 import {GraphQLID, GraphQLNonNull, GraphQLString} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import {OrgUserRole} from 'parabol-client/types/graphql'
 import getRethink from '../../database/rethinkDriver'
 import NotificationPromoteToBillingLeader from '../../database/types/NotificationPromoteToBillingLeader'
+import {OrgUserRole} from '../../database/types/OrganizationUser'
 import {getUserId, isUserBillingLeader} from '../../utils/authorization'
 import publish from '../../utils/publish'
 import segmentIo from '../../utils/segmentIo'
@@ -26,7 +26,11 @@ export default {
       description: 'the user’s new role'
     }
   },
-  async resolve(_source, {orgId, userId, role}, {authToken, dataLoader, socketId: mutatorId}) {
+  async resolve(
+    _source,
+    {orgId, userId, role}: {orgId: string; userId: string; role: OrgUserRole},
+    {authToken, dataLoader, socketId: mutatorId}
+  ) {
     const r = await getRethink()
     const operationId = dataLoader.share()
     const subOptions = {mutatorId, operationId}
@@ -38,7 +42,7 @@ export default {
     }
 
     // VALIDATION
-    if (role && role !== OrgUserRole.BILLING_LEADER) {
+    if (role && role !== 'BILLING_LEADER') {
       return standardError(new Error('Invalid role'), {userId: viewerId})
     }
     // if someone is leaving, make sure there is someone else to take their place
@@ -46,7 +50,7 @@ export default {
       const leaderCount = await r
         .table('OrganizationUser')
         .getAll(orgId, {index: 'orgId'})
-        .filter({removedAt: null, role: OrgUserRole.BILLING_LEADER})
+        .filter({removedAt: null, role: 'BILLING_LEADER'})
         .count()
         .run()
       if (leaderCount === 1) {
@@ -72,7 +76,7 @@ export default {
       .update({role})
       .run()
 
-    if (role === OrgUserRole.BILLING_LEADER) {
+    if (role === 'BILLING_LEADER') {
       const promotionNotification = new NotificationPromoteToBillingLeader({orgId, userId})
       const {id: promotionNotificationId} = promotionNotification
       await r

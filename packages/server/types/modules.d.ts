@@ -6,6 +6,7 @@ declare module '*.svg'
 
 declare const __PRODUCTION__: string
 declare const __STATIC_IMAGES__: string
+declare const __SOCKET_PORT__: string
 interface Window {
   __ACTION__: any
 }
@@ -27,3 +28,4 @@ interface HotMod extends NodeJS.Module {
 }
 
 declare let module: HotMod
+declare type Json = null | boolean | number | string | Json[] | {[key: string]: Json}

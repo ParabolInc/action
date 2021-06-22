@@ -4,15 +4,16 @@ import {
   GraphQLID,
   GraphQLNonNull,
   GraphQLObjectType,
-  GraphQLString
+  GraphQLString,
+  GraphQLList
 } from 'graphql'
-import {IAgendaItem} from 'parabol-client/types/graphql'
 import {GQLContext} from '../graphql'
 import GraphQLISO8601Type from './GraphQLISO8601Type'
 import TeamMember from './TeamMember'
 import ThreadSource, {threadSourceFields} from './ThreadSource'
+import CommentorDetails from './CommentorDetails'
 
-const AgendaItem = new GraphQLObjectType<IAgendaItem, GQLContext>({
+const AgendaItem = new GraphQLObjectType<any, GQLContext>({
   name: 'AgendaItem',
   description: 'A request placeholder that will likely turn into 1 or more tasks',
   interfaces: () => [ThreadSource],
@@ -21,6 +22,13 @@ const AgendaItem = new GraphQLObjectType<IAgendaItem, GQLContext>({
     id: {
       type: new GraphQLNonNull(GraphQLID),
       description: 'The unique agenda item id teamId::shortid'
+    },
+    commentors: {
+      type: new GraphQLList(new GraphQLNonNull(CommentorDetails)),
+      description: 'A list of users currently commenting',
+      resolve: ({commentors = []}) => {
+        return commentors
+      }
     },
     content: {
       type: new GraphQLNonNull(GraphQLString),

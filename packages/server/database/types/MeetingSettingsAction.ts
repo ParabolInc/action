@@ -1,21 +1,20 @@
+import {NewMeetingPhaseTypeEnum} from './GenericMeetingPhase'
 import MeetingSettings from './MeetingSettings'
-import {MeetingTypeEnum, NewMeetingPhaseTypeEnum} from 'parabol-client/types/graphql'
-
 interface Input {
   teamId: string
   id?: string
 }
 
 const phaseTypes = [
-  NewMeetingPhaseTypeEnum.checkin,
-  NewMeetingPhaseTypeEnum.updates,
-  NewMeetingPhaseTypeEnum.firstcall,
-  NewMeetingPhaseTypeEnum.agendaitems,
-  NewMeetingPhaseTypeEnum.lastcall
-]
+  'checkin',
+  'updates',
+  'firstcall',
+  'agendaitems',
+  'lastcall'
+] as NewMeetingPhaseTypeEnum[]
 export default class MeetingSettingsAction extends MeetingSettings {
   constructor(input: Input) {
     const {teamId, id} = input
-    super({teamId, id, meetingType: MeetingTypeEnum.action, phaseTypes})
+    super({teamId, id, meetingType: 'action', phaseTypes})
   }
 }

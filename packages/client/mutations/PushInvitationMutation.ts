@@ -9,6 +9,7 @@ import {
 import {PushInvitationMutation_team} from '../__generated__/PushInvitationMutation_team.graphql'
 import InviteToTeamMutation from './InviteToTeamMutation'
 import DenyPushInvitationMutation from './DenyPushInvitationMutation'
+import useMutationProps from '../hooks/useMutationProps'
 
 graphql`
   fragment PushInvitationMutation_team on PushInvitationPayload {
@@ -40,6 +41,7 @@ export const pushInvitationTeamOnNext: OnNextHandler<PushInvitationMutation_team
   payload,
   {atmosphere}
 ) => {
+  const {onError, onCompleted} = useMutationProps()
   const {user, team, meetingId} = payload
   if (!user || !team) return
   const {preferredName, email, id: userId} = user
@@ -51,7 +53,11 @@ export const pushInvitationTeamOnNext: OnNextHandler<PushInvitationMutation_team
     action: {
       label: 'Accept',
       callback: () => {
-        InviteToTeamMutation(atmosphere, {meetingId, teamId, invitees: [email]})
+        InviteToTeamMutation(
+          atmosphere,
+          {meetingId, teamId, invitees: [email]},
+          {onError, onCompleted}
+        )
       }
     },
     secondaryAction: {

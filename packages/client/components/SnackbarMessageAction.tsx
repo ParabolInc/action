@@ -2,7 +2,7 @@ import React from 'react'
 import {SnackAction} from './Snackbar'
 import styled from '@emotion/styled'
 import PlainButton from './PlainButton/PlainButton'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {DECELERATE} from '../styles/animation'
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
 
 const Action = styled(PlainButton)({
   borderRadius: 2,
-  color: PALETTE.EMPHASIS_WARM,
+  color: PALETTE.ROSE_500,
   fontSize: 14,
   fontWeight: 600,
   marginLeft: 8,

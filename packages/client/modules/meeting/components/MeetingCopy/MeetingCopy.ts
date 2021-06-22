@@ -1,9 +1,9 @@
 import styled from '@emotion/styled'
 import {minWidthMediaQueries} from '../../../../styles/breakpoints'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 
 const MeetingCopy = styled('div')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   fontSize: 13,
   lineHeight: 1.5,
   margin: '24px 0',

@@ -3,8 +3,7 @@ import graphql from 'babel-plugin-relay/macro'
 import React, {ReactNode, useRef} from 'react'
 import {commitLocalUpdate, createFragmentContainer} from 'react-relay'
 import useAtmosphere from '~/hooks/useAtmosphere'
-import {PALETTE} from '~/styles/paletteV2'
-import {AreaEnum} from '~/types/graphql'
+import {PALETTE} from '~/styles/paletteV3'
 import {ThreadedTaskBase_meeting} from '~/__generated__/ThreadedTaskBase_meeting.graphql'
 import {ThreadedTaskBase_task} from '~/__generated__/ThreadedTaskBase_task.graphql'
 import NullableTask from './NullableTask/NullableTask'
@@ -24,7 +23,7 @@ const BodyCol = styled('div')({
 })
 
 const HeaderActions = styled('div')({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontWeight: 60,
   paddingRight: 32
 })
@@ -70,7 +69,7 @@ const ThreadedTaskBase = (props: Props) => {
             <ThreadedReplyButton dataCy={`${dataCy}`} onReply={onReply} />
           </HeaderActions>
         </ThreadedItemHeaderDescription>
-        <StyledNullableTask dataCy={`${dataCy}`} area={AreaEnum.meeting} task={task} />
+        <StyledNullableTask dataCy={`${dataCy}`} area='meeting' task={task} />
         {children}
         <ThreadedItemReply
           dataCy={`${dataCy}-reply`}

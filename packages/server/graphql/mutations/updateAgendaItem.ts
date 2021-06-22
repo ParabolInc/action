@@ -1,17 +1,16 @@
 import {GraphQLNonNull} from 'graphql'
-import getRethink from '../../database/rethinkDriver'
-import UpdateAgendaItemInput from '../types/UpdateAgendaItemInput'
-import UpdateAgendaItemPayload from '../types/UpdateAgendaItemPayload'
-import {getUserId, isTeamMember} from '../../utils/authorization'
-import publish from '../../utils/publish'
+import {SubscriptionChannel} from 'parabol-client/types/constEnums'
 import {AGENDA_ITEMS} from 'parabol-client/utils/constants'
 import makeUpdateAgendaItemSchema from 'parabol-client/validation/makeUpdateAgendaItemSchema'
+import getRethink from '../../database/rethinkDriver'
+import AgendaItemsPhase from '../../database/types/AgendaItemsPhase'
+import AgendaItemsStage from '../../database/types/AgendaItemsStage'
+import {getUserId, isTeamMember} from '../../utils/authorization'
+import publish from '../../utils/publish'
 import standardError from '../../utils/standardError'
 import {GQLContext} from '../graphql'
-import AgendaItemsStage from '../../database/types/AgendaItemsStage'
-import {IAgendaItem, MeetingTypeEnum} from 'parabol-client/types/graphql'
-import AgendaItemsPhase from '../../database/types/AgendaItemsPhase'
-import {SubscriptionChannel} from 'parabol-client/types/constEnums'
+import UpdateAgendaItemInput from '../types/UpdateAgendaItemInput'
+import UpdateAgendaItemPayload from '../types/UpdateAgendaItemPayload'
 
 export default {
   type: UpdateAgendaItemPayload,
@@ -61,7 +60,7 @@ export default {
       .run()
     const activeMeetings = await dataLoader.get('activeMeetingsByTeamId').load(teamId)
     const actionMeeting = activeMeetings.find(
-      (activeMeeting) => activeMeeting.meetingType === MeetingTypeEnum.action
+      (activeMeeting) => activeMeeting.meetingType === 'action'
     )
     const meetingId = actionMeeting?.id ?? null
     if (actionMeeting) {
@@ -70,9 +69,7 @@ export default {
         (phase) => phase.phaseType === AGENDA_ITEMS
       )! as AgendaItemsPhase
       const {stages} = agendaItemPhase
-      const agendaItems = (await dataLoader
-        .get('agendaItemsByTeamId')
-        .load(teamId)) as IAgendaItem[]
+      const agendaItems = await dataLoader.get('agendaItemsByTeamId').load(teamId)
       const getSortOrder = (stage: AgendaItemsStage) => {
         const agendaItem = agendaItems.find((item) => item.id === stage.agendaItemId)
         return (agendaItem && agendaItem.sortOrder) || 0

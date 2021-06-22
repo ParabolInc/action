@@ -16,6 +16,7 @@ const PromptBlock = styled('div')({
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center',
+  width: '100%',
   maxWidth: '37.5rem',
   padding: '0 1.25rem'
 })
@@ -25,6 +26,10 @@ const AvatarBlock = styled('div')({
   display: 'flex',
   justifyContent: 'center',
   paddingBottom: 16
+})
+
+const CheckInBlock = styled('div')({
+  width: '100%'
 })
 
 interface Props {
@@ -44,10 +49,10 @@ const NewMeetingCheckinPrompt = (props: Props) => {
       <AvatarBlock>
         <Avatar picture={picture || defaultUserAvatar} size={size} />
       </AvatarBlock>
-      <div>
+      <CheckInBlock>
         <NewMeetingCheckInGreeting checkInGreeting={checkInGreeting!} teamMember={teamMember} />
         <NewCheckInQuestion meeting={meeting} />
-      </div>
+      </CheckInBlock>
     </PromptBlock>
   )
 }

@@ -31,7 +31,7 @@ const removeUserFromMeetingStages = async (
           isChanged = true
         }
       })
-      if (!isChanged) return Promise.resolve()
+      if (!isChanged) return Promise.resolve(undefined)
       return r
         .table('NewMeeting')
         .get(meetingId)

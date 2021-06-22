@@ -10,9 +10,11 @@ interface Options extends UsePortalOptions {
 }
 
 const useModal = (options: Options = {}) => {
-  const {background, onOpen, onClose, noClose} = options
+  const {background, onOpen, onClose, noClose, id, parentId} = options
   const targetRef = useRef<HTMLDivElement>(null)
   const {portal, closePortal, openPortal, togglePortal, portalStatus, setPortalStatus} = usePortal({
+    id,
+    parentId,
     onOpen,
     onClose
   })

@@ -5,7 +5,6 @@ import GQLTrebuchetClient, {
 import getTrebuchet, {SocketTrebuchet, SSETrebuchet} from '@mattkrick/trebuchet-client'
 import EventEmitter from 'eventemitter3'
 import jwtDecode from 'jwt-decode'
-import AuthToken from 'parabol-server/database/types/AuthToken'
 import {Disposable} from 'react-relay'
 import {RouterProps} from 'react-router'
 import {
@@ -19,17 +18,20 @@ import {
   RequestParameters,
   Store,
   SubscribeFunction,
+  UploadableMap,
   Variables
 } from 'relay-runtime'
 import {Sink} from 'relay-runtime/lib/network/RelayObservable'
-import RelayFeatureFlags from 'relay-runtime/lib/util/RelayFeatureFlags'
+import {RelayFeatureFlags} from 'relay-runtime'
 import StrictEventEmitter from 'strict-event-emitter-types'
 import {Snack, SnackbarRemoveFn} from './components/Snackbar'
 import handleInvalidatedSession from './hooks/handleInvalidatedSession'
 import {LocalStorageKey, TrebuchetCloseReason} from './types/constEnums'
 import handlerProvider from './utils/relay/handlerProvider'
 import {InviteToTeamMutation_notification} from './__generated__/InviteToTeamMutation_notification.graphql'
-;(RelayFeatureFlags as any).ENABLE_RELAY_CONTAINERS_SUSPENSE = false
+import {AuthToken} from './types/AuthToken'
+
+(RelayFeatureFlags as any).ENABLE_RELAY_CONTAINERS_SUSPENSE = false
 
 interface QuerySubscription {
   subKey: string
@@ -41,11 +43,19 @@ interface Subscriptions {
   [subKey: string]: ReturnType<GQLTrebuchetClient['subscribe']>
 }
 
-export type SubscriptionRequestor = (
-  atmosphere: Atmosphere,
-  variables: Variables,
-  router: {history: RouterProps['history']}
-) => Disposable
+export type SubscriptionRequestor = {
+  (
+    atmosphere: Atmosphere,
+    variables: Variables,
+    router: {history: RouterProps['history']}
+  ): Disposable,
+  key: string
+}
+
+export interface FetchHTTPData {
+  type: 'start' | 'stop'
+  payload: OperationPayload
+}
 
 const noop = (): any => {
   /* noop */
@@ -57,6 +67,19 @@ const noopSink = {
   error: noop,
   complete: noop,
   closed: false
+}
+
+const toFormData = (
+  body: FetchHTTPData,
+  formData = new FormData()
+) => {
+  const uploadables = body.payload.uploadables || []
+  delete body.payload.uploadables
+  formData.append('body', JSON.stringify(body))
+  Object.keys(uploadables).forEach(key => {
+    formData.append(`uploadables.${key}`, uploadables[key])
+  })
+  return formData
 }
 
 export interface AtmosphereEvents {
@@ -78,6 +101,7 @@ export default class Atmosphere extends Environment {
   }
   _network: typeof Network
 
+  baseHTTPTransport: GQLHTTPClient
   transport!: GQLHTTPClient | GQLTrebuchetClient
   authToken: string | null = null
   authObj: AuthToken | null = null
@@ -100,7 +124,7 @@ export default class Atmosphere extends Environment {
       network: Network.create(noop)
     })
     this._network = Network.create(this.handleFetch, this.handleSubscribe) as any
-    this.transport = new GQLHTTPClient(this.fetchHTTP)
+    this.baseHTTPTransport = this.transport = new GQLHTTPClient(this.fetchHTTP)
   }
 
   fetchPing = async (connectionId?: string) => {
@@ -112,16 +136,30 @@ export default class Atmosphere extends Environment {
     })
   }
 
-  fetchHTTP = async (body: object, connectionId?: string) => {
-    const res = await fetch('/graphql', {
+  fetchReliable = async (connectionId: string, data: ArrayBuffer) => {
+    return fetch('/sse-ping', {
       method: 'POST',
       headers: {
-        accept: 'application/json',
-        Authorization: this.authToken ? `Bearer ${this.authToken}` : '',
-        'content-type': 'application/json',
+        Authorization: `Bearer ${this.authToken}`,
         'x-correlation-id': connectionId || ''
       },
-      body: JSON.stringify(body)
+      body: data
+    })
+  }
+
+  fetchHTTP = async (body: FetchHTTPData, connectionId?: string) => {
+    const uploadables = body.payload.uploadables
+    const headers = {
+      accept: 'application/json',
+      Authorization: this.authToken ? `Bearer ${this.authToken}` : '',
+      'x-correlation-id': connectionId || '',
+    }
+    /* if uploadables, don't set content type bc we want the browser to set it */
+    if (!uploadables) headers['content-type'] = 'application/json'
+    const res = await fetch('/graphql', {
+      method: 'POST',
+      headers,
+      body: uploadables ? toFormData(body) : JSON.stringify(body)
     })
     const contentTypeHeader = res.headers.get('content-type') || ''
     if (contentTypeHeader.toLowerCase().startsWith('application/json')) {
@@ -150,9 +188,14 @@ export default class Atmosphere extends Environment {
     const transport = this.transport as GQLTrebuchetClient
     if (!transport.subscribe) return
     if (!__PRODUCTION__) {
-      const queryMap = await import('../../queryMap.json')
-      const query = queryMap[documentId!]
-      this.subscriptions[subKey] = transport.subscribe({query, variables}, sink)
+      try {
+        const queryMap = await import('../../queryMap.json')
+        const query = queryMap[documentId!]
+        this.subscriptions[subKey] = transport.subscribe({query, variables}, sink)
+      } catch (e) {
+        return
+      }
+
     } else {
       this.subscriptions[subKey] = transport.subscribe({documentId, variables}, sink)
     }
@@ -182,14 +225,15 @@ export default class Atmosphere extends Environment {
         })
         return ''
       }
-      return `${wsProtocol}//${window.location.host}/?token=${this.authToken}`
+      const host = __PRODUCTION__ ? window.location.host : `${window.location.hostname}:${__SOCKET_PORT__}`
+      return `${wsProtocol}//${host}/?token=${this.authToken}`
     }
     return new SocketTrebuchet({getUrl})
   }
 
   trySSE = () => {
     const getUrl = () => `/sse/?token=${this.authToken}`
-    return new SSETrebuchet({getUrl, fetchData: this.fetchHTTP, fetchPing: this.fetchPing})
+    return new SSETrebuchet({getUrl, fetchData: this.fetchHTTP, fetchPing: this.fetchPing, fetchReliable: this.fetchReliable})
   }
 
   async promiseToUpgrade() {
@@ -220,21 +264,31 @@ export default class Atmosphere extends Environment {
   handleFetchPromise = async (
     request: RequestParameters,
     variables: Variables,
+    uploadables?: UploadableMap | null,
     sink?: Sink<any>
   ) => {
     // await sleep(1000)
     const field = __PRODUCTION__ ? 'documentId' : 'query'
     let data = request.id
     if (!__PRODUCTION__) {
-      const queryMap = await import('../../queryMap.json')
-      data = queryMap[request.id!]
+      try {
+        const queryMap = await import('../../queryMap.json').catch()
+        data = queryMap[request.id!]
+      } catch (e) {
+        return
+      }
     }
-    return this.transport.fetch({[field]: data, variables}, sink || noopSink)
+    const transport = uploadables ? this.baseHTTPTransport : this.transport
+    return transport.fetch({
+      [field]: data,
+      variables,
+      uploadables: uploadables || undefined
+    }, sink || noopSink)
   }
 
-  handleFetch: FetchFunction = (request, variables) => {
+  handleFetch: FetchFunction = (request, variables, _, uploadables) => {
     return Observable.create((sink) => {
-      this.handleFetchPromise(request, variables, sink)
+      this.handleFetchPromise(request, variables, uploadables, sink)
     })
   }
 
@@ -281,10 +335,10 @@ export default class Atmosphere extends Environment {
     window.clearTimeout(this.queryTimeouts[queryKey])
     delete this.queryTimeouts[queryKey]
     await this.upgradeTransport()
-    const {name} = subscription
+    const {key} = subscription
     // runtime error in case relay changes
-    if (!name) throw new Error(`Missing name for sub`)
-    const subKey = Atmosphere.getKey(name, variables)
+    if (!key) throw new Error(`Missing name for sub`)
+    const subKey = Atmosphere.getKey(key, variables)
     const isRequested = Boolean(this.querySubscriptions.find((qs) => qs.subKey === subKey))
     if (!isRequested) {
       subscription(this, variables, router)
@@ -354,8 +408,8 @@ export default class Atmosphere extends Environment {
     this.querySubscriptions.forEach((querySub) => {
       this.unregisterQuery(querySub.queryKey)
     })
-    // remove all records
-    ;(this.getStore().getSource() as any).clear()
+      // remove all records
+      ; (this.getStore().getSource() as any).clear()
     this.upgradeTransportPromise = null
     this.authObj = null
     this.authToken = null

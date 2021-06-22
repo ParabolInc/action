@@ -8,11 +8,13 @@ import getRethink from '../../../database/rethinkDriver'
 import SlackAuth from '../../../database/types/SlackAuth'
 import SlackNotification, {SlackNotificationEvent} from '../../../database/types/SlackNotification'
 import {toEpochSeconds} from '../../../utils/epochTime'
-import makeAppLink from '../../../utils/makeAppLink'
+import makeAppURL from 'parabol-client/utils/makeAppURL'
 import segmentIo from '../../../utils/segmentIo'
 import sendToSentry from '../../../utils/sendToSentry'
 import SlackServerManager from '../../../utils/SlackServerManager'
+import errorFilter from '../../errorFilter'
 import {DataLoaderWorker} from '../../graphql'
+import appOrigin from '../../../appOrigin'
 
 const getSlackDetails = async (
   event: SlackNotificationEvent,
@@ -31,7 +33,9 @@ const getSlackDetails = async (
     distinctChannelNotifications.push(notification)
   }
   const notificationUserIds = distinctChannelNotifications.map(({userId}) => userId)
-  const userSlackAuths = await dataLoader.get('slackAuthByUserId').loadMany(notificationUserIds)
+  const userSlackAuths = (
+    await dataLoader.get('slackAuthByUserId').loadMany(notificationUserIds)
+  ).filter(errorFilter)
   return userSlackAuths.map((userSlackAuthArr, idx) => {
     const auth = userSlackAuthArr.find((val) => val.teamId === teamId) as SlackAuth
     return {auth, notification: distinctChannelNotifications[idx]}
@@ -51,8 +55,8 @@ const notifySlack = async (
   for (let i = 0; i < slackDetails.length; i++) {
     const {notification, auth} = slackDetails[i]
     const {channelId} = notification
-    const {accessToken, botAccessToken, userId} = auth
-    const manager = new SlackServerManager(botAccessToken || accessToken)
+    const {botAccessToken, userId} = auth
+    const manager = new SlackServerManager(botAccessToken)
     const res = await manager.postMessage(channelId!, slackText)
     segmentIo.track({
       userId,
@@ -74,7 +78,6 @@ const notifySlack = async (
           })
           .run()
       } else if (error === 'not_in_channel' || error === 'invalid_auth') {
-        console.log('Slack Channel Notification Error:', error)
         sendToSentry(
           new Error(`Slack Channel Notification Error: ${teamId}, ${channelId}, ${auth.id}`)
         )
@@ -88,28 +91,28 @@ export const startSlackMeeting = async (
   teamId: string,
   dataLoader: DataLoaderWorker
 ) => {
-  const params = {
+  const searchParams = {
     utm_source: 'slack meeting start',
     utm_medium: 'product',
     utm_campaign: 'invitations'
   }
-  const options = {params}
+  const options = {searchParams}
   const team = await dataLoader.get('teams').load(teamId)
 
-  const meetingUrl = makeAppLink(`meet/${meetingId}`, options)
+  const meetingUrl = makeAppURL(appOrigin, `meet/${meetingId}`, options)
   const slackText = `${team.name} has started a meeting!\n To join, click here: ${meetingUrl}`
   notifySlack('meetingStart', dataLoader, teamId, slackText).catch(console.log)
 }
 
 export const endSlackMeeting = async (meetingId, teamId, dataLoader: DataLoaderWorker) => {
-  const params = {
+  const searchParams = {
     utm_source: 'slack summary',
     utm_medium: 'product',
     utm_campaign: 'after-meeting'
   }
-  const options = {params}
+  const options = {searchParams}
   const team = await dataLoader.get('teams').load(teamId)
-  const summaryUrl = makeAppLink(`new-summary/${meetingId}`, options)
+  const summaryUrl = makeAppURL(appOrigin, `new-summary/${meetingId}`, options)
   const slackText = `The meeting for ${team.name} has ended!\n Check out the summary here: ${summaryUrl}`
   notifySlack('meetingEnd', dataLoader, teamId, slackText).catch(console.log)
 }
@@ -120,22 +123,22 @@ const upsertSlackMessage = async (
 ) => {
   const {notification, auth} = slackDetails
   const {channelId} = notification
-  const {accessToken, botAccessToken} = auth
+  const {botAccessToken} = auth
   if (!channelId) return
-  const manager = new SlackServerManager(accessToken)
-  const botManager = new SlackServerManager(botAccessToken)
-  const channelInfo = await manager.getChannelInfo(channelId)
-  if (channelInfo.ok) {
-    const {channel} = channelInfo
+  const manager = new SlackServerManager(botAccessToken)
+  const convoInfo = await manager.getConversationInfo(channelId)
+  if (convoInfo.ok && 'latest' in convoInfo.channel) {
+    const {channel} = convoInfo
     const {latest} = channel
     if (latest) {
-      const {ts, username} = latest
-      if (username === 'Parabol') {
+      const {ts, bot_profile} = latest
+      const {name} = bot_profile
+      if (name === 'Parabol') {
         const timestamp = new Date(Number.parseFloat(ts) * 1000)
         const ageThresh = new Date(Date.now() - ms('5m'))
         if (timestamp >= ageThresh) {
           // trigger update
-          const res = await botManager.updateMessage(channelId, slackText, ts)
+          const res = await manager.updateMessage(channelId, slackText, ts)
           if (!res.ok) {
             console.error(res.error)
           }
@@ -143,12 +146,10 @@ const upsertSlackMessage = async (
         }
       }
     }
-  } else if (channelInfo.error === 'method_not_supported_for_channel_type') {
-    // not a public channel, ignore
   } else {
     // handle error?
   }
-  const res = await botManager.postMessage(channelId, slackText)
+  const res = await manager.postMessage(channelId, slackText)
   if (!res.ok) {
     console.error(res.error)
   }
@@ -167,7 +168,7 @@ export const notifySlackTimeLimitStart = async (
   const {name: meetingName, phases, facilitatorStageId} = meeting
   const stageRes = findStageById(phases, facilitatorStageId)
   const {stage} = stageRes!
-  const meetingUrl = makeAppLink(`meet/${meetingId}`)
+  const meetingUrl = makeAppURL(appOrigin, `meet/${meetingId}`)
   const {phaseType} = stage
   const phaseLabel = phaseLabelLookup[phaseType]
   const slackDetails = await getSlackDetails('MEETING_STAGE_TIME_LIMIT_START', teamId, dataLoader)

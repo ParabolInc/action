@@ -1,8 +1,8 @@
 import styled from '@emotion/styled'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 
 const MenuItemHR = styled('hr')({
-  backgroundColor: PALETTE.BORDER_LIGHT,
+  backgroundColor: PALETTE.SLATE_400,
   border: 'none',
   height: 1,
   marginBottom: 8,

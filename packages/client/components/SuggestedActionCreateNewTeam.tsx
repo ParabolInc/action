@@ -4,7 +4,7 @@ import {createFragmentContainer} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
 import {RouteComponentProps, withRouter} from 'react-router'
 import withAtmosphere, {WithAtmosphereProps} from '../decorators/withAtmosphere/withAtmosphere'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import withMutationProps, {WithMutationProps} from '../utils/relay/withMutationProps'
 import SuggestedActionButton from './SuggestedActionButton'
 import SuggestedActionCard from './SuggestedActionCard'
@@ -25,7 +25,7 @@ class SuggestedActionCreateNewTeam extends Component<Props> {
     const {id: suggestedActionId} = suggestedAction
     return (
       <SuggestedActionCard
-        backgroundColor={PALETTE.BACKGROUND_GREEN}
+        backgroundColor={PALETTE.JADE_400}
         iconName='group_add'
         suggestedActionId={suggestedActionId}
       >

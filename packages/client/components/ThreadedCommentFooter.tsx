@@ -2,14 +2,14 @@ import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
 import {createFragmentContainer} from 'react-relay'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import {ThreadedCommentFooter_reactjis} from '~/__generated__/ThreadedCommentFooter_reactjis.graphql'
 import ReactjiSection from './ReflectionCard/ReactjiSection'
 import ThreadedReplyButton from './ThreadedReplyButton'
 
 const FooterActions = styled('div')({
   alignItems: 'center',
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   display: 'flex',
   fontSize: 12,
   fontWeight: 600,

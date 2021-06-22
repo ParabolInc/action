@@ -1,7 +1,7 @@
-import {NewMeetingPhaseTypeEnum} from 'parabol-client/types/graphql'
 import findStageById from 'parabol-client/utils/meetings/findStageById'
 import nullIfEmpty from 'parabol-client/utils/nullIfEmpty'
 import toTeamMemberId from 'parabol-client/utils/relay/toTeamMemberId'
+import {NewMeetingPhaseTypeEnum} from '../database/types/GenericMeetingPhase'
 import GenericMeetingStage from '../database/types/GenericMeetingStage'
 import Meeting from '../database/types/Meeting'
 import {getUserId, isSuperUser, isUserBillingLeader} from '../utils/authorization'
@@ -85,16 +85,19 @@ export const resolveGQLStageFromId = (stageId: string, meeting: Meeting) => {
 export const resolveGQLStagesFromPhase = ({
   meetingId,
   phaseType,
-  stages
+  stages,
+  teamId
 }: {
   meetingId: string
   phaseType: NewMeetingPhaseTypeEnum
   stages: GenericMeetingStage[]
+  teamId: string
 }) => {
   return stages.map((stage) => ({
     ...stage,
     meetingId,
-    phaseType
+    phaseType,
+    teamId
   }))
 }
 

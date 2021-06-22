@@ -1,5 +1,6 @@
 import {GraphQLObjectType} from 'graphql'
 import {getUserId} from '../../utils/authorization'
+import errorFilter from '../errorFilter'
 import {GQLContext} from '../graphql'
 import {resolveTask} from '../resolvers'
 import NotifyTaskInvolves from './NotifyTaskInvolves'
@@ -20,7 +21,9 @@ const CreateTaskPayload = new GraphQLObjectType<any, GQLContext>({
       type: NotifyTaskInvolves,
       resolve: async ({notificationIds}, _args, {authToken, dataLoader}) => {
         if (!notificationIds) return null
-        const notifications = await dataLoader.get('notifications').loadMany(notificationIds)
+        const notifications = (
+          await dataLoader.get('notifications').loadMany(notificationIds)
+        ).filter(errorFilter)
         const viewerId = getUserId(authToken)
         return notifications.find((notification) => notification.userId === viewerId)
       }

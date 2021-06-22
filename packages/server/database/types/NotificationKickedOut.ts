@@ -1,5 +1,4 @@
 import Notification from './Notification'
-import {NotificationEnum} from 'parabol-client/types/graphql'
 
 interface Input {
   teamId: string
@@ -12,7 +11,7 @@ export default class NotificationKickedOut extends Notification {
   evictorUserId: string
   constructor(input: Input) {
     const {evictorUserId, teamId, userId} = input
-    super({userId, type: NotificationEnum.KICKED_OUT})
+    super({userId, type: 'KICKED_OUT'})
     this.teamId = teamId
     this.evictorUserId = evictorUserId
   }

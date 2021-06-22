@@ -7,14 +7,14 @@ import useTooltip from '~/hooks/useTooltip'
 import {EditingStatus_task} from '~/__generated__/EditingStatus_task.graphql'
 import useAtmosphere from '../../hooks/useAtmosphere'
 import {UseTaskChild} from '../../hooks/useTaskChildFocus'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import {Card} from '../../types/constEnums'
 import DueDateToggle from '../DueDateToggle'
 import EditingStatusText from './EditingStatusText'
 
 const StatusHeader = styled('div')({
   alignItems: 'flex-start',
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   display: 'flex',
   fontSize: 11,
   fontWeight: 400,
@@ -36,10 +36,11 @@ interface Props {
   isTaskHovered: boolean
   task: EditingStatus_task
   useTaskChild: UseTaskChild
+  isArchived?: boolean
 }
 
 const EditingStatus = (props: Props) => {
-  const {children, isTaskHovered, task, useTaskChild} = props
+  const {children, isTaskHovered, task, useTaskChild, isArchived} = props
   const {createdAt, updatedAt, editors} = task
   const atmosphere = useAtmosphere()
   const {viewerId} = atmosphere
@@ -69,6 +70,7 @@ const EditingStatus = (props: Props) => {
         >
           <EditingStatusText
             editors={otherEditors}
+            isArchived={isArchived}
             isEditing={isEditing}
             timestamp={timestamp}
             timestampType={timestampType}
@@ -78,6 +80,7 @@ const EditingStatus = (props: Props) => {
       </div>
       <DueDateToggle
         cardIsActive={isEditing || isTaskHovered}
+        isArchived={isArchived}
         task={task}
         useTaskChild={useTaskChild}
       />

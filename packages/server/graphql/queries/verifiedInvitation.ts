@@ -2,7 +2,7 @@ import dns, {MxRecord} from 'dns'
 import promisify from 'es6-promisify'
 import {GraphQLID, GraphQLNonNull} from 'graphql'
 import {InvitationTokenError} from 'parabol-client/types/constEnums'
-import {AuthIdentityTypeEnum} from 'parabol-client/types/graphql'
+import {AuthIdentityTypeEnum} from '../../../client/types/constEnums'
 import getRethink from '../../database/rethinkDriver'
 import User from '../../database/types/User'
 import db from '../../db'
@@ -11,6 +11,7 @@ import getSAMLURLFromEmail from '../../utils/getSAMLURLFromEmail'
 import {GQLContext} from '../graphql'
 import rateLimit from '../rateLimit'
 import VerifiedInvitationPayload from '../types/VerifiedInvitationPayload'
+import getTeamByTeamId from '../../postgres/queries/getTeamByTeamId'
 
 const resolveMx = promisify(dns.resolveMx, dns)
 
@@ -59,10 +60,7 @@ export default {
         teamId
       } = teamInvitation
       const [team, inviter] = await Promise.all([
-        r
-          .table('Team')
-          .get(teamId)
-          .run(),
+        getTeamByTeamId(teamId),
         db.read('User', invitedBy)
       ])
       const bestMeeting = await getBestInvitationMeeting(teamId, maybeMeetingId, dataLoader)

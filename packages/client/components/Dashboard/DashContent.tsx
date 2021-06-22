@@ -1,9 +1,9 @@
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import {Filter} from '../../types/constEnums'
 import styled from '@emotion/styled'
 
 const DashContent = styled('div')<{hasOverlay?: boolean}>(({hasOverlay}) => ({
-  backgroundColor: PALETTE.BACKGROUND_MAIN,
+  backgroundColor: PALETTE.SLATE_200,
   display: 'flex',
   flex: 1,
   flexDirection: 'column',

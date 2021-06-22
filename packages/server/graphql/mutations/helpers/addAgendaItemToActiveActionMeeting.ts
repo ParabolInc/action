@@ -3,7 +3,6 @@ import getRethink from '../../../database/rethinkDriver'
 import {DataLoaderWorker} from '../../graphql'
 import AgendaItemsPhase from '../../../database/types/AgendaItemsPhase'
 import AgendaItemsStage from '../../../database/types/AgendaItemsStage'
-import {MeetingTypeEnum} from 'parabol-client/types/graphql'
 
 /*
  * NewMeetings have a predefined set of stages, we need to add the new agenda item manually
@@ -17,7 +16,7 @@ const addAgendaItemToActiveActionMeeting = async (
   const r = await getRethink()
   const activeMeetings = await dataLoader.get('activeMeetingsByTeamId').load(teamId)
   const actionMeeting = activeMeetings.find(
-    (activeMeeting) => activeMeeting.meetingType === MeetingTypeEnum.action
+    (activeMeeting) => activeMeeting.meetingType === 'action'
   )
   if (!actionMeeting) return undefined
   const {id: meetingId, phases} = actionMeeting

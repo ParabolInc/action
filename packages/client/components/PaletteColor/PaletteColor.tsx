@@ -2,7 +2,7 @@ import styled from '@emotion/styled'
 import React from 'react'
 import {MenuPosition} from '~/hooks/useCoords'
 import useTooltip from '~/hooks/useTooltip'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import Icon from '../Icon'
 import PlainButton from '../PlainButton/PlainButton'
 interface Props {
@@ -17,7 +17,7 @@ interface Props {
 
 const Border = styled('div')<{isAvailable: boolean}>(({isAvailable}) => ({
   alignItems: 'center',
-  border: `2px solid ${isAvailable ? '#fff' : PALETTE.BORDER_GRAY}`,
+  border: `2px solid ${isAvailable ? '#fff' : PALETTE.SLATE_400}`,
   borderRadius: '50%',
   display: 'flex',
   height: 40,

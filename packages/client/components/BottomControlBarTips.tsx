@@ -7,8 +7,8 @@ import useMenu from '~/hooks/useMenu'
 import useTimeout from '~/hooks/useTimeout'
 import {TransitionStatus} from '~/hooks/useTransition'
 import LocalAtmosphere from '~/modules/demo/LocalAtmosphere'
-import {NewMeetingPhaseTypeEnum} from '~/types/graphql'
-import lazyPreload from '~/utils/lazyPreload'
+import {NewMeetingPhaseTypeEnum} from '../__generated__/BottomControlBarTips_meeting.graphql'
+import lazyPreload, {LazyExoticPreload} from '~/utils/lazyPreload'
 import {BottomControlBarTips_meeting} from '~/__generated__/BottomControlBarTips_meeting.graphql'
 import useAtmosphere from '../hooks/useAtmosphere'
 import isDemoRoute from '../utils/isDemoRoute'
@@ -67,25 +67,35 @@ const UpdatesHelpMenu = lazyPreload(async () =>
   import(/* webpackChunkName: 'UpdatesHelpMenu' */ './MeetingHelp/UpdatesHelpMenu')
 )
 
+const ScopeHelpMenu = lazyPreload(async () =>
+  import(/* webpackChunkName: 'ScopeHelpMenu' */ './MeetingHelp/ScopeHelpMenu')
+)
+
+const EstimateHelpMenu = lazyPreload(async () =>
+  import(/* webpackChunkName: 'EstimateHelpMenu' */ './MeetingHelp/EstimateHelpMenu')
+)
+
 const demoHelps = {
-  [NewMeetingPhaseTypeEnum.checkin]: DemoReflectHelpMenu,
-  [NewMeetingPhaseTypeEnum.reflect]: DemoReflectHelpMenu,
-  [NewMeetingPhaseTypeEnum.group]: DemoGroupHelpMenu,
-  [NewMeetingPhaseTypeEnum.vote]: DemoVoteHelpMenu,
-  [NewMeetingPhaseTypeEnum.discuss]: DemoDiscussHelpMenu
-}
+  checkin: DemoReflectHelpMenu,
+  reflect: DemoReflectHelpMenu,
+  group: DemoGroupHelpMenu,
+  vote: DemoVoteHelpMenu,
+  discuss: DemoDiscussHelpMenu
+} as Record<NewMeetingPhaseTypeEnum, LazyExoticPreload<any>>
 
 const helps = {
-  [NewMeetingPhaseTypeEnum.checkin]: CheckInHelpMenu,
-  [NewMeetingPhaseTypeEnum.reflect]: ReflectHelpMenu,
-  [NewMeetingPhaseTypeEnum.group]: GroupHelpMenu,
-  [NewMeetingPhaseTypeEnum.vote]: VoteHelpMenu,
-  [NewMeetingPhaseTypeEnum.discuss]: DiscussHelpMenu,
-  [NewMeetingPhaseTypeEnum.updates]: UpdatesHelpMenu,
-  [NewMeetingPhaseTypeEnum.firstcall]: ActionMeetingFirstCallHelpMenu,
-  [NewMeetingPhaseTypeEnum.agendaitems]: ActionMeetingAgendaItemsHelpMenu,
-  [NewMeetingPhaseTypeEnum.lastcall]: ActionMeetingLastCallHelpMenu
-}
+  checkin: CheckInHelpMenu,
+  reflect: ReflectHelpMenu,
+  group: GroupHelpMenu,
+  vote: VoteHelpMenu,
+  discuss: DiscussHelpMenu,
+  updates: UpdatesHelpMenu,
+  firstcall: ActionMeetingFirstCallHelpMenu,
+  agendaitems: ActionMeetingAgendaItemsHelpMenu,
+  lastcall: ActionMeetingLastCallHelpMenu,
+  SCOPE: ScopeHelpMenu,
+  ESTIMATE: EstimateHelpMenu
+} as Record<NewMeetingPhaseTypeEnum, LazyExoticPreload<any>>
 
 interface Props {
   cancelConfirm: (() => void) | undefined

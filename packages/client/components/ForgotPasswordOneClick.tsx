@@ -3,7 +3,7 @@ import React, {useState} from 'react'
 import useAtmosphere from '~/hooks/useAtmosphere'
 import useMutationProps from '~/hooks/useMutationProps'
 import EmailPasswordResetMutation from '~/mutations/EmailPasswordResetMutation'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import PlainButton from './PlainButton/PlainButton'
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
 }
 
 const ForgotButton = styled(PlainButton)({
-  color: PALETTE.LINK_BLUE,
+  color: PALETTE.SKY_500,
   marginTop: '1rem'
 })
 
@@ -36,8 +36,8 @@ const ForgotPasswordOneClick = (props: Props) => {
       atmosphere,
       {email},
       {
-        onCompleted: () => {},
-        onError: () => {}
+        onCompleted: () => { },
+        onError: () => { }
       }
     )
     onCompleted()

@@ -18,7 +18,7 @@ exports.up = async (r) => {
     .table('TaskHistory')
     .indexCreate('taskIdUpdatedAt', (row) => [row('taskId'), row('updatedAt')])
     .run()
-
+  await r.table('Task').wait()
   // replace Task.isSoftProject with Task.isSoftTask
   await r
     .table('Task')
@@ -134,7 +134,7 @@ exports.down = async (r) => {
   await r
     .table('Notification')
     .filter(
-      r.row.hasFields('taskId').and(function(row) {
+      r.row.hasFields('taskId').and(function (row) {
         return row('type').eq('TASK_INVOLVES')
       })
     )

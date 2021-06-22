@@ -11,7 +11,9 @@ import {ReflectionGroupHeader_meeting} from '../__generated__/ReflectionGroupHea
 import plural from '../utils/plural'
 import {PortalStatus} from '../hooks/usePortal'
 import {ElementWidth, Gutters} from '../types/constEnums'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
+import {ICON_SIZE} from '~/styles/typographyV2'
+import Icon from './Icon'
 
 interface Props {
   meeting: ReflectionGroupHeader_meeting
@@ -22,27 +24,46 @@ interface Props {
   dataCy?: string
 }
 
-const GroupHeader = styled('div')<{isExpanded: boolean; portalStatus: PortalStatus}>(
-  ({isExpanded, portalStatus}) => ({
-    alignItems: 'center',
-    display: 'flex',
-    flexShrink: 1,
-    fontSize: 14,
-    justifyContent: 'space-between',
-    margin: isExpanded ? `0 ${Gutters.COLUMN_INNER_GUTTER}` : undefined,
-    maxWidth: ElementWidth.REFLECTION_CARD,
-    minHeight: 32,
-    opacity: !isExpanded && portalStatus !== PortalStatus.Exited ? 0 : undefined,
-    paddingLeft: Gutters.REFLECTION_INNER_GUTTER_HORIZONTAL,
-    paddingRight: 8,
-    position: 'relative',
-    width: '100%'
-  })
-)
+const GroupHeader = styled('div')<{
+  isExpanded: boolean
+  portalStatus: PortalStatus
+}>(({isExpanded, portalStatus}) => ({
+  alignItems: 'center',
+  display: 'flex',
+  flexShrink: 1,
+  fontSize: 14,
+  justifyContent: 'space-between',
+  margin: isExpanded ? `0 ${Gutters.COLUMN_INNER_GUTTER}` : undefined,
+  maxWidth: ElementWidth.REFLECTION_CARD,
+  minHeight: 32,
+  opacity: !isExpanded && portalStatus !== PortalStatus.Exited ? 0 : undefined,
+  paddingLeft: Gutters.REFLECTION_INNER_GUTTER_HORIZONTAL,
+  paddingRight: 8,
+  position: 'relative',
+  width: '100%'
+}))
+
+const IconGroup = styled('div')({
+  display: 'flex',
+  alignItems: 'center'
+})
+
+const PencilIcon = styled(Icon)<{isExpanded?: boolean}>(({isExpanded}) => ({
+  color: isExpanded ? '#FFFFFF' : PALETTE.SLATE_600,
+  display: 'block',
+  fontSize: ICON_SIZE.MD18,
+  opacity: 0.5,
+  marginRight: 4,
+  textAlign: 'center',
+  top: 1,
+  '&:hover': {
+    cursor: 'pointer'
+  }
+}))
 
 const StyledTag = styled(BaseTag)<{dialogClosed: boolean}>(({dialogClosed}) => ({
-  backgroundColor: dialogClosed ? PALETTE.BACKGROUND_GRAY : '#FFFFFF',
-  color: dialogClosed ? '#FFFFFF' : PALETTE.TEXT_MAIN,
+  backgroundColor: dialogClosed ? PALETTE.SLATE_600 : '#FFFFFF',
+  color: dialogClosed ? '#FFFFFF' : PALETTE.SLATE_700,
   marginRight: 4
 }))
 
@@ -55,6 +76,10 @@ const ReflectionGroupHeader = forwardRef((props: Props, ref: Ref<HTMLDivElement>
   } = meeting
   const {reflections} = reflectionGroup
   const canEdit = (phaseType === GROUP || phaseType === VOTE) && !localStage.isComplete
+  const onClick = () => {
+    titleInputRef.current && titleInputRef.current.select()
+  }
+
   return (
     <GroupHeader data-cy={dataCy} portalStatus={portalStatus} isExpanded={isExpanded} ref={ref}>
       <ReflectionGroupTitleEditor
@@ -62,15 +87,21 @@ const ReflectionGroupHeader = forwardRef((props: Props, ref: Ref<HTMLDivElement>
         reflectionGroup={reflectionGroup}
         meeting={meeting}
         readOnly={!canEdit}
-        hidePencil={canEdit && phaseType === VOTE}
         titleInputRef={titleInputRef}
       />
       {phaseType === GROUP && (
-        <StyledTag
-          dialogClosed={
-            portalStatus === PortalStatus.Exited || portalStatus === PortalStatus.Exiting
-          }
-        >{`${reflections.length} ${plural(reflections.length, 'Card')}`}</StyledTag>
+        <IconGroup>
+          {canEdit && (
+            <PencilIcon isExpanded={isExpanded} onClick={onClick}>
+              edit
+            </PencilIcon>
+          )}
+          <StyledTag
+            dialogClosed={
+              portalStatus === PortalStatus.Exited || portalStatus === PortalStatus.Exiting
+            }
+          >{`${reflections.length} ${plural(reflections.length, 'Card')}`}</StyledTag>
+        </IconGroup>
       )}
       {phaseType === VOTE && (
         <ReflectionGroupVoting

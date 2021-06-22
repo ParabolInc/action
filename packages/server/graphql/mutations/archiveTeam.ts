@@ -19,6 +19,7 @@ export default {
   },
   async resolve(_source, {teamId}, {authToken, dataLoader, socketId: mutatorId}) {
     const r = await getRethink()
+    const now = new Date()
     const operationId = dataLoader.share()
     const subOptions = {operationId, mutatorId}
 
@@ -42,6 +43,19 @@ export default {
       return standardError(new Error('Already archived team'), {userId: viewerId})
     }
 
+    const teamTemplateIds = (await r
+      .table('MeetingTemplate')
+      .getAll(teamId, {index: 'teamId'})
+      .filter({isActive: true})('id')
+      .coerceTo('array')
+      .run()) as string[]
+    await r({
+      template: r
+        .table('MeetingTemplate')
+        .getAll(teamId, {index: 'teamId'})
+        .update({isActive: false, updatedAt: now})
+    }).run()
+
     const notifications = users
       .map(({id}) => id)
       .filter((userId) => userId !== viewerId)
@@ -60,6 +74,7 @@ export default {
     const data = {
       teamId,
       notificationIds: notifications.map(({id}) => id),
+      teamTemplateIds,
       removedSuggestedActionIds
     }
     publish(SubscriptionChannel.TEAM, teamId, 'ArchiveTeamPayload', data, subOptions)

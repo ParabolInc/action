@@ -16,8 +16,8 @@ const subscription = graphql`
       __typename
       ...RemoveTeamMemberMutation_task @relay(mask: false)
       ...ChangeTaskTeamMutation_task @relay(mask: false)
-      ...CreateGitHubIssueMutation_task @relay(mask: false)
-      ...CreateJiraIssueMutation_task @relay(mask: false)
+      ...CreateGitHubTaskIntegrationMutation_task @relay(mask: false)
+      ...CreateJiraTaskIntegrationMutation_task @relay(mask: false)
       ...CreateTaskMutation_task @relay(mask: false)
       ...DeleteTaskMutation_task @relay(mask: false)
       ...EditTaskMutation_task @relay(mask: false)
@@ -47,7 +47,7 @@ const TaskSubscription = (
       const type = payload.getValue('__typename')
       const context = {atmosphere, store: store as RecordSourceSelectorProxy<any>}
       switch (type) {
-        case 'CreateGitHubIssuePayload':
+        case 'CreateGitHubTaskIntegrationPayload':
           break
         case 'ChangeTaskTeamPayload':
           changeTaskTeamTaskUpdater(payload, context)
@@ -87,5 +87,5 @@ const TaskSubscription = (
     }
   })
 }
-
+TaskSubscription.key = 'task'
 export default TaskSubscription

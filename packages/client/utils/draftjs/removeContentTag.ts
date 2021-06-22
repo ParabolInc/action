@@ -1,7 +1,7 @@
 import Atmosphere from '../../Atmosphere'
 import removeAllRangesForEntity from './removeAllRangesForEntity'
 import UpdateTaskMutation from '../../mutations/UpdateTaskMutation'
-import {AreaEnum} from '../../types/graphql'
+import {AreaEnum} from '~/__generated__/UpdateTaskMutation.graphql'
 
 const removeContentTag = (
   tagValue: string,
@@ -17,7 +17,7 @@ const removeContentTag = (
     id: taskId,
     content: nextContent
   }
-  UpdateTaskMutation(atmosphere, {updatedTask, area})
+  UpdateTaskMutation(atmosphere, {updatedTask, area}, {})
 }
 
 export default removeContentTag

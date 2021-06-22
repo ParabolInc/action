@@ -11,9 +11,10 @@
       "cypress"
     ],
     "target": "esnext",
-    "module": "es2015",
+    "module": "es2015"
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "./support/index.js"
   ]
 }

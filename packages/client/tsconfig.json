@@ -6,9 +6,6 @@
       "~/*": [
         "*"
       ],
-      "parabol-server/*": [
-        "../server/*"
-      ],
       "static/*": [
         "../../static/*"
       ]
@@ -22,6 +19,9 @@
       "node"
     ],
   },
+  "files": [
+    "client.tsx"
+  ],
   "exclude": [
     "serviceWorker",
     "**/node_modules",

@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import {GraphQLID, GraphQLNonNull, GraphQLString} from 'graphql'
 import {Security, Threshold} from 'parabol-client/types/constEnums'
-import {AuthIdentityTypeEnum} from 'parabol-client/types/graphql'
+import {AuthIdentityTypeEnum} from '../../../client/types/constEnums'
 import getRethink from '../../database/rethinkDriver'
 import AuthIdentityLocal from '../../database/types/AuthIdentityLocal'
 import AuthToken from '../../database/types/AuthToken'
@@ -13,6 +13,7 @@ import standardError from '../../utils/standardError'
 import {GQLContext} from '../graphql'
 import rateLimit from '../rateLimit'
 import ResetPasswordPayload from '../types/ResetPasswordPayload'
+import updateUser from '../../postgres/queries/updateUser'
 
 const resetPassword = {
   type: new GraphQLNonNull(ResetPasswordPayload),
@@ -73,6 +74,7 @@ const resetPassword = {
       localIdentity.hashedPassword = await bcrypt.hash(newPassword, Security.SALT_ROUNDS)
       localIdentity.isEmailVerified = true
       await Promise.all([
+        updateUser({identities}, userId),
         db.write('User', userId, {identities}),
         r
           .table('FailedAuthRequest')

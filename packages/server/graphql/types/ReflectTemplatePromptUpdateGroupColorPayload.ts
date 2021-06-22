@@ -1,7 +1,7 @@
 import {GraphQLObjectType} from 'graphql'
-import StandardMutationError from './StandardMutationError'
-import RetroPhaseItem from './RetroPhaseItem'
 import {GQLContext} from '../graphql'
+import ReflectPrompt from './ReflectPrompt'
+import StandardMutationError from './StandardMutationError'
 
 const ReflectTemplatePromptUpdateGroupColorPayload = new GraphQLObjectType<any, GQLContext>({
   name: 'ReflectTemplatePromptUpdateGroupColorPayload',
@@ -10,10 +10,10 @@ const ReflectTemplatePromptUpdateGroupColorPayload = new GraphQLObjectType<any, 
       type: StandardMutationError
     },
     prompt: {
-      type: RetroPhaseItem,
+      type: ReflectPrompt,
       resolve: ({promptId}, _args, {dataLoader}) => {
         if (!promptId) return null
-        return dataLoader.get('customPhaseItems').load(promptId)
+        return dataLoader.get('reflectPrompts').load(promptId)
       }
     }
   })

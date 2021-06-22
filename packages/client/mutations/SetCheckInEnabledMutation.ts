@@ -1,8 +1,11 @@
 import {commitMutation} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
 import {StandardMutation} from '../types/relayMutations'
-import {SetCheckInEnabledMutation as TSetCheckInEnabledMutation} from '../__generated__/SetCheckInEnabledMutation.graphql'
-import {ITeamMeetingSettings, NewMeetingPhaseTypeEnum} from '../types/graphql'
+import {
+  SetCheckInEnabledMutationResponse,
+  SetCheckInEnabledMutation as TSetCheckInEnabledMutation
+} from '../__generated__/SetCheckInEnabledMutation.graphql'
+import {NewMeetingPhaseTypeEnum} from '~/__generated__/ActionMeeting_meeting.graphql'
 
 graphql`
   fragment SetCheckInEnabledMutation_team on SetCheckInEnabledPayload {
@@ -20,6 +23,8 @@ const mutation = graphql`
   }
 `
 
+type Settings = NonNullable<SetCheckInEnabledMutationResponse['setCheckInEnabled']['settings']>
+
 const SetCheckInEnabledMutation: StandardMutation<TSetCheckInEnabledMutation> = (
   atmosphere,
   variables,
@@ -32,15 +37,15 @@ const SetCheckInEnabledMutation: StandardMutation<TSetCheckInEnabledMutation> = 
     onError,
     optimisticUpdater: (store) => {
       const {isEnabled, settingsId} = variables
-      const settings = store.get<ITeamMeetingSettings>(settingsId)
+      const settings = store.get<Settings>(settingsId)
       if (!settings) return
       // relay
-      const phaseTypes = settings.getValue('phaseTypes').slice()
-      if (isEnabled && !phaseTypes.includes(NewMeetingPhaseTypeEnum.checkin)) {
-        phaseTypes.unshift(NewMeetingPhaseTypeEnum.checkin)
-      } else if (!isEnabled && phaseTypes.includes(NewMeetingPhaseTypeEnum.checkin)) {
+      const phaseTypes = settings.getValue('phaseTypes').slice() as NewMeetingPhaseTypeEnum[]
+      if (isEnabled && !phaseTypes.includes('checkin')) {
+        phaseTypes.unshift('checkin')
+      } else if (!isEnabled && phaseTypes.includes('checkin')) {
         phaseTypes.splice(
-          phaseTypes.findIndex((type) => type === NewMeetingPhaseTypeEnum.checkin),
+          phaseTypes.findIndex((type) => type === 'checkin'),
           1
         )
       }

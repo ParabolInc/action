@@ -1,11 +1,10 @@
-import {TierEnum} from '../types/graphql'
+import {TierEnum} from '~/__generated__/StandardHub_viewer.graphql'
 
 const sortByTier = <T extends readonly {tier: TierEnum | string; name: string}[]>(
   teamsOrOrgs: T
 ) => {
   const teamsSlice = teamsOrOrgs.slice()
-  const tierVal = (team) =>
-    team.tier === TierEnum.enterprise ? -2 : team.tier === TierEnum.pro ? -1 : 1
+  const tierVal = (team) => (team.tier === 'enterprise' ? -2 : team.tier === 'pro' ? -1 : 1)
   teamsSlice.sort((a, b) =>
     tierVal(a) < tierVal(b)
       ? -1

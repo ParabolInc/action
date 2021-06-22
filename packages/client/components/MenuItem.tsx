@@ -8,7 +8,7 @@ import React, {
 } from 'react'
 import styled from '@emotion/styled'
 import MenuItemLabel from './MenuItemLabel'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 
 export interface MenuItemProps {
   isActive: boolean
@@ -19,6 +19,7 @@ export interface MenuItemProps {
 interface Props {
   isDisabled?: boolean
   label: ReactNode
+  dataCy?: string
   onClick?: (e: React.MouseEvent) => void
   onMouseEnter?: (e: React.MouseEvent) => void
   noCloseOnClick?: boolean
@@ -29,12 +30,12 @@ interface Props {
 const MenuItemStyles = styled('div')<{isActive: boolean; isDisabled: boolean | undefined}>(
   ({isActive, isDisabled}) => ({
     alignItems: 'center',
-    backgroundColor: isActive ? PALETTE.BACKGROUND_MAIN : undefined,
-    color: isDisabled ? PALETTE.TEXT_GRAY : PALETTE.TEXT_MAIN,
+    backgroundColor: isActive ? PALETTE.SLATE_200 : undefined,
+    color: isDisabled ? PALETTE.SLATE_600 : PALETTE.SLATE_700,
     cursor: isDisabled ? 'not-allowed' : 'pointer',
     display: 'flex',
     '&:hover,:focus': {
-      backgroundColor: isActive ? PALETTE.BACKGROUND_MAIN : PALETTE.BACKGROUND_LIGHTEST,
+      backgroundColor: isActive ? PALETTE.SLATE_200 : PALETTE.SLATE_100,
       outline: 0
     }
   })
@@ -48,7 +49,7 @@ const getIsHidden = (el: HTMLElement, parent: HTMLElement) => {
   return parentBottom < isViewedThreshold
 }
 const MenuItem = forwardRef((props: Props, ref: any) => {
-  const {isDisabled, label, noCloseOnClick, onMouseEnter, onClick, onView, parentRef} = props
+  const {isDisabled, label, noCloseOnClick, onMouseEnter, onClick, onView, parentRef, dataCy} = props
   const itemRef = useRef<HTMLDivElement>(null)
   // we're doing something a little hacky here, overloading a callback ref with some props so we don't need to pass them explicitly
   const {activate, closePortal, isActive} = ref as MenuItemProps
@@ -113,7 +114,7 @@ const MenuItem = forwardRef((props: Props, ref: any) => {
       onClick={handleClick}
       onMouseEnter={onMouseEnter}
     >
-      {typeof label === 'string' ? <MenuItemLabel>{label}</MenuItemLabel> : label}
+      {typeof label === 'string' ? <MenuItemLabel data-cy={dataCy}>{label}</MenuItemLabel> : label}
     </MenuItemStyles>
   )
 })

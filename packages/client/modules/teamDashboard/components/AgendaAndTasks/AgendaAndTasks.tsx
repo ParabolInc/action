@@ -1,11 +1,13 @@
-import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
 import {createFragmentContainer} from 'react-relay'
+import {AgendaAndTasks_viewer} from '~/__generated__/AgendaAndTasks_viewer.graphql'
 import LabelHeading from '~/components/LabelHeading/LabelHeading'
 import useStoreQueryRetry from '~/hooks/useStoreQueryRetry'
 import makeMinWidthMediaQuery from '~/utils/makeMinWidthMediaQuery'
-import {AgendaAndTasks_viewer} from '~/__generated__/AgendaAndTasks_viewer.graphql'
+
+import styled from '@emotion/styled'
+
 import useDocumentTitle from '../../../../hooks/useDocumentTitle'
 import {desktopSidebarShadow, navDrawerShadow} from '../../../../styles/elevation'
 import {AppBar, Breakpoint, NavSidebar, RightSidebar, ZIndex} from '../../../../types/constEnums'
@@ -130,14 +132,13 @@ const AgendaAndTasks = (props: Props) => {
               <StyledLabelHeading>{'Team Agenda'}</StyledLabelHeading>
               <CloseAgenda hideAgenda={hideAgenda} teamId={teamId} />
             </AgendaHeader>
-            <AgendaListAndInput dashSearch={dashSearch || ''} team={team!} />
+            <AgendaListAndInput dashSearch={dashSearch || ''} meeting={null} team={team!} />
           </AgendaContent>
         )}
       </AgendaMain>
     </RootBlock>
   )
 }
-
 export default createFragmentContainer(AgendaAndTasks, {
   viewer: graphql`
     fragment AgendaAndTasks_viewer on User {

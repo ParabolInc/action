@@ -10,49 +10,61 @@ import {EditableTemplatePromptColor_prompts} from '~/__generated__/EditableTempl
 import PalettePicker from '../../../components/PalettePicker/PalettePicker'
 import {MenuPosition} from '../../../hooks/useCoords'
 import useMenu from '../../../hooks/useMenu'
-import {PALETTE} from '../../../styles/paletteV2'
+import {PALETTE} from '../../../styles/paletteV3'
 import {ICON_SIZE} from '../../../styles/typographyV2'
 
 interface Props {
+  isOwner: boolean
   prompt: EditableTemplatePromptColor_prompt
   prompts: EditableTemplatePromptColor_prompts
 }
 
-const PromptColor = styled(PlainButton)({
-  display: 'flex',
+const PromptColor = styled(PlainButton)<{isOwner: boolean}>(({isOwner}) => ({
+  cursor: isOwner ? 'pointer' : 'default',
+  display: 'block',
   flex: 1,
-  padding: '14px 0 5px',
+  flexShrink: 0,
+  height: 24,
+  padding: 4,
+  position: 'relative',
+  width: 24,
   ':hover': {
     i: {
-      opacity: 1
+      opacity: isOwner ? 1 : undefined
     }
   }
-})
+}))
 
 const ColorBadge = styled('div')<{groupColor?: string}>(({groupColor}) => ({
   backgroundColor: groupColor,
   borderRadius: '50%',
-  height: '16px',
-  width: '16px'
+  height: 14,
+  margin: 1,
+  width: 14
 }))
 
 const DropdownIcon = styled(Icon)({
-  color: PALETTE.TEXT_GRAY,
+  bottom: 0,
+  color: PALETTE.SLATE_600,
   fontSize: ICON_SIZE.MD18,
-  marginRight: 8,
+  height: 24,
+  lineHeight: '24px',
   opacity: 0,
-  transition: `opacity 300ms ${BezierCurve.DECELERATE}`
+  position: 'absolute',
+  right: -6,
+  transition: `opacity 300ms ${BezierCurve.DECELERATE}`,
+  width: 12
 })
 
 const EditableTemplatePromptColor = (props: Props) => {
-  const {prompt, prompts} = props
+  const {isOwner, prompt, prompts} = props
   const {groupColor} = prompt
   const {menuProps, menuPortal, originRef, togglePortal} = useMenu<HTMLButtonElement>(
     MenuPosition.UPPER_LEFT,
-    {parentId: 'portal'}
+    {parentId: 'templateModal'}
   )
   return (
-    <PromptColor ref={originRef} onClick={togglePortal}>
+    <PromptColor ref={originRef} isOwner={isOwner} onClick={isOwner ? togglePortal : undefined}>
       <ColorBadge groupColor={groupColor} />
       <DropdownIcon>arrow_drop_down</DropdownIcon>
       {menuPortal(<PalettePicker menuProps={menuProps} prompt={prompt} prompts={prompts} />)}
@@ -62,12 +74,12 @@ const EditableTemplatePromptColor = (props: Props) => {
 
 export default createFragmentContainer(EditableTemplatePromptColor, {
   prompts: graphql`
-    fragment EditableTemplatePromptColor_prompts on RetroPhaseItem @relay(plural: true) {
+    fragment EditableTemplatePromptColor_prompts on ReflectPrompt @relay(plural: true) {
       ...PalettePicker_prompts
     }
   `,
   prompt: graphql`
-    fragment EditableTemplatePromptColor_prompt on RetroPhaseItem {
+    fragment EditableTemplatePromptColor_prompt on ReflectPrompt {
       ...PalettePicker_prompt
       groupColor
     }

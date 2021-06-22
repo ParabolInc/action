@@ -1,7 +1,9 @@
 import {GraphQLID, GraphQLObjectType} from 'graphql'
-import StandardMutationError from './StandardMutationError'
-import User from './User'
+import toTeamMemberId from '../../../client/utils/relay/toTeamMemberId'
 import {GQLContext} from '../graphql'
+import StandardMutationError from './StandardMutationError'
+import TeamMember from './TeamMember'
+import User from './User'
 
 const RemoveAtlassianAuthPayload = new GraphQLObjectType<any, GQLContext>({
   name: 'RemoveAtlassianAuthPayload',
@@ -15,6 +17,14 @@ const RemoveAtlassianAuthPayload = new GraphQLObjectType<any, GQLContext>({
     },
     teamId: {
       type: GraphQLID
+    },
+    teamMember: {
+      type: TeamMember,
+      description: 'The team member with the updated auth',
+      resolve: ({teamId, userId}, _args, {dataLoader}) => {
+        const teamMemberId = toTeamMemberId(teamId, userId)
+        return dataLoader.get('teamMembers').load(teamMemberId)
+      }
     },
     user: {
       type: User,

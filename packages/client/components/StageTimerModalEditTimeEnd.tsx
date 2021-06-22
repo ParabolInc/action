@@ -11,7 +11,7 @@ import useMutationProps from '../hooks/useMutationProps'
 import MenuItemHR from './MenuItemHR'
 import StageTimerModalEndTime from './StageTimerModalEndTime'
 import {StageTimerModalEditTimeEnd_facilitator} from '../__generated__/StageTimerModalEditTimeEnd_facilitator.graphql'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {MeetingLabels} from '../types/constEnums'
 
 interface Props {
@@ -46,7 +46,7 @@ const HR = styled(MenuItemHR)({
 })
 
 const StyledIcon = styled(Icon)({
-  color: PALETTE.TEXT_GRAY
+  color: PALETTE.SLATE_600
 })
 
 const StageTimerModalEditTimeEnd = (props: Props) => {

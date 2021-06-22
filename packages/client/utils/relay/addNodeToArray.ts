@@ -1,4 +1,4 @@
-import {Variables, RecordProxy} from 'relay-runtime'
+import {RecordProxy, Variables} from 'relay-runtime'
 
 export const getDescendingIdx = (
   newName: string | number,
@@ -38,7 +38,7 @@ const addNodeToArray = (
   newNode: RecordProxy | null | undefined,
   parent: RecordProxy | null | undefined,
   arrayName: string,
-  sortValue: string,
+  sortValue?: string,
   options: Options = {}
 ) => {
   if (!newNode || !parent) return
@@ -53,9 +53,9 @@ const addNodeToArray = (
     const node = arr[ii]
     if (node && node.getDataID() === nodeDataId) return
   }
-  const newName = newNode.getValue(sortValue) as string | number
+  const newName = sortValue ? newNode.getValue(sortValue) as string | number : ''
   const idxFinder = descending ? getDescendingIdx : getAscendingIdx
-  const nextIdx = idxFinder(newName, arr, sortValue)
+  const nextIdx = sortValue ? idxFinder(newName, arr, sortValue) : descending ? arr.length - 1 : 0
   const newArr = [...arr.slice(0, nextIdx), newNode, ...arr.slice(nextIdx)]
   parent.setLinkedRecords(newArr, arrayName, storageKeyArgs)
 }

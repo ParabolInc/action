@@ -1,6 +1,5 @@
 import {GraphQLID, GraphQLNonNull} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import {TierEnum} from 'parabol-client/types/graphql'
 import getRethink from '../../database/rethinkDriver'
 import safeArchiveTeam from '../../safeMutations/safeArchiveTeam'
 import {getUserId, isSuperUser, isUserBillingLeader} from '../../utils/authorization'
@@ -34,7 +33,7 @@ export default {
 
     const organization = await dataLoader.get('organizations').load(orgId)
     const {tier} = organization
-    if (tier !== TierEnum.personal) {
+    if (tier !== 'personal') {
       return standardError(new Error('You must first downgrade before archiving'), {
         userId: viewerId
       })

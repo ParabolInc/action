@@ -1,15 +1,16 @@
 import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useEffect, useMemo, useRef, useState} from 'react'
 import {createPaginationContainer, RelayPaginationProp} from 'react-relay'
 import {AutoSizer, CellMeasurer, CellMeasurerCache, Grid, InfiniteLoader} from 'react-virtualized'
+import extractTextFromDraftString from '~/utils/draftjs/extractTextFromDraftString'
+import getSafeRegex from '~/utils/getSafeRegex'
+import toTeamMemberId from '~/utils/relay/toTeamMemberId'
 import {TeamArchive_team} from '~/__generated__/TeamArchive_team.graphql'
 import {TeamArchive_viewer} from '~/__generated__/TeamArchive_viewer.graphql'
 import NullableTask from '../../../../components/NullableTask/NullableTask'
-import useDocumentTitle from '../../../../hooks/useDocumentTitle'
-import {PALETTE} from '../../../../styles/paletteV2'
-import {MathEnum, NavSidebar} from '../../../../types/constEnums'
-import {AreaEnum} from '../../../../types/graphql'
+import {PALETTE} from '../../../../styles/paletteV3'
+import {Layout, MathEnum} from '../../../../types/constEnums'
 import getRallyLink from '../../../userDashboard/helpers/getRallyLink'
 import TeamArchiveHeader from '../TeamArchiveHeader/TeamArchiveHeader'
 
@@ -18,8 +19,8 @@ const GRID_PADDING = 16
 
 const getColumnCount = () => {
   if (typeof window === 'undefined') return 4
-  const {innerWidth} = window
-  return Math.floor((innerWidth - NavSidebar.WIDTH - GRID_PADDING) / CARD_WIDTH)
+
+  return Math.floor((Layout.TASK_COLUMNS_MAX_WIDTH - GRID_PADDING) / CARD_WIDTH)
 }
 
 const getGridIndex = (index: number, columnCount: number) => {
@@ -42,7 +43,7 @@ const Header = styled('div')({
 })
 
 const Border = styled('div')({
-  borderTop: `.0625rem solid ${PALETTE.BORDER_LIGHTER}`,
+  borderTop: `.0625rem solid ${PALETTE.SLATE_300}`,
   height: 1,
   width: '100%'
 })
@@ -50,9 +51,14 @@ const Border = styled('div')({
 const Body = styled('div')({
   display: 'flex',
   flex: 1,
+  height: '100%',
+  margin: '0 auto',
   flexDirection: 'column',
   justifyContent: 'flex-start',
-  paddingLeft: '12',
+  maxWidth: Layout.TASK_COLUMNS_MAX_WIDTH,
+  overflow: 'auto',
+  padding: `0 10px`,
+  width: '100%',
   position: 'relative'
 })
 const CardGrid = styled('div')({
@@ -60,13 +66,12 @@ const CardGrid = styled('div')({
   display: 'flex',
   // grow to the largest height possible
   flex: 1,
-  outline: 0,
-  width: '100%'
+  outline: 0
 })
 
 const EmptyMsg = styled('div')({
   backgroundColor: '#FFFFFF',
-  border: `1px solid ${PALETTE.BORDER_LIGHT}`,
+  border: `1px solid ${PALETTE.SLATE_400}`,
   borderRadius: 4,
   fontSize: 14,
   display: 'inline-block',
@@ -75,22 +80,45 @@ const EmptyMsg = styled('div')({
 })
 
 const LinkSpan = styled('div')({
-  color: PALETTE.BACKGROUND_TEAL
+  color: PALETTE.AQUA_400
 })
 
 interface Props {
   relay: RelayPaginationProp
   viewer: TeamArchive_viewer
-  teamId: string
-  team: TeamArchive_team
+  returnToTeamId?: string
+  team?: TeamArchive_team
 }
 
 const TeamArchive = (props: Props) => {
-  const {viewer, relay, team, teamId} = props
+  const {viewer, relay, team, returnToTeamId} = props
   const {hasMore, isLoading, loadMore} = relay
-  const {teamName} = team
-  const {archivedTasks} = viewer
-  const {edges} = archivedTasks!
+  const {teamMembers, teamMemberFilter} = team || {}
+  const teamMemberFilterId = (teamMemberFilter && teamMemberFilter.id) || null
+  const {archivedTasks, dashSearch} = viewer
+
+  const teamMemberFilteredTasks = useMemo(() => {
+    const edges = teamMemberFilterId
+      ? archivedTasks?.edges.filter((edge) => {
+        return (
+          edge.node.userId &&
+          toTeamMemberId(edge.node.teamId, edge.node.userId) === teamMemberFilterId
+        )
+      })
+      : archivedTasks.edges
+    return {...archivedTasks, edges: edges}
+  }, [archivedTasks?.edges, teamMemberFilterId, teamMembers])
+
+  const filteredTasks = useMemo(() => {
+    if (!dashSearch) return teamMemberFilteredTasks
+    const dashSearchRegex = getSafeRegex(dashSearch, 'i')
+    const filteredEdges = teamMemberFilteredTasks.edges.filter((edge) =>
+      extractTextFromDraftString(edge.node.content).match(dashSearchRegex)
+    )
+    return {...teamMemberFilteredTasks, edges: filteredEdges}
+  }, [dashSearch, teamMemberFilteredTasks])
+
+  const {edges} = filteredTasks
   const [columnCount] = useState(getColumnCount)
   const _onRowsRenderedRef = useRef<
     ({startIndex, stopIndex}: {startIndex: number; stopIndex: number}) => void
@@ -152,7 +180,6 @@ const TeamArchive = (props: Props) => {
     oldEdgesRef.current = edges
   }, [edges, oldEdgesRef])
 
-  useDocumentTitle(`Team Archive | ${teamName}`, 'Archive')
   const rowRenderer = ({columnIndex, parent, rowIndex, key, style}) => {
     // TODO render a very inexpensive lo-fi card while scrolling. We should reuse that cheap card for drags, too
     const index = getIndex(columnIndex, rowIndex)
@@ -171,12 +198,12 @@ const TeamArchive = (props: Props) => {
             // put styles here because aphrodite is async
             <div
               key={`cardBlockFor${task.id}`}
-              style={{...style, width: CARD_WIDTH, padding: '1rem 0.5rem 0'}}
+              style={{...style, width: CARD_WIDTH, padding: '1rem 0.5rem'}}
             >
               <NullableTask
                 dataCy={`archive-task`}
                 key={key}
-                area={AreaEnum.teamDash}
+                area='teamDash'
                 measure={measure}
                 task={task}
               />
@@ -197,10 +224,12 @@ const TeamArchive = (props: Props) => {
 
   return (
     <Root>
-      <Header>
-        <TeamArchiveHeader teamId={teamId} />
-        <Border />
-      </Header>
+      {returnToTeamId && (
+        <Header>
+          <TeamArchiveHeader teamId={returnToTeamId} />
+          <Border />
+        </Header>
+      )}
       <Body>
         {edges.length ? (
           <CardGrid>
@@ -263,12 +292,21 @@ export default createPaginationContainer(
   {
     viewer: graphql`
       fragment TeamArchive_viewer on User {
-        archivedTasks(first: $first, teamId: $teamId, after: $after)
-          @connection(key: "TeamArchive_archivedTasks") {
+        dashSearch
+        archivedTasks: tasks(
+          first: $first
+          after: $after
+          userIds: $userIds
+          teamIds: $teamIds
+          archived: true
+        ) @connection(key: "TeamArchive_archivedTasks", filters: ["userIds", "teamIds"]) {
           edges {
             cursor
             node {
               id
+              teamId
+              userId
+              content
               ...NullableTask_task
             }
           }
@@ -281,8 +319,14 @@ export default createPaginationContainer(
     `,
     team: graphql`
       fragment TeamArchive_team on Team {
-        teamName: name
-        orgId
+        teamMemberFilter {
+          id
+        }
+        teamMembers(sortBy: "preferredName") {
+          id
+          picture
+          preferredName
+        }
       }
     `
   },
@@ -305,7 +349,12 @@ export default createPaginationContainer(
       }
     },
     query: graphql`
-      query TeamArchivePaginationQuery($first: Int!, $after: DateTime, $teamId: ID!) {
+      query TeamArchivePaginationQuery(
+        $first: Int!
+        $after: DateTime
+        $teamIds: [ID!]
+        $userIds: [ID!]
+      ) {
         viewer {
           ...TeamArchive_viewer
         }

@@ -4,8 +4,8 @@ import React from 'react'
 import {Draggable, DraggableProvided, DraggableStateSnapshot} from 'react-beautiful-dnd'
 import {createFragmentContainer} from 'react-relay'
 import NullableTask from '../../components/NullableTask/NullableTask'
-import {AreaEnum, TaskStatusEnum} from '../../types/graphql'
 import {DraggableTask_task} from '../../__generated__/DraggableTask_task.graphql'
+import {AreaEnum, TaskStatusEnum} from '~/__generated__/UpdateTaskMutation.graphql'
 
 const DraggableStyles = styled('div')({
   // sometimes the default blue fuzzies show up around the containing div

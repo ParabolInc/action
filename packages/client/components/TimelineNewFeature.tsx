@@ -6,7 +6,7 @@ import withAtmosphere, {WithAtmosphereProps} from '../decorators/withAtmosphere/
 import DismissNewFeatureMutation from '../mutations/DismissNewFeatureMutation'
 import {DECELERATE, fadeIn} from '../styles/animation'
 import {cardShadow} from '../styles/elevation'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import gift from '../styles/theme/images/gift.svg'
 import {ICON_SIZE} from '../styles/typographyV2'
 import withMutationProps, {WithMutationProps} from '../utils/relay/withMutationProps'
@@ -31,7 +31,7 @@ const NewFeature = styled('div')({
 })
 
 const CancelIcon = styled(Icon)({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   cursor: 'pointer',
   fontSize: ICON_SIZE.MD18,
   position: 'absolute',
@@ -69,11 +69,11 @@ const Body = styled('div')({
 })
 
 const LearnMore = styled('a')({
-  color: PALETTE.LINK_BLUE,
+  color: PALETTE.SKY_500,
   paddingTop: 8,
   textAlign: 'right',
   ':hover,:focus,:active': {
-    color: PALETTE.LINK_BLUE,
+    color: PALETTE.SKY_500,
     textDecoration: 'none'
   }
 })

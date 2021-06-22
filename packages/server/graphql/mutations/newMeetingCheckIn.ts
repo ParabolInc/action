@@ -1,15 +1,10 @@
 import {GraphQLBoolean, GraphQLID, GraphQLNonNull} from 'graphql'
-import getRethink from '../../database/rethinkDriver'
-import {getUserId, isTeamMember} from '../../utils/authorization'
-import publish from '../../utils/publish'
 import NewMeetingCheckInPayload from '../types/NewMeetingCheckInPayload'
-import toTeamMemberId from 'parabol-client/utils/relay/toTeamMemberId'
-import standardError from '../../utils/standardError'
-import {SubscriptionChannel} from 'parabol-client/types/constEnums'
 
 export default {
   type: NewMeetingCheckInPayload,
   description: 'Check a member in as present or absent',
+  deprecationReason: 'Members now join lazily and joining means they are present',
   args: {
     userId: {
       type: new GraphQLNonNull(GraphQLID),
@@ -24,38 +19,7 @@ export default {
       description: 'true if the member is present, false if absent, null if undecided'
     }
   },
-  async resolve(
-    _source,
-    {userId, meetingId, isCheckedIn},
-    {authToken, dataLoader, socketId: mutatorId}
-  ) {
-    const r = await getRethink()
-    const operationId = dataLoader.share()
-    const subOptions = {mutatorId, operationId}
-    const viewerId = getUserId(authToken)
-    // AUTH
-    const meeting = await r
-      .table('NewMeeting')
-      .get(meetingId)
-      .default(null)
-      .run()
-    if (!meeting) return standardError(new Error('Meeting not found'), {userId: viewerId})
-    const {endedAt, teamId} = meeting
-    if (endedAt) return standardError(new Error('Meeting already ended'), {userId: viewerId})
-    if (!isTeamMember(authToken, teamId)) {
-      return standardError(new Error('Team not found'), {userId: viewerId})
-    }
-
-    // RESOLUTION
-    const meetingMemberId = toTeamMemberId(meetingId, userId)
-    await r
-      .table('MeetingMember')
-      .get(meetingMemberId)
-      .update({isCheckedIn})
-      .run()
-
-    const data = {meetingId, userId}
-    publish(SubscriptionChannel.MEETING, meetingId, 'NewMeetingCheckInPayload', data, subOptions)
-    return data
+  async resolve(_source, {userId, meetingId}) {
+    return {meetingId, userId}
   }
 }

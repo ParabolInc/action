@@ -7,10 +7,6 @@ const rallyList = [
     link: 'https://youtu.be/DUIP-TOxbQs'
   },
   {
-    phrase: 'Let It Go',
-    link: 'https://youtu.be/G_l1vNlWcPY'
-  },
-  {
     phrase: 'Carpe Diem',
     link: 'https://youtu.be/veYR3ZC9wMQ'
   },

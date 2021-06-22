@@ -3,7 +3,7 @@
  * Grabbing state from the url is non-deterministic depending on when a component updates!
  */
 import {matchPath} from 'react-router-dom'
-import {NewMeetingPhaseTypeEnum} from '../../types/graphql'
+import {NewMeetingPhaseTypeEnum} from '~/__generated__/ActionMeeting_meeting.graphql'
 import findKeyByValue from '../findKeyByValue'
 import {phaseTypeToSlug} from './lookups'
 import {RetroDemo} from '../../types/constEnums'

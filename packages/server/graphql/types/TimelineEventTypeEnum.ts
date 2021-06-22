@@ -12,7 +12,8 @@ const TimelineEventTypeEnum = new GraphQLEnumType({
     [COMPLETED_RETRO_MEETING]: {},
     [COMPLETED_ACTION_MEETING]: {},
     [JOINED_PARABOL]: {},
-    [CREATED_TEAM]: {}
+    [CREATED_TEAM]: {},
+    POKER_COMPLETE: {}
   }
 })
 

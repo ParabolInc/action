@@ -1,6 +1,5 @@
 import {GraphQLID, GraphQLInt, GraphQLNonNull} from 'graphql'
 import {MeetingSettingsThreshold, SubscriptionChannel} from 'parabol-client/types/constEnums'
-import {MeetingTypeEnum, NewMeetingPhaseTypeEnum} from 'parabol-client/types/graphql'
 import mode from 'parabol-client/utils/mode'
 import isPhaseComplete from 'parabol-client/utils/meetings/isPhaseComplete'
 import getRethink from '../../database/rethinkDriver'
@@ -57,7 +56,7 @@ const updateRetroMaxVotes = {
       maxVotesPerGroup: oldMaxVotesPerGroup
     } = meeting
 
-    if (meetingType !== MeetingTypeEnum.retrospective) {
+    if (meetingType !== 'retrospective') {
       return {error: {message: `Meeting not found`}}
     }
 
@@ -69,7 +68,7 @@ const updateRetroMaxVotes = {
       return standardError(new Error('Team not found'), {userId: viewerId})
     }
 
-    if (isPhaseComplete(NewMeetingPhaseTypeEnum.vote, phases)) {
+    if (isPhaseComplete('vote', phases)) {
       return standardError(new Error('Vote phase already completed'), {userId: viewerId})
     }
 
@@ -90,7 +89,6 @@ const updateRetroMaxVotes = {
     // this isn't 100% atomic, but it's done in a single call, so it's pretty close
     // eventual consistancy is OK, it's just possible for a client to get a bad data in between the 2 updates
     // if votesRemaining goes negative for any user, we know we can't decrease any more
-    console.log('')
     const hasError = await r
       .table('MeetingMember')
       .getAll(meetingId, {index: 'meetingId'})
@@ -139,7 +137,7 @@ const updateRetroMaxVotes = {
       r
         .table('MeetingSettings')
         .getAll(teamId, {index: 'teamId'})
-        .filter({meetingType: MeetingTypeEnum.retrospective})
+        .filter({meetingType: 'retrospective'})
         .update({
           totalVotes,
           maxVotesPerGroup

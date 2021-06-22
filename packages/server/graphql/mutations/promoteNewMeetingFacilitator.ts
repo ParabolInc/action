@@ -52,7 +52,6 @@ export default {
       .table('NewMeeting')
       .get(meetingId)
       .update({
-        defaultFacilitatorUserId: facilitatorUserId,
         facilitatorUserId,
         updatedAt: now
       })

@@ -3,11 +3,10 @@ import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
 import {createFragmentContainer} from 'react-relay'
 import ArchiveOrganization from '~/modules/teamDashboard/components/ArchiveTeam/ArchiveOrganization'
-import {TierEnum} from '~/types/graphql'
 import {OrgBillingDangerZone_organization} from '~/__generated__/OrgBillingDangerZone_organization.graphql'
 import Icon from '../../../../components/Icon'
 import Panel from '../../../../components/Panel/Panel'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import {ICON_SIZE} from '../../../../styles/typographyV2'
 import {Layout} from '../../../../types/constEnums'
 
@@ -17,19 +16,19 @@ const EnvelopeIcon = styled(Icon)({
 })
 
 const PanelRow = styled('div')({
-  borderTop: `1px solid ${PALETTE.BORDER_LIGHTER}`,
+  borderTop: `1px solid ${PALETTE.SLATE_300}`,
   padding: Layout.ROW_GUTTER,
   textAlign: 'center'
 })
 
 const Unsubscribe = styled('div')({
   alignItems: 'center',
-  color: PALETTE.LINK_MAIN,
+  color: PALETTE.SLATE_700,
   display: 'flex',
   justifyContent: 'center',
   '& a': {
     alignItems: 'center',
-    color: PALETTE.LINK_BLUE,
+    color: PALETTE.SKY_500,
     display: 'flex',
     marginLeft: 8,
     '& > u': {
@@ -48,7 +47,7 @@ const OrgBillingDangerZone = (props: Props) => {
   const {organization} = props
   const {isBillingLeader, tier} = organization
   if (!isBillingLeader) return null
-  const isPersonal = tier === TierEnum.personal
+  const isPersonal = tier === 'personal'
   return (
     <Panel label='Danger Zone'>
       <PanelRow>

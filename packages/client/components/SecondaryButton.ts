@@ -1,10 +1,11 @@
 import styled from '@emotion/styled'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import FlatButton from './FlatButton'
 
+// Gray, neutral emphasis
 const SecondaryButton = styled(FlatButton)({
-  borderColor: PALETTE.BORDER_LIGHT,
-  color: PALETTE.TEXT_MAIN,
+  borderColor: PALETTE.SLATE_400,
+  color: PALETTE.SLATE_700,
   fontWeight: 600
 })
 

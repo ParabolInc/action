@@ -1,5 +1,7 @@
-import {TierEnum, MeetingTypeEnum} from 'parabol-client/types/graphql'
-import shortid from 'shortid'
+import generateUID from '../../generateUID'
+import {TierEnum} from './Invoice'
+import JiraDimensionField from './JiraDimensionField'
+import {MeetingTypeEnum} from './Meeting'
 
 interface Input {
   id?: string
@@ -22,6 +24,7 @@ export default class Team {
   createdBy: string
   isArchived: boolean
   isPaid: boolean
+  jiraDimensionFields?: JiraDimensionField[]
   lastMeetingType: MeetingTypeEnum
   tier: TierEnum
   orgId: string
@@ -45,10 +48,10 @@ export default class Team {
     this.createdBy = createdBy
     this.orgId = orgId
     this.tier = tier
-    this.id = id ?? shortid.generate()
+    this.id = id ?? generateUID()
     this.createdAt = createdAt ?? new Date()
     this.updatedAt = updatedAt ?? new Date()
-    this.lastMeetingType = lastMeetingType ?? MeetingTypeEnum.retrospective
+    this.lastMeetingType = lastMeetingType ?? 'retrospective'
     this.isArchived = isArchived ?? false
     this.isOnboardTeam = isOnboardTeam ?? false
     this.isPaid = isPaid ?? true

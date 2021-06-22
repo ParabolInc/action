@@ -7,7 +7,6 @@ import AgendaShortcutHint from '../modules/meeting/components/AgendaShortcutHint
 import MeetingCopy from '../modules/meeting/components/MeetingCopy/MeetingCopy'
 import MeetingFacilitationHint from '../modules/meeting/components/MeetingFacilitationHint/MeetingFacilitationHint'
 import MeetingPhaseHeading from '../modules/meeting/components/MeetingPhaseHeading/MeetingPhaseHeading'
-import {NewMeetingPhaseTypeEnum} from '../types/graphql'
 import {AGENDA_ITEMS, AGENDA_ITEM_LABEL} from '../utils/constants'
 import {phaseLabelLookup} from '../utils/meetings/lookups'
 import {ActionMeetingFirstCall_meeting} from '../__generated__/ActionMeetingFirstCall_meeting.graphql'
@@ -34,10 +33,13 @@ const ActionMeetingFirstCall = (props: Props) => {
   const {avatarGroup, toggleSidebar, meeting} = props
   const atmosphere = useAtmosphere()
   const {viewerId} = atmosphere
-  const {endedAt, facilitator, facilitatorUserId, showSidebar} = meeting
+  const {endedAt, facilitator, facilitatorUserId, phases, showSidebar} = meeting
   const {preferredName} = facilitator
   const isFacilitating = facilitatorUserId === viewerId && !endedAt
   const phaseName = phaseLabelLookup[AGENDA_ITEMS]
+  const agendaItemPhase = phases.find((phase) => phase.phaseType === 'agendaitems')!
+  const {stages} = agendaItemPhase
+  const agendaItemsCompleted = stages.filter((stage) => stage.isComplete).length
   return (
     <MeetingContent>
       <MeetingHeaderAndPhase hideBottomBar={!!endedAt}>
@@ -46,20 +48,29 @@ const ActionMeetingFirstCall = (props: Props) => {
           isMeetingSidebarCollapsed={!showSidebar}
           toggleSidebar={toggleSidebar}
         >
-          <PhaseHeaderTitle>
-            {phaseLabelLookup[NewMeetingPhaseTypeEnum.agendaitems]}
-          </PhaseHeaderTitle>
+          <PhaseHeaderTitle>{phaseLabelLookup.agendaitems}</PhaseHeaderTitle>
         </MeetingTopBar>
         <PhaseWrapper>
           <FirstCallWrapper>
-            <MeetingPhaseHeading>{'Now, what do you need?'}</MeetingPhaseHeading>
-
-            <MeetingCopy>{`Time to add your ${AGENDA_ITEM_LABEL}s to the list.`}</MeetingCopy>
-            <AgendaShortcutHint />
-            {!isFacilitating && (
-              <MeetingFacilitationHint>
-                {'Waiting for'} <b>{preferredName}</b> {`to start the ${phaseName}`}
-              </MeetingFacilitationHint>
+            <MeetingPhaseHeading>
+              {endedAt && agendaItemsCompleted === 0
+                ? 'Nothing to see here'
+                : 'Now, what do you need?'}
+            </MeetingPhaseHeading>
+            <MeetingCopy>
+              {endedAt && agendaItemsCompleted === 0
+                ? `There were no ${AGENDA_ITEM_LABEL}s in this meeting.`
+                : `Time to add your ${AGENDA_ITEM_LABEL}s to the list.`}
+            </MeetingCopy>
+            {!endedAt && (
+              <>
+                <AgendaShortcutHint />
+                {!isFacilitating && (
+                  <MeetingFacilitationHint>
+                    {'Waiting for'} <b>{preferredName}</b> {`to start the ${phaseName}`}
+                  </MeetingFacilitationHint>
+                )}
+              </>
             )}
           </FirstCallWrapper>
         </PhaseWrapper>
@@ -76,6 +87,12 @@ export default createFragmentContainer(ActionMeetingFirstCall, {
       facilitatorUserId
       facilitator {
         preferredName
+      }
+      phases {
+        phaseType
+        stages {
+          isComplete
+        }
       }
     }
   `

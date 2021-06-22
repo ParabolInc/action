@@ -3,7 +3,7 @@ import React, {Component} from 'react'
 import getWordAt from './getWordAt'
 import getDraftCoords from '../../utils/getDraftCoords'
 import getAnchorLocation from './getAnchorLocation'
-import {autoCompleteEmoji} from '../../utils/draftjs/completeEnitity'
+import {autoCompleteEmoji} from '../../utils/draftjs/completeEntity'
 import EmojiMenuContainer from './EmojiMenuContainer'
 
 const withEmojis = (ComposedComponent) => {

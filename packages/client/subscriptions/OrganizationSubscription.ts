@@ -1,21 +1,22 @@
-import {addOrgMutationOrganizationUpdater} from '../mutations/AddOrgMutation'
-import {
-  setOrgUserRoleAddedOrganizationOnNext,
-  setOrgUserRoleAddedOrganizationUpdater
-} from '../mutations/SetOrgUserRoleMutation'
-import {
-  removeOrgUserOrganizationOnNext,
-  removeOrgUserOrganizationUpdater
-} from '../mutations/RemoveOrgUserMutation'
 import graphql from 'babel-plugin-relay/macro'
-import Atmosphere from '../Atmosphere'
-import {requestSubscription, Variables} from 'relay-runtime'
-import {OrganizationSubscriptionResponse} from '~/__generated__/OrganizationSubscription.graphql'
 import {RouterProps} from 'react-router'
+import {requestSubscription, Variables} from 'relay-runtime'
 import {
   archiveOrganizationOrganizationOnNext,
   archiveOrganizationOrganizationUpdater
 } from '~/mutations/ArchiveOrganizationMutation'
+import {OrganizationSubscriptionResponse} from '~/__generated__/OrganizationSubscription.graphql'
+import Atmosphere from '../Atmosphere'
+import {addOrgMutationOrganizationUpdater} from '../mutations/AddOrgMutation'
+import {
+  removeOrgUserOrganizationOnNext,
+  removeOrgUserOrganizationUpdater
+} from '../mutations/RemoveOrgUserMutation'
+import {
+  setOrgUserRoleAddedOrganizationOnNext,
+  setOrgUserRoleAddedOrganizationUpdater
+} from '../mutations/SetOrgUserRoleMutation'
+import {updateTemplateScopeOrganizationUpdater} from '../mutations/UpdateReflectTemplateScopeMutation'
 
 const subscription = graphql`
   subscription OrganizationSubscription {
@@ -30,6 +31,7 @@ const subscription = graphql`
       ...UpdateOrgMutation_organization @relay(mask: false)
       ...UpgradeToProMutation_organization @relay(mask: false)
       ...RemoveOrgUserMutation_organization @relay(mask: false)
+      ...UpdateReflectTemplateScopeMutation_organization @relay(mask: false)
     }
   }
 `
@@ -44,7 +46,8 @@ const updateHandlers = {
   AddOrgPayload: addOrgMutationOrganizationUpdater,
   ArchiveOrganizationPayload: archiveOrganizationOrganizationUpdater,
   SetOrgUserRoleAddedPayload: setOrgUserRoleAddedOrganizationUpdater,
-  RemoveOrgUserPayload: removeOrgUserOrganizationUpdater
+  RemoveOrgUserPayload: removeOrgUserOrganizationUpdater,
+  UpdateTemplateScopeSuccess: updateTemplateScopeOrganizationUpdater,
 }
 
 const OrganizationSubscription = (
@@ -78,5 +81,5 @@ const OrganizationSubscription = (
     }
   })
 }
-
+OrganizationSubscription.key = 'organization'
 export default OrganizationSubscription

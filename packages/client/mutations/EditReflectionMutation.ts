@@ -9,13 +9,13 @@ graphql`
   fragment EditReflectionMutation_meeting on EditReflectionPayload {
     editorId
     isEditing
-    phaseItemId
+    promptId
   }
 `
 
 const mutation = graphql`
-  mutation EditReflectionMutation($phaseItemId: ID!, $isEditing: Boolean!, $meetingId: ID!) {
-    editReflection(phaseItemId: $phaseItemId, isEditing: $isEditing, meetingId: $meetingId) {
+  mutation EditReflectionMutation($promptId: ID!, $isEditing: Boolean!, $meetingId: ID!) {
+    editReflection(promptId: $promptId, isEditing: $isEditing, meetingId: $meetingId) {
       ...EditReflectionMutation_meeting @relay(mask: false)
     }
   }

@@ -1,4 +1,3 @@
-import {TimelineEventEnum} from 'parabol-client/types/graphql'
 import TimelineEvent from './TimelineEvent'
 
 interface Input {
@@ -16,7 +15,7 @@ export default class TimelineEventCheckinComplete extends TimelineEvent {
   meetingId: string
   orgId: string
   constructor(input: Input) {
-    super({...input, type: TimelineEventEnum.actionComplete})
+    super({...input, type: 'actionComplete'})
     const {teamId, orgId, meetingId} = input
     this.teamId = teamId
     this.orgId = orgId

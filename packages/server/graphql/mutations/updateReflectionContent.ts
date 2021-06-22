@@ -1,6 +1,5 @@
 import {GraphQLID, GraphQLNonNull, GraphQLString} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import {NewMeetingPhaseTypeEnum} from 'parabol-client/types/graphql'
 import extractTextFromDraftString from 'parabol-client/utils/draftjs/extractTextFromDraftString'
 import isPhaseComplete from 'parabol-client/utils/meetings/isPhaseComplete'
 import getGroupSmartTitle from 'parabol-client/utils/smartGroup/getGroupSmartTitle'
@@ -54,7 +53,7 @@ export default {
       return standardError(new Error('Team not found'), {userId: viewerId})
     }
     if (endedAt) return standardError(new Error('Meeting already ended'), {userId: viewerId})
-    if (isPhaseComplete(NewMeetingPhaseTypeEnum.group, phases)) {
+    if (isPhaseComplete('group', phases)) {
       return standardError(new Error('Meeting phase already ended'), {userId: viewerId})
     }
     if (creatorId !== viewerId) {

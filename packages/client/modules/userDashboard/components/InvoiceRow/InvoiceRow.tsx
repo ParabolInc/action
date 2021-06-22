@@ -8,20 +8,19 @@ import Row from '../../../../components/Row/Row'
 import RowInfo from '../../../../components/Row/RowInfo'
 import RowInfoHeading from '../../../../components/Row/RowInfoHeading'
 import Icon from '../../../../components/Icon'
-import {PALETTE} from '../../../../styles/paletteV2'
-import {InvoiceStatusEnum} from '../../../../types/graphql'
+import {PALETTE} from '../../../../styles/paletteV3'
 import {createFragmentContainer} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
 import {InvoiceRow_invoice} from '~/__generated__/InvoiceRow_invoice.graphql'
 
 const InvoiceAmount = styled('span')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   fontSize: 16,
   lineHeight: '24px'
 })
 
 const FileIcon = styled(Icon)<{isEstimate: boolean}>(({isEstimate}) => ({
-  color: isEstimate ? PALETTE.EMPHASIS_COOL : PALETTE.TEXT_GRAY
+  color: isEstimate ? PALETTE.SKY_500 : PALETTE.SLATE_600
 }))
 
 const InvoiceInfo = styled(RowInfo)({
@@ -45,7 +44,7 @@ const InfoRowRight = styled('div')({
 })
 
 const LinkStyles = styled('div')({
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   alignItems: 'flex-start',
   display: 'flex',
   justifyContent: 'space-between',
@@ -58,12 +57,12 @@ const RowLink = LinkStyles.withComponent(Link)
 const StyledDate = styled('span')<{styledToPay?: boolean; styledPaid?: boolean}>(
   ({styledToPay, styledPaid}) => ({
     fontSize: 13,
-    color: styledToPay || styledPaid ? PALETTE.TEXT_GRAY : PALETTE.ERROR_MAIN
+    color: styledToPay || styledPaid ? PALETTE.SLATE_600 : PALETTE.TOMATO_500
   })
 )
 
 const PayURL = styled('a')({
-  color: PALETTE.LINK_BLUE,
+  color: PALETTE.SKY_500,
   fontWeight: 600,
   textDecoration: 'none'
 })
@@ -75,7 +74,7 @@ const InvoiceRow = (props: Props) => {
   const {
     invoice: {id: invoiceId, amountDue, creditCard, endAt, paidAt, payUrl, status}
   } = props
-  const isEstimate = status === InvoiceStatusEnum.UPCOMING
+  const isEstimate = status === 'UPCOMING'
   return (
     <Row>
       <RowLink rel='noopener noreferrer' target='_blank' to={`/invoice/${invoiceId}`}>
@@ -91,7 +90,7 @@ const InvoiceRow = (props: Props) => {
             </InfoRowRight>
           </InfoRow>
           <InfoRow>
-            {status === InvoiceStatusEnum.UPCOMING && (
+            {status === 'UPCOMING' && (
               <StyledDate styledToPay>
                 {isEstimate && '*Current estimate. '}
                 {creditCard
@@ -99,14 +98,14 @@ const InvoiceRow = (props: Props) => {
                   : `Make sure to add billing info before ${makeDateString(endAt)}!`}
               </StyledDate>
             )}
-            {status === InvoiceStatusEnum.PAID && (
+            {status === 'PAID' && (
               <StyledDate styledPaid>
                 {'Paid on '}
                 {makeDateString(paidAt)}
               </StyledDate>
             )}
-            {status !== InvoiceStatusEnum.PAID && status !== InvoiceStatusEnum.UPCOMING && (
-              <StyledDate styledPaid={status === InvoiceStatusEnum.PENDING}>
+            {status !== 'PAID' && status !== 'UPCOMING' && (
+              <StyledDate styledPaid={status === 'PENDING'}>
                 {payUrl ? (
                   <PayURL rel='noopener noreferrer' target='_blank' href={payUrl}>
                     {'PAY NOW'}

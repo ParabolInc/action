@@ -6,7 +6,6 @@ import {createFragmentContainer} from 'react-relay'
 import NotificationAction from '~/components/NotificationAction'
 import OutcomeCardStatusIndicator from '~/modules/outcomeCard/components/OutcomeCardStatusIndicator/OutcomeCardStatusIndicator'
 import {cardShadow} from '~/styles/elevation'
-import {NotificationStatusEnum, TaskStatusEnum} from '~/types/graphql'
 import convertToTaskContent from '~/utils/draftjs/convertToTaskContent'
 import useAtmosphere from '../hooks/useAtmosphere'
 import useEditorState from '../hooks/useEditorState'
@@ -61,13 +60,13 @@ interface Props {
 
 const deletedTask = {
   content: convertToTaskContent('<<TASK DELETED>>'),
-  status: TaskStatusEnum.done,
+  status: 'done',
   tags: [] as string[],
   user: {
     picture: null,
     preferredName: null
   }
-}
+} as const
 
 const TaskInvolves = (props: Props) => {
   const {notification} = props
@@ -86,7 +85,7 @@ const TaskInvolves = (props: Props) => {
     submitMutation()
     SetNotificationStatusMutation(
       atmosphere,
-      {notificationId, status: NotificationStatusEnum.CLICKED},
+      {notificationId, status: 'CLICKED'},
       {onError, onCompleted}
     )
     const archiveSuffix = tags.includes('archived') ? '/archive' : ''
@@ -114,8 +113,8 @@ const TaskInvolves = (props: Props) => {
           }}
         />
         <Owner>
-          <OwnerAvatar alt='Avatar' src={user.picture || changeAuthorPicture} />
-          <OwnerName>{user.preferredName || changeAuthorName}</OwnerName>
+          <OwnerAvatar alt='Avatar' src={user?.picture || changeAuthorPicture} />
+          <OwnerName>{user?.preferredName || changeAuthorName}</OwnerName>
         </Owner>
       </TaskListView>
     </NotificationTemplate>

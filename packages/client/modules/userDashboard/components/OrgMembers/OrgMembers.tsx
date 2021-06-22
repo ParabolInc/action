@@ -4,7 +4,6 @@ import graphql from 'babel-plugin-relay/macro'
 import OrgMemberRow from '../OrgUserRow/OrgMemberRow'
 import Panel from '../../../../components/Panel/Panel'
 import {OrgMembers_viewer} from '../../../../__generated__/OrgMembers_viewer.graphql'
-import {OrgUserRole} from '../../../../types/graphql'
 
 interface Props {
   viewer: OrgMembers_viewer
@@ -17,7 +16,7 @@ const OrgMembers = (props: Props) => {
   if (!organization) return null
   const {organizationUsers} = organization
   const billingLeaderCount = organizationUsers.edges.reduce(
-    (count, {node}) => (node.role === OrgUserRole.BILLING_LEADER ? count + 1 : count),
+    (count, {node}) => (node.role === 'BILLING_LEADER' ? count + 1 : count),
     0
   )
   return (

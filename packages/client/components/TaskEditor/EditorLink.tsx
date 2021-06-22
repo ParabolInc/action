@@ -1,9 +1,9 @@
 import {ContentState} from 'draft-js'
 import React, {Component, ReactNode} from 'react'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 
 const baseStyle = {
-  color: PALETTE.TEXT_MAIN
+  color: PALETTE.SLATE_700
 }
 
 interface Props {

@@ -1,11 +1,12 @@
 import graphql from 'babel-plugin-relay/macro'
 import {commitMutation} from 'react-relay'
-import {ITask} from '../types/graphql'
+import ITask from '../../server/database/types/Task'
 import {
   OnNextHandler,
   OnNextHistoryContext,
+  OptionalHandlers,
   SharedUpdater,
-  SimpleMutation
+  StandardMutation
 } from '../types/relayMutations'
 import getTagsFromEntityMap from '../utils/draftjs/getTagsFromEntityMap'
 import ContentFilterHandler from '../utils/relay/ContentFilterHandler'
@@ -83,9 +84,10 @@ export const updateTaskTaskUpdater: SharedUpdater<UpdateTaskMutation_task> = (pa
   }
 }
 
-const UpdateTaskMutation: SimpleMutation<TUpdateTaskMutation> = (
+const UpdateTaskMutation: StandardMutation<TUpdateTaskMutation, OptionalHandlers> = (
   atmosphere,
-  {updatedTask, area}
+  {updatedTask, area},
+  {onError, onCompleted}
 ) => {
   return commitMutation<TUpdateTaskMutation>(atmosphere, {
     mutation,
@@ -131,7 +133,9 @@ const UpdateTaskMutation: SimpleMutation<TUpdateTaskMutation> = (
         task.setValue(nextTags, 'tags')
       }
       handleUpsertTasks(task as any, store)
-    }
+    },
+    onError,
+    onCompleted
   })
 }
 

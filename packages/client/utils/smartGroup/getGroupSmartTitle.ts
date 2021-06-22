@@ -2,12 +2,11 @@
  * Takes a guess at what the cards are talking about.
  * If that fails, just gives them a generic name
  */
-import Reflection from 'parabol-server/database/types/Reflection'
 import computeDistanceMatrix from './computeDistanceMatrix'
 import getAllLemmasFromReflections from './getAllLemmasFromReflections'
 import getTitleFromComputedGroup from './getTitleFromComputedGroup'
 
-const getGroupSmartTitle = (reflections: Reflection[]) => {
+const getGroupSmartTitle = (reflections: {entities: any[]}[]) => {
   const allReflectionEntities = reflections.map(({entities}) => entities).filter(Boolean)
   const uniqueLemmaArr = getAllLemmasFromReflections(allReflectionEntities)
 

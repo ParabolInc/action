@@ -7,7 +7,8 @@ export default class CompiledQueryCache {
   store = {} as {[docId: string]: CompiledQuery}
   private set(docId: string, queryString: string, schema: GraphQLSchema) {
     const document = parse(queryString)
-    const compiledQuery = compileQuery(schema, document) as CompiledQuery
+    const compiledQuery = compileQuery(schema, document)
+    if (!('query' in compiledQuery)) return null
     this.store[docId] = compiledQuery
     return compiledQuery
   }
@@ -21,8 +22,13 @@ export default class CompiledQueryCache {
       .default(null)
       .run()
     if (!queryString && !PROD) {
-      const queryMap = require('../../../queryMap.json')
-      queryString = queryMap[docId]
+      // try/catch block required for building the toolbox
+      try {
+        const queryMap = require('../../../queryMap.json')
+        queryString = queryMap[docId]
+      } catch (e) {
+        return undefined
+      }
     }
     if (!queryString) return undefined
     return this.set(docId, queryString, schema)

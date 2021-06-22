@@ -14,7 +14,7 @@ import DashNavControl from '../../../../components/DashNavControl/DashNavControl
 import {MenuPosition} from '../../../../hooks/useCoords'
 import useMenu from '../../../../hooks/useMenu'
 import useRouter from '../../../../hooks/useRouter'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import {Breakpoint} from '../../../../types/constEnums'
 import lazyPreload from '../../../../utils/lazyPreload'
 import {TeamTasksHeader_team} from '../../../../__generated__/TeamTasksHeader_team.graphql'
@@ -44,7 +44,7 @@ const TeamLinks = styled('div')({
 
 const DashHeading = styled('div')({
   alignItems: 'center',
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   display: 'flex',
   fontSize: 24,
   lineHeight: '32px',
@@ -54,7 +54,7 @@ const DashHeading = styled('div')({
 })
 
 const linkStyles = {
-  color: PALETTE.LINK_BLUE,
+  color: PALETTE.SKY_500,
   cursor: 'pointer',
   fontWeight: 600,
   height: 24,
@@ -62,7 +62,7 @@ const linkStyles = {
   marginRight: 8,
   outline: 0,
   ':hover, :focus, :active': {
-    color: PALETTE.LINK_BLUE_HOVER
+    color: PALETTE.SKY_600
   }
 }
 
@@ -80,7 +80,7 @@ const TeamDashTeamMemberMenu = lazyPreload(() =>
 )
 
 const TeamHeaderAndAvatars = styled('div')({
-  borderBottom: `1px solid ${PALETTE.BORDER_DASH_LIGHT}`,
+  borderBottom: `1px solid ${PALETTE.SLATE_300}`,
   flexShrink: 0,
   margin: '0 0 16px',
   padding: '0 0 16px',

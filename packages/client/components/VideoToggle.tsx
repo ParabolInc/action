@@ -1,10 +1,10 @@
 import React from 'react'
 import styled from '@emotion/styled'
 import Icon from './Icon'
-import {StreamUI} from '../hooks/useSwarm'
-import MediaSwarm from '../utils/swarm/MediaSwarm'
+import MediaRoom from '../utils/mediaRoom/MediaRoom'
 import MediaControlToggle from './MediaControlToggle'
 import {ICON_SIZE} from '../styles/typographyV2'
+import {ProducersState} from '../utils/mediaRoom/reducerMediaRoom'
 
 const Toggle = styled(MediaControlToggle)({})
 const StyledIcon = styled(Icon)({
@@ -12,19 +12,20 @@ const StyledIcon = styled(Icon)({
 })
 
 interface Props {
-  localStreamUI: StreamUI
-  swarm: MediaSwarm
+  mediaRoom: MediaRoom
+  producers: ProducersState
 }
 
 const VideoToggle = (props: Props) => {
-  const {swarm, localStreamUI} = props
-  const {hasVideo} = localStreamUI
+  const {mediaRoom, producers} = props
+  const videoProducer = Object.values(producers).find((producer) => producer.track.kind === 'video')
+  const videoEnabled = videoProducer && !videoProducer.paused
   const onClick = async () => {
-    if (hasVideo) {
-      swarm.muteWebcamVideo()
+    if (videoEnabled) {
+      await mediaRoom.disableWebcam()
     } else {
       try {
-        await swarm.broadcastWebcam('lowVideo')
+        await mediaRoom.enableWebcam()
       } catch (e) {
         /**/
       }
@@ -32,7 +33,7 @@ const VideoToggle = (props: Props) => {
   }
   return (
     <Toggle onClick={onClick}>
-      <StyledIcon>{hasVideo ? 'videocam' : 'videocam_off'}</StyledIcon>
+      <StyledIcon>{videoEnabled ? 'videocam' : 'videocam_off'}</StyledIcon>
     </Toggle>
   )
 }

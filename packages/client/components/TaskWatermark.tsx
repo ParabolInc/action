@@ -2,7 +2,7 @@ import React from 'react'
 import styled from '@emotion/styled'
 import GitHubSVG from './GitHubSVG'
 import JiraSVG from './JiraSVG'
-import {TaskServiceEnum} from '../types/graphql'
+import {TaskServiceEnum} from '~/__generated__/UpdateTaskMutation.graphql'
 
 const iconLookup = {
   github: GitHubSVG,

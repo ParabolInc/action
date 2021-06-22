@@ -8,10 +8,9 @@ import {RetroSidebarDiscussSection_meeting} from '~/__generated__/RetroSidebarDi
 import withAtmosphere, {WithAtmosphereProps} from '../decorators/withAtmosphere/withAtmosphere'
 import DragDiscussionTopicMutation from '../mutations/DragDiscussionTopicMutation'
 import {navItemRaised} from '../styles/elevation'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {ICON_SIZE} from '../styles/typographyV2'
 import {NavSidebar} from '../types/constEnums'
-import {NewMeetingPhaseTypeEnum} from '../types/graphql'
 import {DISCUSSION_TOPIC, SORT_STEP} from '../utils/constants'
 import dndNoise from '../utils/dndNoise'
 import Icon from './Icon'
@@ -29,7 +28,7 @@ interface Props extends WithAtmosphereProps {
 const VoteTally = styled('div')<{isUnsyncedFacilitatorStage: boolean | null}>(
   ({isUnsyncedFacilitatorStage}) => ({
     alignItems: 'center',
-    color: isUnsyncedFacilitatorStage ? PALETTE.EMPHASIS_WARM : PALETTE.TEXT_GRAY,
+    color: isUnsyncedFacilitatorStage ? PALETTE.ROSE_500 : PALETTE.SLATE_600,
     display: 'flex',
     fontSize: NavSidebar.SUB_FONT_SIZE,
     fontWeight: 600,
@@ -61,7 +60,7 @@ const ScrollWrapper = styled('div')({
 const RetroSidebarDiscussSection = (props: Props) => {
   const {atmosphere, gotoStageId, handleMenuClick, meeting} = props
   const {localStage, facilitatorStageId, id: meetingId, phases, endedAt} = meeting
-  const discussPhase = phases!.find(({phaseType}) => phaseType === NewMeetingPhaseTypeEnum.discuss)!
+  const discussPhase = phases!.find(({phaseType}) => phaseType === 'discuss')!
   // assert that the discuss phase and its stages are non-null
   // since we render this component when the vote phase is complete
   // see: RetroSidebarPhaseListItemChildren.tsx
@@ -143,14 +142,15 @@ const RetroSidebarDiscussSection = (props: Props) => {
                             <MeetingSubnavItem
                               key={stage.id}
                               isDragging={dragSnapshot.isDragging}
-                              label={title!}
                               metaContent={voteMeta}
                               onClick={() => handleClick(stage.id)}
                               isActive={localStage.id === stage.id}
                               isComplete={stage.isComplete}
                               isDisabled={!stage.isNavigable}
                               isUnsyncedFacilitatorStage={isUnsyncedFacilitatorStage}
-                            />
+                            >
+                              {title!}
+                            </MeetingSubnavItem>
                           </DraggableMeetingSubnavItem>
                         )
                       }}

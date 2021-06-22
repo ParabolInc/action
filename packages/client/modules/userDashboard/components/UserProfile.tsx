@@ -14,7 +14,7 @@ import useDocumentTitle from '../../../hooks/useDocumentTitle'
 import useModal from '../../../hooks/useModal'
 import useMutationProps from '../../../hooks/useMutationProps'
 import UpdateUserProfileMutation from '../../../mutations/UpdateUserProfileMutation'
-import {PALETTE} from '../../../styles/paletteV2'
+import {PALETTE} from '../../../styles/paletteV3'
 import defaultUserAvatar from '../../../styles/theme/images/avatar-user.svg'
 import {Breakpoint, Layout} from '../../../types/constEnums'
 import withForm, {WithFormProps} from '../../../utils/relay/withForm'
@@ -30,7 +30,7 @@ const SettingsBlock = styled('div')({
 
 const SettingsForm = styled('form')({
   alignItems: 'center',
-  borderTop: `1px solid ${PALETTE.BORDER_LIGHTER}`,
+  borderTop: `1px solid ${PALETTE.SLATE_300}`,
   display: 'flex',
   flexDirection: 'column',
   padding: Layout.ROW_GUTTER,
@@ -70,7 +70,7 @@ const StyledButton = styled(SecondaryButton)({
 })
 
 const PanelRow = styled('div')({
-  borderTop: `1px solid ${PALETTE.BORDER_LIGHTER}`,
+  borderTop: `1px solid ${PALETTE.SLATE_300}`,
   padding: Layout.ROW_GUTTER,
   textAlign: 'center'
 })

@@ -6,7 +6,7 @@ import Menu from '../Menu'
 import MenuItem from '../MenuItem'
 import withAtmosphere, {WithAtmosphereProps} from '../../decorators/withAtmosphere/withAtmosphere'
 import {MenuProps} from '../../hooks/useMenu'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import MenuItemLabel from '../MenuItemLabel'
 import styled from '@emotion/styled'
 import RoleTag from '~/components/Tag/RoleTag'
@@ -23,7 +23,7 @@ interface Props extends WithAtmosphereProps {
 }
 
 const Header = styled('div')<{hasOptions: boolean}>(({hasOptions}) => ({
-  borderBottom: hasOptions ? `1px solid ${PALETTE.BORDER_LIGHTER}` : undefined,
+  borderBottom: hasOptions ? `1px solid ${PALETTE.SLATE_300}` : undefined,
   display: 'flex',
   justifyContent: 'space-between',
   marginBottom: hasOptions ? 8 : 0,
@@ -42,7 +42,7 @@ const Name = styled('div')({
 })
 
 const Meta = styled('div')({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: 12,
   lineHeight: '16px',
   textTransform: 'capitalize'

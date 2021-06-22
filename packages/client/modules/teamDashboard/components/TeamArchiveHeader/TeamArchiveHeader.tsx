@@ -4,7 +4,7 @@ import styled from '@emotion/styled'
 import {withRouter} from 'react-router-dom'
 import Icon from '../../../../components/Icon'
 import DashNavControl from '../../../../components/DashNavControl/DashNavControl'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import {ICON_SIZE} from '../../../../styles/typographyV2'
 
 const RootBlock = styled('div')({
@@ -27,7 +27,7 @@ const Heading = styled('div')({
 })
 
 const StyledIcon = styled(Icon)({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: ICON_SIZE.MD24,
   marginRight: 8
 })

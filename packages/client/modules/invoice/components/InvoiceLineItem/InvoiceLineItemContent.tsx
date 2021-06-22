@@ -1,10 +1,10 @@
 import styled from '@emotion/styled'
-import {PALETTE} from '../../../../styles/paletteV2'
+import {PALETTE} from '../../../../styles/paletteV3'
 import React, {ReactNode} from 'react'
 import {Breakpoint} from '../../../../types/constEnums'
 
 const Item = styled('div')({
-  borderBottom: `1px solid ${PALETTE.BORDER_INVOICE_SECTION}`,
+  borderBottom: `1px solid ${PALETTE.SLATE_300}`,
   display: 'block',
   paddingBottom: 10,
   paddingTop: 10

@@ -1,15 +1,15 @@
 import graphql from 'babel-plugin-relay/macro'
-import MeetingSummaryEmail from 'parabol-server/email/components/SummaryEmail/MeetingSummaryEmail/MeetingSummaryEmail'
 import React, {useEffect} from 'react'
 import {createFragmentContainer} from 'react-relay'
 import useDocumentTitle from '../../../hooks/useDocumentTitle'
 import useRouter from '../../../hooks/useRouter'
-import {PALETTE} from '../../../styles/paletteV2'
+import {PALETTE} from '../../../styles/paletteV3'
 import {MEETING_SUMMARY_LABEL} from '../../../utils/constants'
 import isDemoRoute from '../../../utils/isDemoRoute'
 import makeHref from '../../../utils/makeHref'
 import {NewMeetingSummary_viewer} from '../../../__generated__/NewMeetingSummary_viewer.graphql'
 import {demoTeamId} from '../../demo/initDB'
+import MeetingSummaryEmail from '../../email/components/SummaryEmail/MeetingSummaryEmail/MeetingSummaryEmail'
 
 interface Props {
   viewer: NewMeetingSummary_viewer
@@ -41,8 +41,9 @@ const NewMeetingSummary = (props: Props) => {
     ? `/retrospective-demo-summary/csv`
     : `/new-summary/${meetingId}/csv`
   return (
-    <div style={{backgroundColor: PALETTE.BACKGROUND_MAIN, minHeight: '100vh'}}>
+    <div style={{backgroundColor: PALETTE.SLATE_200, minHeight: '100vh'}}>
       <MeetingSummaryEmail
+        appOrigin={window.location.origin}
         urlAction={urlAction}
         isDemo={teamId === demoTeamId}
         meeting={newMeeting}

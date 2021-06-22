@@ -8,7 +8,7 @@ import useMutationProps from '~/hooks/useMutationProps'
 import RenameMeetingMutation from '~/mutations/RenameMeetingMutation'
 import Legitity from '~/validation/Legitity'
 import {NewMeetingSidebar_meeting} from '~/__generated__/NewMeetingSidebar_meeting.graphql'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {NavSidebar} from '../types/constEnums'
 import isDemoRoute from '../utils/isDemoRoute'
 import EditableText from './EditableText'
@@ -27,7 +27,7 @@ const EditableMeetingName = MeetingName.withComponent(EditableText)
 
 const SidebarHeader = styled('div')({
   alignItems: 'flex-start',
-  borderBottom: `1px solid ${PALETTE.BORDER_LIGHTER}`,
+  borderBottom: `1px solid ${PALETTE.SLATE_300}`,
   display: 'flex',
   marginBottom: 8,
   padding: 16,
@@ -51,7 +51,7 @@ const SidebarParent = styled('div')({
 })
 
 const TeamDashboardLink = styled(Link)({
-  color: PALETTE.LINK_BLUE,
+  color: PALETTE.SKY_500,
   display: 'block',
   fontSize: 13,
   fontWeight: 400,
@@ -59,7 +59,7 @@ const TeamDashboardLink = styled(Link)({
   marginTop: 4,
   wordBreak: 'break-word',
   '&:hover': {
-    color: PALETTE.LINK_BLUE,
+    color: PALETTE.SKY_500,
     cursor: 'pointer'
   }
 })
@@ -132,7 +132,7 @@ const NewMeetingSidebar = (props: Props) => {
       </SidebarHeader>
       <Facilitator meeting={meeting} />
       {children}
-      <LogoBlock variant='primary' onClick={handleMenuClick} />
+      <LogoBlock onClick={handleMenuClick} />
     </SidebarParent>
   )
 }

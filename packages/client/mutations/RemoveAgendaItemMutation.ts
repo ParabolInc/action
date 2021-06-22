@@ -1,11 +1,9 @@
-import {commitMutation} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
-import Atmosphere from '../Atmosphere'
-import handleRemoveAgendaItems from './handlers/handleRemoveAgendaItems'
-import {IRemoveAgendaItemOnMutationArguments} from '../types/graphql'
-import {LocalHandlers} from '../types/relayMutations'
+import {commitMutation} from 'react-relay'
+import {StandardMutation} from '../types/relayMutations'
 import getInProxy from '../utils/relay/getInProxy'
 import {RemoveAgendaItemMutation as TRemoveAgendaItemMutation} from '../__generated__/RemoveAgendaItemMutation.graphql'
+import handleRemoveAgendaItems from './handlers/handleRemoveAgendaItems'
 
 graphql`
   fragment RemoveAgendaItemMutation_team on RemoveAgendaItemPayload {
@@ -13,6 +11,7 @@ graphql`
       id
     }
     meeting {
+      id
       facilitatorStageId
       phases {
         ...ActionSidebarAgendaItemsSectionAgendaItemPhase @relay(mask: false)
@@ -34,14 +33,14 @@ const mutation = graphql`
 
 export const removeAgendaItemUpdater = (payload, {store}) => {
   const agendaItemId = getInProxy(payload, 'agendaItem', 'id')
-  handleRemoveAgendaItems(agendaItemId, store)
+  const meetingId = getInProxy(payload, 'meeting', 'id')
+  handleRemoveAgendaItems(agendaItemId, store, meetingId)
 }
 
-const RemoveAgendaItemMutation = (
-  atmosphere: Atmosphere,
-  variables: IRemoveAgendaItemOnMutationArguments,
-  {onError, onCompleted}: LocalHandlers = {}
-) => {
+const RemoveAgendaItemMutation: StandardMutation<
+  TRemoveAgendaItemMutation,
+  {meetingId?: string}
+> = (atmosphere, variables, {meetingId}) => {
   return commitMutation<TRemoveAgendaItemMutation>(atmosphere, {
     mutation,
     variables,
@@ -52,10 +51,8 @@ const RemoveAgendaItemMutation = (
     },
     optimisticUpdater: (store) => {
       const {agendaItemId} = variables
-      handleRemoveAgendaItems(agendaItemId, store)
-    },
-    onCompleted,
-    onError
+      handleRemoveAgendaItems(agendaItemId, store, meetingId)
+    }
   })
 }
 

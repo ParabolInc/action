@@ -1,9 +1,53 @@
-version: '3.7'
+version: "3.7"
 
 services:
   db:
     image: rethinkdb:latest
     ports:
-      - '8080:8080'
-      - '29015:29015'
-      - '28015:28015'
+      - "8080:8080"
+      - "29015:29015"
+      - "28015:28015"
+    volumes:
+      - rethink-data:/data
+    networks:
+      - parabol-network
+  postgres:
+    image: postgres:12.5
+    restart: always
+    env_file: .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - "./packages/server/postgres/postgres.conf:/usr/local/etc/postgres/postgres.conf"
+      - "postgres-data:/data"
+    command: "postgres -c config_file=/usr/local/etc/postgres/postgres.conf"
+    networks:
+      - parabol-network
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - parabol-network
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.prod
+      target: prod
+    env_file: .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - redis
+      - postgres
+    networks:
+      - parabol-network
+networks:
+  parabol-network:
+volumes:
+  redis-data: {}
+  rethink-data: {}
+  postgres-data: {}

@@ -12,6 +12,23 @@ extend type ActionMeeting {
   showSidebar: Boolean!
 }
 
+type ParabolSearchQuery {
+  id: String!
+  queryString: String
+  statusFilters: [TaskStatusEnum!]
+}
+
+extend type PokerMeeting {
+  isCommentUnread: Boolean!
+  isRightDrawerOpen: Boolean!
+  localPhase: NewMeetingPhase!
+  localStage: NewMeetingStage!
+  showSidebar: Boolean!
+  githubSearchQuery: GitHubSearchQuery!
+  jiraSearchQuery: JiraSearchQuery!
+  parabolSearchQuery: ParabolSearchQuery!
+}
+
 extend type RetrospectiveMeeting {
   isAnonymousComment: Boolean
   isViewerDragInProgress: Boolean
@@ -22,6 +39,15 @@ extend type RetrospectiveMeeting {
 
 extend type Team {
   teamMemberFilter: TeamMember
+  editingScaleId: ID
+}
+
+extend type PokerMeetingSettings {
+  activeTemplate: PokerTemplate!
+}
+
+extend type RetrospectiveMeetingSettings {
+  activeTemplate: ReflectTemplate!
 }
 
 extend type User {
@@ -29,8 +55,6 @@ extend type User {
   clientClockOffset: Int
   dashSearch: String
   pageName: String
-  snackbarOffset: Int
-  teamFilter: Team
 }
 
 extend type Task {
@@ -40,6 +64,7 @@ extend type Task {
 
 extend type RetroReflectionGroup {
   isExpanded: Boolean
+  subColumnIdx: Int
 }
 
 extend type RetroReflection {
@@ -50,12 +75,8 @@ extend type RetroReflection {
   isEditing: Boolean
 }
 
-extend type RetroPhaseItem {
+extend type ReflectPrompt {
   editorIds: [ID!]
-}
-
-extend type RetrospectiveMeetingSettings {
-  activeTemplateId: String
 }
 
 extend interface NewMeetingStage {
@@ -80,4 +101,8 @@ extend type UpdatesStage {
 
 extend type AgendaItemsStage {
   localScheduledEndTime: String
+}
+
+extend type EstimateStage {
+  finalScoreError: String
 }

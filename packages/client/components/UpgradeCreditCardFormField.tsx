@@ -1,12 +1,12 @@
 import React from 'react'
 import styled from '@emotion/styled'
 import Icon from './Icon'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import {ICON_SIZE} from '../styles/typographyV2'
 
 const FieldBlock = styled('div')({
   alignItems: 'center',
-  border: `1px solid ${PALETTE.BORDER_GRAY}`,
+  border: `1px solid ${PALETTE.SLATE_400}`,
   borderRadius: 4,
   display: 'flex'
 })
@@ -16,7 +16,7 @@ interface StyleProps {
 }
 
 const FieldIcon = styled(Icon)<StyleProps>(({hasError}) => ({
-  color: hasError ? PALETTE.ERROR_MAIN : PALETTE.TEXT_GRAY,
+  color: hasError ? PALETTE.TOMATO_500 : PALETTE.SLATE_600,
   display: 'block',
   fontSize: ICON_SIZE.MD18,
   opacity: 0.5,
@@ -45,14 +45,14 @@ const Input = styled('input')<StyleProps>(({hasError}) => ({
   border: 0,
   borderRadius: 4,
   boxShadow: 'none',
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   fontSize: '.9375rem',
   lineHeight: '24px',
   outline: 0,
   padding: '7px 8px', // account for top/bottom border
   width: '100%',
   '::placeholder': {
-    color: hasError ? PALETTE.BACKGROUND_ORANGE : undefined
+    color: hasError ? PALETTE.TOMATO_500 : undefined
   }
 }))
 

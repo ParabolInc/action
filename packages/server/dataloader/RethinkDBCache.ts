@@ -2,18 +2,25 @@ import getRethink, {DBType} from '../database/rethinkDriver'
 import {RDatum} from '../database/stricterR'
 
 export type Updater<T> = Partial<T> | ((doc: RDatum<T>) => any)
-export type RWrite<T> = {id: string; table: T; updater: Updater<T>}
+export interface RRead<T> {
+  id: string
+  table: T
+}
+export interface RWrite<T> extends RRead<T> {
+  updater: Updater<T>
+}
+
 export default class RethinkDBCache {
-  read = async <T extends keyof DBType>(keys: string[]) => {
+  read = async <T extends keyof DBType>(fetches: RRead<T>[]) => {
     const r = await getRethink()
     const idsByTable = {} as {[table: string]: string[]}
-    keys.forEach((key) => {
-      const [table, id] = key.split(':')
+    fetches.forEach((fetch) => {
+      const {table, id} = fetch
       idsByTable[table] = idsByTable[table] || []
       idsByTable[table].push(id)
     })
     const reqlObj = {} as {[table: string]: DBType[T][]}
-    Object.keys(idsByTable).forEach((table) => {
+    Object.keys(idsByTable).forEach((table: string) => {
       const ids = idsByTable[table]
       reqlObj[table] = (r
         .table(table as any)

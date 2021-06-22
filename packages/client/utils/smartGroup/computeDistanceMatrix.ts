@@ -3,10 +3,9 @@
  * see if it exists for this reflection in particular.
  * if it does, grab the salience, else, set it to 0
  */
-import GoogleAnalyzedEntity from 'parabol-server/database/types/GoogleAnalyzedEntity'
 
 const computeDistanceMatrix = (
-  reflectionEntities: GoogleAnalyzedEntity[][],
+  reflectionEntities: {lemma?: string, name: string, salience: number}[][],
   uniqueLemmaArr: string[]
 ) => {
   return reflectionEntities.map((entities) => {

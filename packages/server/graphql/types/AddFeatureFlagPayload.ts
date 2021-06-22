@@ -1,8 +1,9 @@
-import {GraphQLObjectType, GraphQLList, GraphQLString} from 'graphql'
-import {resolveUser} from '../resolvers'
-import User from './User'
-import StandardMutationError from './StandardMutationError'
+import {GraphQLList, GraphQLObjectType} from 'graphql'
+import db from '../../db'
+import {getUserId} from '../../utils/authorization'
 import {GQLContext} from '../graphql'
+import StandardMutationError from './StandardMutationError'
+import User from './User'
 
 const AddFeatureFlagPayload = new GraphQLObjectType<any, GQLContext>({
   name: 'AddFeatureFlagPayload',
@@ -14,7 +15,10 @@ const AddFeatureFlagPayload = new GraphQLObjectType<any, GQLContext>({
       type: User,
       description:
         'the user that was given the super power. Use users instead in GraphiQL since it may affect multiple users',
-      resolve: resolveUser
+      resolve: (_source, _args, {authToken}) => {
+        const viewerId = getUserId(authToken)
+        return db.read('User', viewerId)
+      }
     },
     users: {
       type: new GraphQLList(User),
@@ -22,10 +26,6 @@ const AddFeatureFlagPayload = new GraphQLObjectType<any, GQLContext>({
       resolve: ({userIds}, _args, {dataLoader}) => {
         return dataLoader.get('users').loadMany(userIds)
       }
-    },
-    result: {
-      type: GraphQLString,
-      description: 'A human-readable result'
     }
   })
 })

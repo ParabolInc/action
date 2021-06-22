@@ -39,6 +39,12 @@ server {
 }
 {{ end }}
 
+{{/* Hacky-but-necessary workaround since you can't escape $ in nginx string literals */}}
+{{/* See: https://stackoverflow.com/questions/57466554/how-do-i-escape-in-nginx-variables */}}
+geo $dollar {
+  default "$";
+}
+
 {{ if eq $scheme "http" }}
 server {
   listen      [{{ $.NGINX_BIND_ADDRESS_IP6 }}]:{{ $listen_port }};
@@ -87,6 +93,11 @@ server {
     proxy_set_header X-Forwarded-For $remote_addr;
     proxy_set_header X-Forwarded-Port $server_port;
     proxy_set_header X-Request-Start $msec;
+  }
+
+  location = /robots.txt {
+    add_header Content-Type text/plain;
+    return 200 "User-agent: *\nDisallow: /\nAllow: /$dollar\nAllow: create-account\nAllow: /signin\nAllow: /retrospective-demo\n";
   }
   include {{ $.DOKKU_ROOT }}/{{ $.APP }}/nginx.conf.d/*.conf;
 
@@ -164,6 +175,10 @@ server {
     proxy_set_header X-Forwarded-For $remote_addr;
     proxy_set_header X-Forwarded-Port $server_port;
     proxy_set_header X-Request-Start $msec;
+  }
+  location = /robots.txt {
+    add_header Content-Type text/plain;
+    return 200 "User-agent: *\nDisallow: /\nAllow: /$dollar\nAllow: create-account\nAllow: /signin\nAllow: /retrospective-demo\n";
   }
   include {{ $.DOKKU_ROOT }}/{{ $.APP }}/nginx.conf.d/*.conf;
 

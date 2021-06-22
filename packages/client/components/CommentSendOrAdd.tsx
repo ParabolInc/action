@@ -5,12 +5,12 @@ import React from 'react'
 import {commitLocalUpdate, createFragmentContainer} from 'react-relay'
 import useAtmosphere from '~/hooks/useAtmosphere'
 import CreateTaskMutation from '~/mutations/CreateTaskMutation'
-import {PALETTE} from '~/styles/paletteV2'
+import {PALETTE} from '~/styles/paletteV3'
 import {BezierCurve} from '~/types/constEnums'
-import {TaskStatusEnum, ThreadSourceEnum} from '~/types/graphql'
 import {SORT_STEP} from '~/utils/constants'
 import dndNoise from '~/utils/dndNoise'
 import {CommentSendOrAdd_meeting} from '~/__generated__/CommentSendOrAdd_meeting.graphql'
+import {ThreadSourceEnum} from '~/__generated__/CreateTaskMutation.graphql'
 import {DECELERATE} from '../styles/animation'
 import Icon from './Icon'
 import PlainButton from './PlainButton/PlainButton'
@@ -31,7 +31,7 @@ const animateIn = keyframes`
 const SendIcon = styled(Icon)({
   animation: `${animateIn.toString()} 300ms ${DECELERATE} `,
   opacity: 1,
-  color: PALETTE.TEXT_BLUE,
+  color: PALETTE.SKY_500,
   fontSize: 32,
   padding: 8
 })
@@ -46,7 +46,7 @@ const AddIcon = styled(Icon)<{isExpanded: boolean}>(({isExpanded}) => ({
 const AddButton = styled(PlainButton)({
   alignItems: 'center',
   color: '#fff',
-  backgroundColor: PALETTE.BACKGROUND_BLUE,
+  backgroundColor: PALETTE.SKY_500,
   borderRadius: 16,
   display: 'flex',
   height: 32,
@@ -66,7 +66,7 @@ const ExpandedLabel = styled('div')<{isExpanded: boolean}>(({isExpanded}) => ({
 }))
 
 const ButtonGroup = styled('div')({
-  borderLeft: `1px solid ${PALETTE.BORDER_GRAY} `,
+  borderLeft: `1px solid ${PALETTE.SLATE_400} `,
   padding: 8,
   userSelect: 'none'
 })
@@ -78,7 +78,7 @@ interface Props {
   meeting: CommentSendOrAdd_meeting
   threadSourceId: string
   threadParentId?: string
-  threadSource: string
+  threadSource: ThreadSourceEnum
   onSubmit: () => void
   dataCy: string
 }
@@ -107,16 +107,16 @@ const CommentSendOrAdd = (props: Props) => {
   const addTask = () => {
     const {viewerId} = atmosphere
     const newTask = {
-      status: TaskStatusEnum.active,
+      status: 'active',
       sortOrder: dndNoise(),
       meetingId,
       threadId: threadSourceId,
       threadParentId,
-      threadSource: threadSource as ThreadSourceEnum,
+      threadSource: threadSource,
       threadSortOrder: getMaxSortOrder() + SORT_STEP + dndNoise(),
       userId: viewerId,
       teamId
-    }
+    } as const
     CreateTaskMutation(atmosphere, {newTask}, {})
     collapseAddTask()
     commitLocalUpdate(atmosphere, (store) => {

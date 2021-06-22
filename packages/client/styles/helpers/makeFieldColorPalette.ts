@@ -1,4 +1,4 @@
-import {PALETTE} from '../paletteV2'
+import {PALETTE} from '../paletteV3'
 import {Radius} from '../../types/constEnums'
 import makePlaceholderStyles from './makePlaceholderStyles'
 
@@ -7,21 +7,21 @@ const fieldPalettes = {
   cool: {
     backgroundColor: '#FFFFFF',
     borderColor: 'transparent',
-    color: PALETTE.TEXT_MAIN,
-    focusBorderColor: PALETTE.BORDER_BLUE,
-    placeholder: makePlaceholderStyles(PALETTE.TEXT_BLUE),
-    placeholderColorFocusActive: makePlaceholderStyles(PALETTE.BORDER_BLUE),
-    selection: PALETTE.BACKGROUND_PRIMARY_20A
+    color: PALETTE.SLATE_700,
+    focusBorderColor: PALETTE.SKY_500,
+    placeholder: makePlaceholderStyles(PALETTE.SKY_500),
+    placeholderColorFocusActive: makePlaceholderStyles(PALETTE.SKY_500),
+    selection: PALETTE.SLATE_300
   },
   // all fields
   white: {
     backgroundColor: '#FFFFFF',
-    borderColor: PALETTE.BORDER_MAIN_40,
-    color: PALETTE.TEXT_MAIN,
-    focusBorderColor: PALETTE.BORDER_FIELD_FOCUS,
-    placeholder: makePlaceholderStyles(PALETTE.PLACEHOLDER),
-    placeholderColorFocusActive: makePlaceholderStyles(PALETTE.PLACEHOLDER_FOCUS_ACTIVE),
-    selection: PALETTE.BACKGROUND_PRIMARY_20A
+    borderColor: PALETTE.SLATE_500,
+    color: PALETTE.SLATE_700,
+    focusBorderColor: PALETTE.SLATE_700,
+    placeholder: makePlaceholderStyles(PALETTE.SLATE_600),
+    placeholderColorFocusActive: makePlaceholderStyles(PALETTE.SLATE_400),
+    selection: PALETTE.SLATE_300
   }
 }
 

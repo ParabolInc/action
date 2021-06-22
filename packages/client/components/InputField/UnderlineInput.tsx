@@ -1,16 +1,16 @@
 import React, {forwardRef, Ref} from 'react'
 import styled from '@emotion/styled'
 import StyledError from '../StyledError'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import {FONT_FAMILY} from '../../styles/typographyV2'
 
 const Input = styled('input')({
   appearance: 'none',
   borderWidth: 0,
-  borderBottom: `1px solid ${PALETTE.BORDER_LIGHT}`,
+  borderBottom: `1px solid ${PALETTE.SLATE_400}`,
   borderRadius: 0,
   boxShadow: 'none',
-  color: PALETTE.TEXT_MAIN,
+  color: PALETTE.SLATE_700,
   display: 'block',
   fontFamily: FONT_FAMILY.SANS_SERIF,
   fontSize: 14,
@@ -20,7 +20,7 @@ const Input = styled('input')({
   padding: '.3125rem 1rem .3125rem 0',
   width: '100%',
   ':hover,:focus,:active': {
-    borderColor: PALETTE.BORDER_MAIN
+    borderColor: PALETTE.GRAPE_700
   }
 })
 

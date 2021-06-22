@@ -1,16 +1,22 @@
-import {EditableTemplatePrompt_prompts} from '../../../__generated__/EditableTemplatePrompt_prompts.graphql'
-import React, {Component} from 'react'
-import {createFragmentContainer} from 'react-relay'
+import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
+import React from 'react'
+import {createFragmentContainer} from 'react-relay'
 import EditableText from '../../../components/EditableText'
-import withAtmosphere, {
-  WithAtmosphereProps
-} from '../../../decorators/withAtmosphere/withAtmosphere'
-import withMutationProps, {WithMutationProps} from '../../../utils/relay/withMutationProps'
-import Legitity from '../../../validation/Legitity'
+import useAtmosphere from '../../../hooks/useAtmosphere'
+import useMutationProps from '../../../hooks/useMutationProps'
 import RenameReflectTemplatePromptMutation from '../../../mutations/RenameReflectTemplatePromptMutation'
+import Legitity from '../../../validation/Legitity'
+import {EditableTemplatePrompt_prompts} from '../../../__generated__/EditableTemplatePrompt_prompts.graphql'
 
-interface Props extends WithAtmosphereProps, WithMutationProps {
+const StyledEditableText = styled(EditableText)({
+  fontSize: 16,
+  lineHeight: '24px',
+  padding: 0
+})
+
+interface Props {
+  isOwner: boolean
   isEditingDescription: boolean
   isHover: boolean
   question: string
@@ -18,27 +24,21 @@ interface Props extends WithAtmosphereProps, WithMutationProps {
   prompts: EditableTemplatePrompt_prompts
 }
 
-class EditableTemplatePrompt extends Component<Props> {
-  handleSubmit = (rawQuestion) => {
-    const {
-      atmosphere,
-      promptId,
-      onError,
-      onCompleted,
-      setDirty,
-      submitMutation,
-      submitting
-    } = this.props
+const EditableTemplatePrompt = (props: Props) => {
+  const {isOwner, promptId, isHover, question, isEditingDescription} = props
+  const atmosphere = useAtmosphere()
+  const {onError, error, onCompleted, submitMutation, submitting} = useMutationProps()
+
+  const handleSubmit = (rawQuestion) => {
     if (submitting) return
-    setDirty()
-    const {error, value: question} = this.validate(rawQuestion)
+    const {error, value: question} = validate(rawQuestion)
     if (error) return
     submitMutation()
-    RenameReflectTemplatePromptMutation(atmosphere, {promptId, question}, {}, onError, onCompleted)
+    RenameReflectTemplatePromptMutation(atmosphere, {promptId, question}, {onError, onCompleted})
   }
 
-  legitify(value: string) {
-    const {promptId, prompts} = this.props
+  const legitify = (value: string) => {
+    const {promptId, prompts} = props
     return new Legitity(value)
       .trim()
       .required('Please enter a prompt question')
@@ -51,37 +51,34 @@ class EditableTemplatePrompt extends Component<Props> {
       })
   }
 
-  validate = (rawValue: string) => {
-    const {error, onError} = this.props
-    const res = this.legitify(rawValue)
+  const validate = (rawValue: string) => {
+    const res = legitify(rawValue)
     if (res.error) {
-      onError(res.error)
-    } else if (error) {
-      onError()
+      onError(new Error(res.error))
+    } else {
+      onCompleted()
     }
     return res
   }
 
-  render() {
-    const {error, isHover, question, isEditingDescription} = this.props
-    return (
-      <EditableText
-        autoFocus={question.startsWith('New prompt #')}
-        error={error as string}
-        hideIcon={isEditingDescription ? true : !isHover}
-        handleSubmit={this.handleSubmit}
-        initialValue={question}
-        maxLength={100}
-        validate={this.validate}
-        placeholder={'New Prompt'}
-      />
-    )
-  }
+  return (
+    <StyledEditableText
+      autoFocus={question.startsWith('New prompt #')}
+      disabled={!isOwner}
+      error={error?.message}
+      hideIcon={isEditingDescription ? true : !isHover}
+      handleSubmit={handleSubmit}
+      initialValue={question}
+      maxLength={100}
+      validate={validate}
+      placeholder={'New Prompt'}
+    />
+  )
 }
 
-export default createFragmentContainer(withAtmosphere(withMutationProps(EditableTemplatePrompt)), {
+export default createFragmentContainer(EditableTemplatePrompt, {
   prompts: graphql`
-    fragment EditableTemplatePrompt_prompts on RetroPhaseItem @relay(plural: true) {
+    fragment EditableTemplatePrompt_prompts on ReflectPrompt @relay(plural: true) {
       id
       question
     }

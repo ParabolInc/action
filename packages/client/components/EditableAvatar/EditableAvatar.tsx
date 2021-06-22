@@ -2,7 +2,7 @@ import React from 'react'
 import styled from '@emotion/styled'
 import Avatar from '../Avatar/Avatar'
 import {panelShadow} from '../../styles/elevation'
-import {PALETTE} from '../../styles/paletteV2'
+import {PALETTE} from '../../styles/paletteV3'
 import Icon from '../Icon'
 
 const borderRadius = '50%'
@@ -23,7 +23,7 @@ const EditableAvatarRoot = styled('div')<Pick<Props, 'hasPanel' | 'size'>>(({has
 const EditableAvatarEditOverlay = styled('div')<Pick<Props, 'hasPanel' | 'size'>>(
   ({hasPanel, size}) => ({
     alignItems: 'center',
-    backgroundColor: PALETTE.BACKGROUND_DARK,
+    backgroundColor: PALETTE.SLATE_700,
     borderRadius: hasPanel ? borderRadiusPanel : borderRadius,
     color: 'white',
     cursor: 'pointer',

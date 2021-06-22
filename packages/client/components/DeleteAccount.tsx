@@ -1,7 +1,7 @@
 import styled from '@emotion/styled'
 import React from 'react'
 import useModal from '../hooks/useModal'
-import {PALETTE} from '../styles/paletteV2'
+import {PALETTE} from '../styles/paletteV3'
 import lazyPreload from '../utils/lazyPreload'
 import IconLabel from './IconLabel'
 import LinkButton from './LinkButton'
@@ -11,7 +11,7 @@ const DeleteAccountModal = lazyPreload(() =>
 )
 
 const Hint = styled('div')({
-  color: PALETTE.TEXT_GRAY,
+  color: PALETTE.SLATE_600,
   fontSize: 13,
   marginTop: 8
 })

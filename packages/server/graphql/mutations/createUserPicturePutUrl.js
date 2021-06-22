@@ -1,14 +1,15 @@
 import {GraphQLNonNull} from 'graphql'
-import CreateUserPicturePutUrlPayload from '../types/CreateUserPicturePutUrlPayload'
+import validateAvatarUpload from '../../fileStorage/validateAvatarUpload'
+import generateUID from '../../generateUID'
 import {getUserId, isAuthenticated} from '../../utils/authorization'
-import getS3PutUrl from '../../utils/getS3PutUrl'
-import validateAvatarUpload from '../../utils/validateAvatarUpload'
-import shortid from 'shortid'
+import getS3SignedPutUrl from '../../utils/getS3SignedPutUrl'
 import standardError from '../../utils/standardError'
+import CreateUserPicturePutUrlPayload from '../types/CreateUserPicturePutUrlPayload'
 import ImageMetadataInput from '../types/ImageMetadataInput'
 
 const createUserPicturePutUrl = {
   type: CreateUserPicturePutUrlPayload,
+  deprecationReason: 'Replaced with `uploadUserImage` mutation',
   description: 'Create a PUT URL on the CDN for the currently authenticated user’s profile picture',
   args: {
     image: {
@@ -33,13 +34,13 @@ const createUserPicturePutUrl = {
     }
 
     // RESOLUTION
-    const imgId = shortid.generate()
+    const imgId = generateUID()
     const partialPath = `User/${userId}/picture/${imgId}.${ext}`
-    const url = await getS3PutUrl(contentType, contentLength, partialPath)
+    const url = await getS3SignedPutUrl(contentType, contentLength, partialPath)
     let pngUrl
     if (pngVersion) {
       const partialPath = `User/${userId}/picture/${imgId}.png`
-      pngUrl = await getS3PutUrl(contentType, contentLength, partialPath)
+      pngUrl = await getS3SignedPutUrl(contentType, contentLength, partialPath)
     }
     return {url, pngUrl}
   }

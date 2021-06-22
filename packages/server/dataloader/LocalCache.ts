@@ -1,16 +1,16 @@
 import {DBType} from '../database/rethinkDriver'
-import RedisCache from './RedisCache'
+import RedisCache, {CacheType} from './RedisCache'
 import {RWrite, Updater} from './RethinkDBCache'
 
 const resolvedPromise = Promise.resolve()
 
 type Thunk = () => void
-export default class LocalCache<T extends keyof DBType> {
+export default class LocalCache<T extends keyof CacheType> {
   private cacheMap = {} as {[key: string]: {ts: number; promise: Promise<any>}}
   private hasReadDispatched = true
   private hasWriteDispatched = true
   private fetches = [] as {
-    table: T
+    table: keyof CacheType
     id: string
     resolve: (payload: any) => void
     reject: (err: any) => void
@@ -20,7 +20,7 @@ export default class LocalCache<T extends keyof DBType> {
     table: T
     id: string
     resolve: (payload: any) => void
-    updater: Updater<DBType[T]>
+    updater: Updater<CacheType[T]>
   }[]
   private ttl: number
   private redisCache = new RedisCache()
@@ -80,7 +80,7 @@ export default class LocalCache<T extends keyof DBType> {
     delete this.cacheMap[key]
     return this
   }
-  private primeLocal(key: string, doc: DBType[keyof DBType]) {
+  private primeLocal(key: string, doc: CacheType[keyof CacheType]) {
     this.cacheMap[key] = {
       ts: Date.now(),
       promise: Promise.resolve(doc)
@@ -105,7 +105,7 @@ export default class LocalCache<T extends keyof DBType> {
     return this
   }
 
-  async prime(table: T, docs: DBType[T][]) {
+  async prime(table: T, docs: CacheType[T][]) {
     docs.forEach((doc) => {
       const key = `${table}:${doc.id}`
       this.primeLocal(key, doc)
@@ -113,7 +113,8 @@ export default class LocalCache<T extends keyof DBType> {
     this.redisCache.prime(table, docs)
     return this
   }
-  async read(table: T, id: string) {
+  async read<T extends keyof CacheType>(table: T, id: string) {
+    // return 42 as any as CacheType[T]
     if (this.hasReadDispatched) {
       this.hasReadDispatched = false
       this.fetches = []
@@ -128,27 +129,27 @@ export default class LocalCache<T extends keyof DBType> {
       cachedRecord.ts = Date.now()
       // there's marginal savings to be had by reusing promises instead of creating a new one for each cache hit
       // not implemented for the sake of simplicity
-      return new Promise<DBType[T]>((resolve) => {
+      return new Promise<CacheType[T]>((resolve) => {
         this.cacheHits.push(() => {
           resolve(cachedRecord.promise)
         })
       })
     }
-    const promise = new Promise<DBType[T]>((resolve, reject) => {
+    const promise = new Promise<CacheType[T]>((resolve, reject) => {
       this.fetches.push({resolve, reject, table, id})
     })
     this.cacheMap[key] = {ts: Date.now(), promise}
     return promise
   }
 
-  async readMany(table: T, ids: string[]) {
-    const loadPromises = [] as Promise<DBType[T]>[]
+  async readMany<T extends keyof CacheType>(table: T, ids: string[]) {
+    const loadPromises = [] as Promise<CacheType[T]>[]
     for (let i = 0; i < ids.length; i++) {
       loadPromises.push(this.read(table, ids[i]).catch((error) => error))
     }
     return Promise.all(loadPromises)
   }
-  async write<P extends DBType[T]>(table: T, id: string, updater: Updater<P>) {
+  async write<P extends CacheType[T]>(table: T, id: string, updater: Updater<P>) {
     if (this.hasWriteDispatched) {
       this.hasWriteDispatched = false
       this.writes = [] as (RWrite<P> & {resolve: (payload: any) => void})[]
@@ -161,12 +162,12 @@ export default class LocalCache<T extends keyof DBType> {
     })
   }
 
-  async writeMany<P extends DBType[T]>(table: T, ids: string[], updater: Updater<P>) {
+  async writeMany<P extends CacheType[T]>(table: T, ids: string[], updater: Updater<P>) {
     return Promise.all(ids.map((id) => this.write(table, id, updater)))
   }
 
   // currently doesn't support updater functions
-  async writeTable<P extends Partial<DBType[T]>>(table: T, updater: P) {
+  async writeTable<T extends keyof DBType, P extends Partial<DBType[T]>>(table: T, updater: P) {
     Object.keys(this.cacheMap).forEach((key) => {
       if (!key.startsWith(`${table}:`)) return
       const doc = this.cacheMap[key]

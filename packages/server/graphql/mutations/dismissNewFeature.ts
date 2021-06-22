@@ -2,6 +2,9 @@ import {GraphQLNonNull} from 'graphql'
 import db from '../../db'
 import {getUserId} from '../../utils/authorization'
 import DismissNewFeaturePayload from '../types/DismissNewFeaturePayload'
+import {dismissNewFeatureQuery} from '../../postgres/queries/generated/dismissNewFeatureQuery'
+import catchAndLog from '../../postgres/utils/catchAndLog'
+import getPg from '../../postgres/getPg'
 
 export default {
   type: new GraphQLNonNull(DismissNewFeaturePayload),
@@ -10,7 +13,11 @@ export default {
   resolve: async (_source, _args, {authToken}) => {
     // AUTH
     const viewerId = getUserId(authToken)
-    await db.write('User', viewerId, {newFeatureId: null})
+    const update = {newFeatureId: null}
+    await Promise.all([
+      catchAndLog(() => dismissNewFeatureQuery.run({ids: [viewerId]}, getPg())),
+      db.write('User', viewerId, update)
+    ])
     return {}
   }
 }

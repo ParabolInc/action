@@ -1,10 +1,11 @@
-import {GraphQLNonNull} from 'graphql'
+import {GraphQLID, GraphQLNonNull} from 'graphql'
 import {SubscriptionChannel} from 'parabol-client/types/constEnums'
-import {IAddCommentOnMutationArguments, NewMeetingPhaseTypeEnum} from 'parabol-client/types/graphql'
 import toTeamMemberId from 'parabol-client/utils/relay/toTeamMemberId'
 import normalizeRawDraftJS from 'parabol-client/validation/normalizeRawDraftJS'
 import getRethink from '../../database/rethinkDriver'
 import Comment from '../../database/types/Comment'
+import {NewMeetingPhaseTypeEnum} from '../../database/types/GenericMeetingPhase'
+import {ThreadSourceEnum} from '../../database/types/ThreadSource'
 import {getUserId} from '../../utils/authorization'
 import publish from '../../utils/publish'
 import segmentIo from '../../utils/segmentIo'
@@ -13,6 +14,16 @@ import AddCommentInput from '../types/AddCommentInput'
 import AddCommentPayload from '../types/AddCommentPayload'
 import validateThreadableThreadSourceId from './validateThreadableThreadSourceId'
 
+type AddCommentMutationVariables = {
+  comment: {
+    threadSource: ThreadSourceEnum
+    threadId: string
+    content: string
+    threadSortOrder: number
+  }
+  meetingId: string
+}
+
 const addComment = {
   type: GraphQLNonNull(AddCommentPayload),
   description: `Add a comment to a discussion`,
@@ -20,11 +31,15 @@ const addComment = {
     comment: {
       type: GraphQLNonNull(AddCommentInput),
       description: 'A partial new comment'
+    },
+    meetingId: {
+      type: new GraphQLNonNull(GraphQLID),
+      description: 'The id of the meeting'
     }
   },
   resolve: async (
     _source,
-    {comment}: IAddCommentOnMutationArguments,
+    {comment, meetingId}: AddCommentMutationVariables,
     {authToken, dataLoader, socketId: mutatorId}: GQLContext
   ) => {
     const r = await getRethink()
@@ -33,9 +48,8 @@ const addComment = {
     const subOptions = {mutatorId, operationId}
 
     //AUTH
-    const {meetingId, threadId, threadSource} = comment
+    const {threadId, threadSource} = comment
     const meetingMemberId = toTeamMemberId(meetingId, viewerId)
-
     const [meeting, viewerMeetingMember, threadError] = await Promise.all([
       dataLoader.get('newMeetings').load(meetingId),
       dataLoader.get('meetingMembers').load(meetingMemberId),
@@ -59,11 +73,11 @@ const addComment = {
       .insert(dbComment)
       .run()
 
-    const data = {commentId}
+    const data = {commentId, meetingId}
     const {phases, teamId} = meeting!
-    const containsThreadablePhase = phases.find(
-      (phase) => (phase.phaseType === NewMeetingPhaseTypeEnum.discuss ||
-        phase.phaseType === NewMeetingPhaseTypeEnum.agendaitems)
+    const threadablePhases = ['discuss', 'agendaitems', 'ESTIMATE'] as NewMeetingPhaseTypeEnum[]
+    const containsThreadablePhase = phases.find(({phaseType}) =>
+      threadablePhases.includes(phaseType)
     )!
     const {stages} = containsThreadablePhase
     const isAsync = stages.some((stage) => stage.isAsync)

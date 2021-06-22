@@ -1,6 +1,5 @@
 import {GraphQLID, GraphQLNonNull} from 'graphql'
 import {InvoiceItemType, Threshold} from 'parabol-client/types/constEnums'
-import {TierEnum} from 'parabol-client/types/graphql'
 import adjustUserCount from '../../billing/helpers/adjustUserCount'
 import getRethink from '../../database/rethinkDriver'
 import Organization from '../../database/types/Organization'
@@ -50,7 +49,7 @@ export default {
     const hookPromises = orgs.map((orgDoc) => {
       const {periodStart, periodEnd, stripeSubscriptionId, tier} = orgDoc
       // TODO see if this is OK for enterprise
-      if (tier === TierEnum.personal) return undefined as any
+      if (tier === 'personal') return undefined as any
       const periodStartInSeconds = toEpochSeconds(periodStart!)
       const periodEndInSeconds = toEpochSeconds(periodEnd!)
       return r
