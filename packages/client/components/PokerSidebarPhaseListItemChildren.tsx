@@ -13,22 +13,12 @@ interface Props {
   gotoStageId: ReturnType<typeof useGotoStageId>
   handleMenuClick: () => void
   phaseType: NewMeetingPhaseTypeEnum
+  maxChildHeight: number | null
   meeting: PokerSidebarPhaseListItemChildren_meeting
 }
 
 const PokerSidebarPhaseListItemChildren = (props: Props) => {
-  const {gotoStageId, handleMenuClick, phaseType, meeting} = props
-  const {localPhase} = meeting
-  const showCheckInSection = localPhase && localPhase.phaseType === phaseType
-  if (phaseType === 'checkin' && showCheckInSection) {
-    return (
-      <MeetingSidebarTeamMemberStageItems
-        gotoStageId={gotoStageId}
-        handleMenuClick={handleMenuClick}
-        meeting={meeting}
-      />
-    )
-  }
+  const {gotoStageId, handleMenuClick, phaseType, maxChildHeight, meeting} = props
   if (phaseType === 'ESTIMATE') {
     return (
       <PokerSidebarEstimateSection
@@ -38,7 +28,15 @@ const PokerSidebarPhaseListItemChildren = (props: Props) => {
       />
     )
   }
-  return null
+  return (
+    <MeetingSidebarTeamMemberStageItems
+      gotoStageId={gotoStageId}
+      handleMenuClick={handleMenuClick}
+      maxChildHeight={maxChildHeight}
+      meeting={meeting}
+      phaseType={phaseType}
+    />
+  )
 }
 
 export default createFragmentContainer(PokerSidebarPhaseListItemChildren, {
@@ -46,9 +44,6 @@ export default createFragmentContainer(PokerSidebarPhaseListItemChildren, {
     fragment PokerSidebarPhaseListItemChildren_meeting on PokerMeeting {
       ...MeetingSidebarTeamMemberStageItems_meeting
       ...PokerSidebarEstimateSection_meeting
-      localPhase {
-        phaseType
-      }
       phases {
         phaseType
         stages {

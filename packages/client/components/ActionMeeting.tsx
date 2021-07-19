@@ -1,11 +1,11 @@
 import graphql from 'babel-plugin-relay/macro'
-import React, {ReactElement, useEffect} from 'react'
+import React, {ReactElement, Suspense, useEffect} from 'react'
 import {createFragmentContainer} from 'react-relay'
 import {ActionMeeting_meeting} from '~/__generated__/ActionMeeting_meeting.graphql'
 import useMeeting from '../hooks/useMeeting'
 import NewMeetingAvatarGroup from '../modules/meeting/components/MeetingAvatarGroup/NewMeetingAvatarGroup'
-import {NewMeetingPhaseTypeEnum} from '../__generated__/ActionMeeting_meeting.graphql'
 import lazyPreload, {LazyExoticPreload} from '../utils/lazyPreload'
+import {NewMeetingPhaseTypeEnum} from '../__generated__/ActionMeeting_meeting.graphql'
 import ActionMeetingSidebar from './ActionMeetingSidebar'
 import MeetingArea from './MeetingArea'
 import MeetingControlBar from './MeetingControlBar'
@@ -72,6 +72,7 @@ const ActionMeeting = (props: Props) => {
         />
       </ResponsiveDashSidebar>
       <MeetingArea>
+        <Suspense fallback={''}>
         <Phase
           meeting={meeting}
           toggleSidebar={toggleSidebar}
@@ -86,7 +87,8 @@ const ActionMeeting = (props: Props) => {
               meeting={meeting}
             />
           }
-        />
+          />
+          </Suspense>
       </MeetingArea>
       <MeetingControlBar
         meeting={meeting}

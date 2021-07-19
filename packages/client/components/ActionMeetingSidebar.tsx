@@ -1,16 +1,20 @@
-import {ActionMeetingSidebar_meeting} from '../__generated__/ActionMeetingSidebar_meeting.graphql'
-import React from 'react'
-import {createFragmentContainer} from 'react-relay'
 import graphql from 'babel-plugin-relay/macro'
-import NewMeetingSidebarPhaseListItem from './NewMeetingSidebarPhaseListItem'
-import ActionSidebarPhaseListItemChildren from './ActionSidebarPhaseListItemChildren'
-import {NewMeetingPhaseTypeEnum} from '../__generated__/ActionMeetingSidebar_meeting.graphql'
-import getSidebarItemStage from '../utils/getSidebarItemStage'
-import findStageById from '../utils/meetings/findStageById'
-import NewMeetingSidebar from './NewMeetingSidebar'
-import MeetingNavList from './MeetingNavList'
+import React from 'react'
+import {useRef} from 'react'
+import {createFragmentContainer} from 'react-relay'
 import useAtmosphere from '../hooks/useAtmosphere'
 import useGotoStageId from '../hooks/useGotoStageId'
+import getSidebarItemStage from '../utils/getSidebarItemStage'
+import findStageById from '../utils/meetings/findStageById'
+import {
+  ActionMeetingSidebar_meeting,
+  NewMeetingPhaseTypeEnum
+} from '../__generated__/ActionMeetingSidebar_meeting.graphql'
+import ActionSidebarPhaseListItemChildren from './ActionSidebarPhaseListItemChildren'
+import MeetingNavList from './MeetingNavList'
+import NewMeetingSidebar from './NewMeetingSidebar'
+import NewMeetingSidebarPhaseListItem from './NewMeetingSidebarPhaseListItem'
+import useMaxChildHeight from '../hooks/useMaxChildHeight'
 
 interface Props {
   gotoStageId: ReturnType<typeof useGotoStageId>
@@ -30,6 +34,12 @@ const ActionMeetingSidebar = (props: Props) => {
   const {agendaItems} = team
   const {phaseTypes} = settings
   const {facilitatorUserId, facilitatorStageId, localPhase, localStage, phases} = meeting
+  const navPhasesRef = useRef<HTMLDivElement>(null)
+  const maxChildHeight = useMaxChildHeight(
+    navPhasesRef,
+    collapsiblePhases.length,
+    agendaItems.length === 0
+  )
   const localPhaseType = localPhase ? localPhase.phaseType : ''
   const facilitatorStageRes = findStageById(phases, facilitatorStageId)
   const facilitatorPhaseType = facilitatorStageRes ? facilitatorStageRes.phase.phaseType : ''
@@ -41,6 +51,7 @@ const ActionMeetingSidebar = (props: Props) => {
       handleMenuClick={handleMenuClick}
       toggleSidebar={toggleSidebar}
       meeting={meeting}
+      navPhasesRef={navPhasesRef}
     >
       <MeetingNavList>
         {phaseTypes
@@ -78,6 +89,7 @@ const ActionMeetingSidebar = (props: Props) => {
                   gotoStageId={gotoStageId}
                   handleMenuClick={handleMenuClick}
                   phaseType={phaseType}
+                  maxChildHeight={maxChildHeight}
                   meeting={meeting}
                 />
               </NewMeetingSidebarPhaseListItem>

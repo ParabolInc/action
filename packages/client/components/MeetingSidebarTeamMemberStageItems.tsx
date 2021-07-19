@@ -1,55 +1,71 @@
-import * as Sentry from '@sentry/browser'
 import styled from '@emotion/styled'
+import * as Sentry from '@sentry/browser'
 import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
 import {createFragmentContainer} from 'react-relay'
 import {MeetingSidebarTeamMemberStageItems_meeting} from '~/__generated__/MeetingSidebarTeamMemberStageItems_meeting.graphql'
 import Avatar from '../components/Avatar/Avatar'
 import MeetingSubnavItem from '../components/MeetingSubnavItem'
+import useAnimatedPhaseListChildren from '../hooks/useAnimatedPhaseListChildren'
 import useAtmosphere from '../hooks/useAtmosphere'
 import useGotoStageId from '../hooks/useGotoStageId'
+import {NewMeetingPhaseTypeEnum} from '../__generated__/ActionMeeting_meeting.graphql'
 import MeetingSidebarPhaseItemChild from './MeetingSidebarPhaseItemChild'
 
 const AvatarBlock = styled('div')({
   width: 32
 })
 
-const ScrollStageItems = styled('div')({
+const ScrollStageItems = styled('div')<{isActive: boolean}>(({isActive}) => ({
   display: 'flex',
   flexDirection: 'column',
   height: '100%', // trickle down height for overflow
   // react-beautiful-dnd supports scrolling on 1 parent
   // this is where we need it, in order to scroll a long list
-  overflow: 'auto',
+  overflow: isActive ? 'auto' : 'hidden',
   paddingRight: 8,
   width: '100%'
-})
+}))
 
 interface Props {
   gotoStageId: ReturnType<typeof useGotoStageId>
   handleMenuClick: () => void
+  maxChildHeight: number | null
   meeting: MeetingSidebarTeamMemberStageItems_meeting
+  phaseType: NewMeetingPhaseTypeEnum
 }
 
 const MeetingSidebarTeamMemberStageItems = (props: Props) => {
-  const {gotoStageId, handleMenuClick, meeting} = props
-  const {id: meetingId, facilitatorStageId, facilitatorUserId, localPhase, localStage} = meeting
-  const {phaseType} = localPhase
+  const {gotoStageId, handleMenuClick, maxChildHeight, meeting, phaseType} = props
+  const {
+    id: meetingId,
+    facilitatorStageId,
+    facilitatorUserId,
+    localPhase,
+    localStage,
+    phases
+  } = meeting
+  const sidebarPhase = phases.find((phase) => phase.phaseType === phaseType)!
   const localStageId = (localStage && localStage.id) || ''
   const gotoStage = (teamMemberId) => () => {
-    const teamMemberStage =
-      localPhase && localPhase.stages.find((stage) => stage.teamMemberId === teamMemberId)
+    const teamMemberStage = sidebarPhase.stages.find((stage) => stage.teamMemberId === teamMemberId)
     const teamMemberStageId = (teamMemberStage && teamMemberStage.id) || ''
     gotoStageId(teamMemberStageId).catch()
     handleMenuClick()
   }
   const atmosphere = useAtmosphere()
   const {viewerId} = atmosphere
+  const isActive = localPhase.phaseType === sidebarPhase.phaseType
   const isViewerFacilitator = viewerId === facilitatorUserId
+  const {height, ref} = useAnimatedPhaseListChildren(isActive, sidebarPhase.stages.length)
+  const childHeight =
+    typeof height === 'number' && maxChildHeight !== null
+      ? Math.min(maxChildHeight, height)
+      : height
   return (
-    <MeetingSidebarPhaseItemChild>
-      <ScrollStageItems>
-        {localPhase.stages.map((stage) => {
+    <MeetingSidebarPhaseItemChild height={isActive ? childHeight : 0}>
+      <ScrollStageItems isActive={isActive} ref={ref}>
+        {sidebarPhase.stages.map((stage) => {
           const {
             id: stageId,
             isComplete,
@@ -61,7 +77,9 @@ const MeetingSidebarTeamMemberStageItems = (props: Props) => {
           if (!teamMember) {
             Sentry.captureException(
               new Error(
-                `Team member is undefined. teamMemberId is ${teamMemberId}. phaseType is ${phaseType}. stageId is ${stageId}. meetingId is ${meetingId}. localStageId is ${localStageId}. stage is ${JSON.stringify(stage)}.`
+                `Team member is undefined. teamMemberId is ${teamMemberId}. phaseType is ${phaseType}. stageId is ${stageId}. meetingId is ${meetingId}. localStageId is ${localStageId}. stage is ${JSON.stringify(
+                  stage
+                )}.`
               )
             )
             return null

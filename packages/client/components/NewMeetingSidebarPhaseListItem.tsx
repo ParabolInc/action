@@ -2,11 +2,12 @@ import styled from '@emotion/styled'
 import React, {ReactNode} from 'react'
 import {PALETTE} from '../styles/paletteV3'
 import {NavSidebar} from '../types/constEnums'
-import {NewMeetingPhaseTypeEnum} from '~/__generated__/NewMeetingSettingsToggleCheckIn_settings.graphql.ts'
 import {phaseIconLookup, phaseImageLookup, phaseLabelLookup} from '../utils/meetings/lookups'
 import Badge from './Badge/Badge'
 import Icon from './Icon'
+import {NewMeetingPhaseTypeEnum} from '../__generated__/ActionMeeting_meeting.graphql'
 
+const minHeightPhases: NewMeetingPhaseTypeEnum[] = ['agendaitems', 'discuss', 'ESTIMATE']
 const NavListItem = styled('li')<{phaseType: NewMeetingPhaseTypeEnum}>(({phaseType}) => ({
   fontWeight: 600,
   display: 'flex',
@@ -14,7 +15,13 @@ const NavListItem = styled('li')<{phaseType: NewMeetingPhaseTypeEnum}>(({phaseTy
   margin: 0,
   // hack to work around broken flexbox
   // https://bugs.chromium.org/p/chromium/issues/detail?id=927066
-  minHeight: phaseType === 'agendaitems' ? 98 : 40
+  // minHeightPhases require a minHeight number for scroll
+  // others use fit-content so they don't get squeezed
+  minHeight: minHeightPhases.includes(phaseType)
+    ? phaseType === 'agendaitems'
+      ? NavSidebar.ITEM_HEIGHT + NavSidebar.AGENDA_ITEM_INPUT_HEIGHT
+      : NavSidebar.ITEM_HEIGHT
+    : 'fit-content'
 }))
 
 const NavItemIcon = styled(Icon)<{isUnsyncedFacilitatorPhase: boolean}>(

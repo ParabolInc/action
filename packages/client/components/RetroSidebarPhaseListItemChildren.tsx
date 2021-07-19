@@ -14,23 +14,14 @@ interface Props {
   gotoStageId: ReturnType<typeof useGotoStageId>
   handleMenuClick: () => void
   phaseType: NewMeetingPhaseTypeEnum
+  maxChildHeight: number | null
   meeting: RetroSidebarPhaseListItemChildren_meeting
 }
 
 const RetroSidebarPhaseListItemChildren = (props: Props) => {
-  const {gotoStageId, handleMenuClick, phaseType, meeting} = props
-  const {phases, localPhase} = meeting
-  const showCheckInSection = localPhase && localPhase.phaseType === phaseType
+  const {gotoStageId, handleMenuClick, phaseType, maxChildHeight, meeting} = props
+  const {phases} = meeting
   const showDiscussSection = phases && isPhaseComplete('vote', phases)
-  if (phaseType === 'checkin' && showCheckInSection) {
-    return (
-      <MeetingSidebarTeamMemberStageItems
-        gotoStageId={gotoStageId}
-        handleMenuClick={handleMenuClick}
-        meeting={meeting}
-      />
-    )
-  }
   if (phaseType === 'discuss' && showDiscussSection) {
     return (
       <RetroSidebarDiscussSection
@@ -40,7 +31,15 @@ const RetroSidebarPhaseListItemChildren = (props: Props) => {
       />
     )
   }
-  return null
+  return (
+    <MeetingSidebarTeamMemberStageItems
+      gotoStageId={gotoStageId}
+      handleMenuClick={handleMenuClick}
+      maxChildHeight={maxChildHeight}
+      meeting={meeting}
+      phaseType={phaseType}
+    />
+  )
 }
 
 export default createFragmentContainer(RetroSidebarPhaseListItemChildren, {
@@ -48,9 +47,6 @@ export default createFragmentContainer(RetroSidebarPhaseListItemChildren, {
     fragment RetroSidebarPhaseListItemChildren_meeting on RetrospectiveMeeting {
       ...MeetingSidebarTeamMemberStageItems_meeting
       ...RetroSidebarDiscussSection_meeting
-      localPhase {
-        phaseType
-      }
       phases {
         phaseType
         stages {

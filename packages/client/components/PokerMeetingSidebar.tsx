@@ -1,5 +1,5 @@
 import graphql from 'babel-plugin-relay/macro'
-import React from 'react'
+import React, {useRef} from 'react'
 import {createFragmentContainer} from 'react-relay'
 import useRouter from '~/hooks/useRouter'
 import {
@@ -8,6 +8,7 @@ import {
 } from '~/__generated__/PokerMeetingSidebar_meeting.graphql'
 import useAtmosphere from '../hooks/useAtmosphere'
 import useGotoStageId from '../hooks/useGotoStageId'
+import useMaxChildHeight from '../hooks/useMaxChildHeight'
 import getSidebarItemStage from '../utils/getSidebarItemStage'
 import findStageById from '../utils/meetings/findStageById'
 import MeetingNavList from './MeetingNavList'
@@ -39,6 +40,8 @@ const PokerMeetingSidebar = (props: Props) => {
     phases,
     settings
   } = meeting
+  const navPhasesRef = useRef<HTMLDivElement>(null)
+  const maxChildHeight = useMaxChildHeight(navPhasesRef, phases.length)
   const {phaseTypes} = settings
   const localPhaseType = localPhase ? localPhase.phaseType : ''
   const facilitatorStageRes = findStageById(phases, facilitatorStageId)
@@ -51,6 +54,7 @@ const PokerMeetingSidebar = (props: Props) => {
       handleMenuClick={handleMenuClick}
       toggleSidebar={toggleSidebar}
       meeting={meeting}
+      navPhasesRef={navPhasesRef}
     >
       <MeetingNavList>
         {phaseTypes.map((phaseType) => {
@@ -87,6 +91,7 @@ const PokerMeetingSidebar = (props: Props) => {
                 gotoStageId={gotoStageId}
                 handleMenuClick={handleMenuClick}
                 phaseType={phaseType}
+                maxChildHeight={maxChildHeight}
                 meeting={meeting}
               />
             </NewMeetingSidebarPhaseListItem>

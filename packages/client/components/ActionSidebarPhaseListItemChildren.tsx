@@ -1,21 +1,22 @@
+import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
 import {createFragmentContainer} from 'react-relay'
-import graphql from 'babel-plugin-relay/macro'
-import ActionSidebarAgendaItemsSection from './ActionSidebarAgendaItemsSection'
-import MeetingSidebarTeamMemberStageItems from './MeetingSidebarTeamMemberStageItems'
-import {NewMeetingPhaseTypeEnum} from '../__generated__/ActionSidebarAgendaItemsSection_meeting.graphql'
 import {ActionSidebarPhaseListItemChildren_meeting} from '~/__generated__/ActionSidebarPhaseListItemChildren_meeting.graphql'
 import useGotoStageId from '../hooks/useGotoStageId'
+import {NewMeetingPhaseTypeEnum} from '../__generated__/ActionSidebarAgendaItemsSection_meeting.graphql'
+import ActionSidebarAgendaItemsSection from './ActionSidebarAgendaItemsSection'
+import MeetingSidebarTeamMemberStageItems from './MeetingSidebarTeamMemberStageItems'
 
 interface Props {
   gotoStageId: ReturnType<typeof useGotoStageId>
   handleMenuClick: () => void
-  phaseType: NewMeetingPhaseTypeEnum | string
+  phaseType: NewMeetingPhaseTypeEnum
+  maxChildHeight: number | null
   meeting: ActionSidebarPhaseListItemChildren_meeting
 }
 
 const ActionSidebarPhaseListItemChildren = (props: Props) => {
-  const {gotoStageId, handleMenuClick, phaseType, meeting} = props
+  const {gotoStageId, handleMenuClick, phaseType, maxChildHeight, meeting} = props
   if (phaseType === 'agendaitems') {
     return (
       <ActionSidebarAgendaItemsSection
@@ -24,16 +25,16 @@ const ActionSidebarPhaseListItemChildren = (props: Props) => {
         meeting={meeting}
       />
     )
-  } else if (meeting.localPhase && meeting.localPhase.phaseType === phaseType) {
-    return (
-      <MeetingSidebarTeamMemberStageItems
-        gotoStageId={gotoStageId}
-        handleMenuClick={handleMenuClick}
-        meeting={meeting}
-      />
-    )
   }
-  return null
+  return (
+    <MeetingSidebarTeamMemberStageItems
+      gotoStageId={gotoStageId}
+      handleMenuClick={handleMenuClick}
+      maxChildHeight={maxChildHeight}
+      meeting={meeting}
+      phaseType={phaseType}
+    />
+  )
 }
 
 export default createFragmentContainer(ActionSidebarPhaseListItemChildren, {

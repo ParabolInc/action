@@ -1,6 +1,7 @@
 import styled from '@emotion/styled'
 import graphql from 'babel-plugin-relay/macro'
 import React, {ReactNode} from 'react'
+import {RefObject} from 'react'
 import {createFragmentContainer} from 'react-relay'
 import {Link} from 'react-router-dom'
 import useAtmosphere from '~/hooks/useAtmosphere'
@@ -22,6 +23,12 @@ const MeetingName = styled('div')({
   fontWeight: 600,
   lineHeight: '24px',
   wordBreak: 'break-word'
+})
+
+const NavPhasesContainer = styled('div')({
+  display: 'flex',
+  minHeight: 0,
+  height: '100%'
 })
 
 const EditableMeetingName = MeetingName.withComponent(EditableText)
@@ -75,10 +82,11 @@ interface Props {
   handleMenuClick: () => void
   toggleSidebar: () => void
   meeting: NewMeetingSidebar_meeting
+  navPhasesRef: RefObject<HTMLDivElement>
 }
 
 const NewMeetingSidebar = (props: Props) => {
-  const {children, handleMenuClick, toggleSidebar, meeting} = props
+  const {children, handleMenuClick, toggleSidebar, meeting, navPhasesRef} = props
   const {error, submitMutation, submitting, onCompleted, onError} = useMutationProps()
   const {id: meetingId, endedAt, team, name: meetingName, facilitatorUserId} = meeting
   const {id: teamId, name: teamName} = team
@@ -132,7 +140,7 @@ const NewMeetingSidebar = (props: Props) => {
         </div>
       </SidebarHeader>
       <Facilitator meeting={meeting} />
-      {children}
+      <NavPhasesContainer ref={navPhasesRef}>{children}</NavPhasesContainer>
       <LogoBlock onClick={handleMenuClick} />
     </SidebarParent>
   )
