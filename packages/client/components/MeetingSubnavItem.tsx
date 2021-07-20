@@ -4,8 +4,6 @@ import useScrollIntoView from '../hooks/useScrollIntoVIew'
 import {PALETTE} from '../styles/paletteV3'
 import {NavSidebar} from '../types/constEnums'
 
-const lineHeight = NavSidebar.SUB_LINE_HEIGHT
-
 interface ItemRootProps {
   isActive: boolean
   isComplete?: boolean
@@ -25,7 +23,7 @@ const ItemRoot = styled('div')<ItemRootProps>(
     flexShrink: 0,
     fontSize: 14,
     fontWeight: 400,
-    minHeight: 40,
+    height: NavSidebar.ITEM_HEIGHT,
     opacity: !isActive && isComplete ? 0.5 : undefined,
     padding: '8px 0',
     position: 'relative',
@@ -60,7 +58,7 @@ const ItemMeta = styled('div')({
   alignItems: 'center',
   alignContent: 'center',
   display: 'flex',
-  height: lineHeight,
+  height: NavSidebar.SUB_LINE_HEIGHT,
   paddingLeft: 4
 })
 

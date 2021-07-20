@@ -9,47 +9,66 @@ import MeetingSubnavItem from '../components/MeetingSubnavItem'
 import useAtmosphere from '../hooks/useAtmosphere'
 import useGotoStageId from '../hooks/useGotoStageId'
 import MeetingSidebarPhaseItemChild from './MeetingSidebarPhaseItemChild'
+import {NewMeetingPhaseTypeEnum} from '../__generated__/DraggableReflectionCard_meeting.graphql'
+import {NavSidebar} from '../types/constEnums'
 
 const AvatarBlock = styled('div')({
   width: 32
 })
 
-const ScrollStageItems = styled('div')({
+const ScrollStageItems = styled('div')<{
+  showScrollbar: boolean
+}>(({showScrollbar}) => ({
   display: 'flex',
   flexDirection: 'column',
   height: '100%', // trickle down height for overflow
   // react-beautiful-dnd supports scrolling on 1 parent
   // this is where we need it, in order to scroll a long list
-  overflow: 'auto',
+  overflow: showScrollbar ? 'auto' : 'hidden',
   paddingRight: 8,
   width: '100%'
-})
+}))
 
 interface Props {
   gotoStageId: ReturnType<typeof useGotoStageId>
   handleMenuClick: () => void
   meeting: MeetingSidebarTeamMemberStageItems_meeting
+  phaseType: NewMeetingPhaseTypeEnum
+  maxSidebarChildrenHeight: number
 }
 
 const MeetingSidebarTeamMemberStageItems = (props: Props) => {
-  const {gotoStageId, handleMenuClick, meeting} = props
-  const {id: meetingId, facilitatorStageId, facilitatorUserId, localPhase, localStage} = meeting
-  const {phaseType} = localPhase
+  const {gotoStageId, handleMenuClick, meeting, phaseType, maxSidebarChildrenHeight} = props
+  const {
+    id: meetingId,
+    facilitatorStageId,
+    facilitatorUserId,
+    localPhase,
+    localStage,
+    phases
+  } = meeting
+  const {phaseType: localPhaseType} = localPhase
   const localStageId = (localStage && localStage.id) || ''
+  const atmosphere = useAtmosphere()
+  const {viewerId} = atmosphere
+  const isActivePhase = phaseType === localPhaseType
+  const isViewerFacilitator = viewerId === facilitatorUserId
+  const stages = phases.find((stage) => stage.phaseType === phaseType)?.stages
+  const stagesCount = stages?.length || 0
+  const maxHeight = NavSidebar.ITEM_HEIGHT * stagesCount
+  const childHeight = isActivePhase ? Math.min(maxSidebarChildrenHeight, maxHeight) : 0
+  const showScrollbar = maxHeight > maxSidebarChildrenHeight
   const gotoStage = (teamMemberId) => () => {
-    const teamMemberStage =
-      localPhase && localPhase.stages.find((stage) => stage.teamMemberId === teamMemberId)
+    const teamMemberStage = stages?.find((stage) => stage.teamMemberId === teamMemberId)
     const teamMemberStageId = (teamMemberStage && teamMemberStage.id) || ''
     gotoStageId(teamMemberStageId).catch()
     handleMenuClick()
   }
-  const atmosphere = useAtmosphere()
-  const {viewerId} = atmosphere
-  const isViewerFacilitator = viewerId === facilitatorUserId
+
   return (
-    <MeetingSidebarPhaseItemChild>
-      <ScrollStageItems>
-        {localPhase.stages.map((stage) => {
+    <MeetingSidebarPhaseItemChild height={childHeight}>
+      <ScrollStageItems showScrollbar={showScrollbar}>
+        {stages!.map((stage) => {
           const {
             id: stageId,
             isComplete,
@@ -61,12 +80,14 @@ const MeetingSidebarTeamMemberStageItems = (props: Props) => {
           if (!teamMember) {
             Sentry.captureException(
               new Error(
-                `Team member is undefined. teamMemberId is ${teamMemberId}. phaseType is ${phaseType}. stageId is ${stageId}. meetingId is ${meetingId}. localStageId is ${localStageId}. stage is ${JSON.stringify(stage)}.`
+                `Team member is undefined. teamMemberId is ${teamMemberId}. phaseType is ${localPhaseType}. stageId is ${stageId}. meetingId is ${meetingId}. localStageId is ${localStageId}. stage is ${JSON.stringify(
+                  stage
+                )}.`
               )
             )
             return null
           }
-          const {picture, preferredName} = teamMember!
+          const {picture, preferredName} = teamMember
           const isLocalStage = localStageId === stageId
           const isFacilitatorStage = facilitatorStageId === stageId
           const isUnsyncedFacilitatorStage = isFacilitatorStage !== isLocalStage && !isLocalStage
@@ -80,7 +101,7 @@ const MeetingSidebarTeamMemberStageItems = (props: Props) => {
               }
               isDisabled={isViewerFacilitator ? !isNavigableByFacilitator : !isNavigable}
               onClick={gotoStage(teamMemberId)}
-              isActive={localStageId === stageId}
+              isActive={isActivePhase && localStageId === stageId}
               isComplete={isComplete}
               isDragging={false}
               isUnsyncedFacilitatorStage={isUnsyncedFacilitatorStage}

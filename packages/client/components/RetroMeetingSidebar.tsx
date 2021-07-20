@@ -1,6 +1,6 @@
 import graphql from 'babel-plugin-relay/macro'
 import useRouter from '~/hooks/useRouter'
-import React from 'react'
+import React, {useRef} from 'react'
 import {createFragmentContainer} from 'react-relay'
 import isDemoRoute from '~/utils/isDemoRoute'
 import {
@@ -16,6 +16,7 @@ import MeetingNavList from './MeetingNavList'
 import NewMeetingSidebar from './NewMeetingSidebar'
 import NewMeetingSidebarPhaseListItem from './NewMeetingSidebarPhaseListItem'
 import RetroSidebarPhaseListItemChildren from './RetroSidebarPhaseListItemChildren'
+import useSidebarChildrenHeight from '../hooks/useSidebarChildrenHeight'
 
 interface Props {
   gotoStageId: ReturnType<typeof useGotoStageId>
@@ -48,51 +49,58 @@ const RetroMeetingSidebar = (props: Props) => {
   const isViewerFacilitator = facilitatorUserId === viewerId
   const isUnsyncedFacilitatorPhase = facilitatorPhaseType !== localPhaseType
   const isUnsyncedFacilitatorStage = localStage ? localStage.id !== facilitatorStageId : undefined
+  const navListRef = useRef<HTMLUListElement>(null)
+  const maxSidebarChildrenHeight = useSidebarChildrenHeight(navListRef, phases.length)
   return (
     <NewMeetingSidebar
       handleMenuClick={handleMenuClick}
       toggleSidebar={toggleSidebar}
       meeting={meeting}
     >
-      <MeetingNavList>
-        {phaseTypes.map((phaseType) => {
-          const itemStage = getSidebarItemStage(phaseType, phases, facilitatorStageId)
-          const {id: itemStageId = '', isNavigable = false, isNavigableByFacilitator = false} =
-            itemStage || {}
-          const canNavigate = isViewerFacilitator ? isNavigableByFacilitator : isNavigable
-          const handleClick = () => {
-            gotoStageId(itemStageId).catch()
-            handleMenuClick()
-          }
-          const discussPhase = phases.find((phase) => {
-            return phase.phaseType === 'discuss'
-          })!
-          const showDiscussSection = isPhaseComplete('vote', phases)
-          const phaseCount =
-            phaseType === 'discuss' && showDiscussSection ? discussPhase.stages.length : undefined
-          return (
-            <NewMeetingSidebarPhaseListItem
-              handleClick={canNavigate ? handleClick : undefined}
-              isActive={phaseType === 'discuss' ? false : localPhaseType === phaseType}
-              isCollapsible={collapsiblePhases.includes(phaseType)}
-              isFacilitatorPhase={phaseType === facilitatorPhaseType}
-              isUnsyncedFacilitatorPhase={
-                isUnsyncedFacilitatorPhase && phaseType === facilitatorPhaseType
+      <MeetingNavList ref={navListRef}>
+        {maxSidebarChildrenHeight === null
+          ? null
+          : phaseTypes.map((phaseType) => {
+              const itemStage = getSidebarItemStage(phaseType, phases, facilitatorStageId)
+              const {id: itemStageId = '', isNavigable = false, isNavigableByFacilitator = false} =
+                itemStage || {}
+              const canNavigate = isViewerFacilitator ? isNavigableByFacilitator : isNavigable
+              const handleClick = () => {
+                gotoStageId(itemStageId).catch()
+                handleMenuClick()
               }
-              isUnsyncedFacilitatorStage={isUnsyncedFacilitatorStage}
-              key={phaseType}
-              phaseCount={phaseCount}
-              phaseType={phaseType}
-            >
-              <RetroSidebarPhaseListItemChildren
-                gotoStageId={gotoStageId}
-                handleMenuClick={handleMenuClick}
-                phaseType={phaseType}
-                meeting={meeting}
-              />
-            </NewMeetingSidebarPhaseListItem>
-          )
-        })}
+              const discussPhase = phases.find((phase) => {
+                return phase.phaseType === 'discuss'
+              })!
+              const showDiscussSection = isPhaseComplete('vote', phases)
+              const phaseCount =
+                phaseType === 'discuss' && showDiscussSection
+                  ? discussPhase.stages.length
+                  : undefined
+              return (
+                <NewMeetingSidebarPhaseListItem
+                  handleClick={canNavigate ? handleClick : undefined}
+                  isActive={phaseType === 'discuss' ? false : localPhaseType === phaseType}
+                  isCollapsible={collapsiblePhases.includes(phaseType)}
+                  isFacilitatorPhase={phaseType === facilitatorPhaseType}
+                  isUnsyncedFacilitatorPhase={
+                    isUnsyncedFacilitatorPhase && phaseType === facilitatorPhaseType
+                  }
+                  isUnsyncedFacilitatorStage={isUnsyncedFacilitatorStage}
+                  key={phaseType}
+                  phaseCount={phaseCount}
+                  phaseType={phaseType}
+                >
+                  <RetroSidebarPhaseListItemChildren
+                    gotoStageId={gotoStageId}
+                    handleMenuClick={handleMenuClick}
+                    phaseType={phaseType}
+                    maxSidebarChildrenHeight={maxSidebarChildrenHeight}
+                    meeting={meeting}
+                  />
+                </NewMeetingSidebarPhaseListItem>
+              )
+            })}
         {endedAt && (
           <NewMeetingSidebarPhaseListItem
             key='summary'

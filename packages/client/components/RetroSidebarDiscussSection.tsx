@@ -22,6 +22,8 @@ const lineHeight = NavSidebar.SUB_LINE_HEIGHT
 interface Props extends WithAtmosphereProps {
   gotoStageId: ReturnType<typeof useGotoStageId>
   handleMenuClick: () => void
+  isDiscussPhaseActive: boolean
+  maxDiscussHeight: number
   meeting: RetroSidebarDiscussSection_meeting
 }
 
@@ -50,23 +52,33 @@ const DraggableMeetingSubnavItem = styled('div')<{isDragging: boolean}>(({isDrag
   boxShadow: isDragging ? navItemRaised : undefined
 }))
 
+const SCROLL_PADDING = 8
+
 const ScrollWrapper = styled('div')({
   overflow: 'auto',
-  paddingBottom: 8,
-  paddingRight: 8,
+  paddingBottom: SCROLL_PADDING,
+  paddingRight: SCROLL_PADDING,
   height: '100%'
 })
 
 const RetroSidebarDiscussSection = (props: Props) => {
-  const {atmosphere, gotoStageId, handleMenuClick, meeting} = props
+  const {
+    atmosphere,
+    gotoStageId,
+    handleMenuClick,
+    maxDiscussHeight,
+    isDiscussPhaseActive,
+    meeting
+  } = props
   const {localStage, facilitatorStageId, id: meetingId, phases, endedAt} = meeting
+  // parent only renders component if discuss phase exists
   const discussPhase = phases!.find(({phaseType}) => phaseType === 'discuss')!
-  // assert that the discuss phase and its stages are non-null
-  // since we render this component when the vote phase is complete
-  // see: RetroSidebarPhaseListItemChildren.tsx
   const {stages} = discussPhase!
   const {id: localStageId} = localStage
   const inSync = localStageId === facilitatorStageId
+  const stagesCount = stages!.length
+  const maxHeight = stagesCount * NavSidebar.ITEM_HEIGHT + SCROLL_PADDING
+  const childHeight = isDiscussPhaseActive ? Math.min(maxDiscussHeight, maxHeight) : 0
 
   const onDragEnd = (result) => {
     const {source, destination} = result
@@ -106,7 +118,7 @@ const RetroSidebarDiscussSection = (props: Props) => {
   }
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <MeetingSidebarPhaseItemChild>
+      <MeetingSidebarPhaseItemChild height={childHeight}>
         <Droppable droppableId={DISCUSSION_TOPIC}>
           {(provided) => {
             return (

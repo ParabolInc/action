@@ -1,5 +1,6 @@
 import graphql from 'babel-plugin-relay/macro'
 import React from 'react'
+import {useRef} from 'react'
 import {createFragmentContainer} from 'react-relay'
 import useRouter from '~/hooks/useRouter'
 import {
@@ -8,6 +9,7 @@ import {
 } from '~/__generated__/PokerMeetingSidebar_meeting.graphql'
 import useAtmosphere from '../hooks/useAtmosphere'
 import useGotoStageId from '../hooks/useGotoStageId'
+import useSidebarChildrenHeight from '../hooks/useSidebarChildrenHeight'
 import getSidebarItemStage from '../utils/getSidebarItemStage'
 import findStageById from '../utils/meetings/findStageById'
 import MeetingNavList from './MeetingNavList'
@@ -46,52 +48,57 @@ const PokerMeetingSidebar = (props: Props) => {
   const isViewerFacilitator = facilitatorUserId === viewerId
   const isUnsyncedFacilitatorPhase = facilitatorPhaseType !== localPhaseType
   const isUnsyncedFacilitatorStage = localStage ? localStage.id !== facilitatorStageId : undefined
+  const navListRef = useRef<HTMLUListElement>(null)
+  const maxSidebarChildrenHeight = useSidebarChildrenHeight(navListRef, phases.length)
   return (
     <NewMeetingSidebar
       handleMenuClick={handleMenuClick}
       toggleSidebar={toggleSidebar}
       meeting={meeting}
     >
-      <MeetingNavList>
-        {phaseTypes.map((phaseType) => {
-          const itemStage = getSidebarItemStage(phaseType, phases, facilitatorStageId)
-          const {id: itemStageId = '', isNavigable = false, isNavigableByFacilitator = false} =
-            itemStage || {}
-          const canNavigate = isViewerFacilitator ? isNavigableByFacilitator : isNavigable
-          const handleClick = () => {
-            gotoStageId(itemStageId).catch()
-            handleMenuClick()
-          }
-          const estimatePhase = phases.find((phase) => {
-            return phase.phaseType === 'ESTIMATE'
-          })!
-          const phaseCount =
-            phaseType === 'ESTIMATE'
-              ? new Set(estimatePhase.stages.map(({serviceTaskId}) => serviceTaskId)).size
-              : undefined
-          return (
-            <NewMeetingSidebarPhaseListItem
-              handleClick={canNavigate ? handleClick : undefined}
-              isActive={phaseType === 'ESTIMATE' ? false : localPhaseType === phaseType}
-              isCollapsible={collapsiblePhases.includes(phaseType)}
-              isFacilitatorPhase={phaseType === facilitatorPhaseType}
-              isUnsyncedFacilitatorPhase={
-                isUnsyncedFacilitatorPhase && phaseType === facilitatorPhaseType
+      <MeetingNavList ref={navListRef}>
+        {maxSidebarChildrenHeight === null
+          ? null
+          : phaseTypes.map((phaseType) => {
+              const itemStage = getSidebarItemStage(phaseType, phases, facilitatorStageId)
+              const {id: itemStageId = '', isNavigable = false, isNavigableByFacilitator = false} =
+                itemStage || {}
+              const canNavigate = isViewerFacilitator ? isNavigableByFacilitator : isNavigable
+              const handleClick = () => {
+                gotoStageId(itemStageId).catch()
+                handleMenuClick()
               }
-              isUnsyncedFacilitatorStage={isUnsyncedFacilitatorStage}
-              key={phaseType}
-              phaseCount={phaseCount}
-              phaseType={phaseType}
-            >
-              <PokerSidebarPhaseListItemChildren
-                gotoStageId={gotoStageId}
-                handleMenuClick={handleMenuClick}
-                phaseType={phaseType}
-                meeting={meeting}
-              />
-            </NewMeetingSidebarPhaseListItem>
-          )
-        })}
+              const estimatePhase = phases.find((phase) => {
+                return phase.phaseType === 'ESTIMATE'
+              })!
+              const phaseCount =
+                phaseType === 'ESTIMATE'
+                  ? new Set(estimatePhase.stages.map(({serviceTaskId}) => serviceTaskId)).size
+                  : undefined
+              return (
+                <NewMeetingSidebarPhaseListItem
+                  handleClick={canNavigate ? handleClick : undefined}
+                  isActive={phaseType === 'ESTIMATE' ? false : localPhaseType === phaseType}
+                  isCollapsible={collapsiblePhases.includes(phaseType)}
+                  isFacilitatorPhase={phaseType === facilitatorPhaseType}
+                  isUnsyncedFacilitatorPhase={
+                    isUnsyncedFacilitatorPhase && phaseType === facilitatorPhaseType
+                  }
+                  isUnsyncedFacilitatorStage={isUnsyncedFacilitatorStage}
+                  key={phaseType}
+                  phaseCount={phaseCount}
+                  phaseType={phaseType}
+                >
+                  <PokerSidebarPhaseListItemChildren
+                    gotoStageId={gotoStageId}
+                    handleMenuClick={handleMenuClick}
+                    phaseType={phaseType}
+                    maxSidebarChildrenHeight={maxSidebarChildrenHeight}
+                    meeting={meeting}
+                  />
+                </NewMeetingSidebarPhaseListItem>
+              )
+            })}
         {endedAt && (
           <NewMeetingSidebarPhaseListItem
             key='summary'

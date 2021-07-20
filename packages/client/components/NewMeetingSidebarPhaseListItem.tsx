@@ -14,7 +14,10 @@ const NavListItem = styled('li')<{phaseType: NewMeetingPhaseTypeEnum}>(({phaseTy
   margin: 0,
   // hack to work around broken flexbox
   // https://bugs.chromium.org/p/chromium/issues/detail?id=927066
-  minHeight: phaseType === 'agendaitems' ? 98 : 40
+  minHeight:
+    phaseType === 'agendaitems'
+      ? NavSidebar.ITEM_HEIGHT + NavSidebar.AGENDA_ITEM_INPUT_HEIGHT
+      : NavSidebar.ITEM_HEIGHT
 }))
 
 const NavItemIcon = styled(Icon)<{isUnsyncedFacilitatorPhase: boolean}>(

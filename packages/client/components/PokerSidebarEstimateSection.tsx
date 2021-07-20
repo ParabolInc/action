@@ -10,6 +10,7 @@ import useMakeStageSummaries from '../hooks/useMakeStageSummaries'
 import DragEstimatingTaskMutation from '../mutations/DragEstimatingTaskMutation'
 import {navItemRaised} from '../styles/elevation'
 import {PALETTE} from '../styles/paletteV3'
+import {NavSidebar} from '../types/constEnums'
 import {SORT_STEP} from '../utils/constants'
 import dndNoise from '../utils/dndNoise'
 import MeetingSidebarPhaseItemChild from './MeetingSidebarPhaseItemChild'
@@ -19,6 +20,7 @@ import PokerSidebarEstimateMeta from './PokerSidebarEstimateMeta'
 interface Props {
   gotoStageId: ReturnType<typeof useGotoStageId>
   handleMenuClick: () => void
+  maxEstimateHeight: number
   meeting: PokerSidebarEstimateSection_meeting
 }
 
@@ -26,10 +28,12 @@ const DraggableMeetingSubnavItem = styled('div')<{isDragging: boolean}>(({isDrag
   boxShadow: isDragging ? navItemRaised : undefined
 }))
 
+const SCROLL_PADDING = 8
+
 const ScrollWrapper = styled('div')({
   overflow: 'auto',
-  paddingBottom: 8,
-  paddingRight: 8,
+  paddingBottom: SCROLL_PADDING,
+  paddingRight: SCROLL_PADDING,
   height: '100%'
 })
 
@@ -50,7 +54,7 @@ const Subtitle = styled('div')({
 })
 
 const PokerSidebarEstimateSection = (props: Props) => {
-  const {gotoStageId, handleMenuClick, meeting} = props
+  const {gotoStageId, handleMenuClick, maxEstimateHeight, meeting} = props
   const {localStage, facilitatorStageId, id: meetingId, phases, endedAt} = meeting
   const atmosphere = useAtmosphere()
   const {viewerId} = atmosphere
@@ -58,6 +62,9 @@ const PokerSidebarEstimateSection = (props: Props) => {
   const {stages} = estimatePhase!
   const {id: localStageId} = localStage
   const stageSummaries = useMakeStageSummaries(estimatePhase, localStageId)
+  const stageSummariesCount = stageSummaries.length
+  const maxHeight = stageSummariesCount * NavSidebar.ITEM_HEIGHT + SCROLL_PADDING
+  const childHeight = Math.min(maxEstimateHeight, maxHeight)
   const inSync = localStageId === facilitatorStageId
 
   const onDragEnd = (result) => {
@@ -116,20 +123,13 @@ const PokerSidebarEstimateSection = (props: Props) => {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <MeetingSidebarPhaseItemChild>
+      <MeetingSidebarPhaseItemChild height={childHeight}>
         <Droppable droppableId={'TASK'}>
           {(provided) => {
             return (
               <ScrollWrapper ref={provided.innerRef}>
                 {stageSummaries!.map((summary, idx) => {
-                  const {
-                    stageIds,
-                    title,
-                    subtitle,
-                    isActive,
-                    isNavigable,
-                    finalScores
-                  } = summary
+                  const {stageIds, title, subtitle, isActive, isNavigable, finalScores} = summary
                   const [firstStageId] = stageIds
                   // the local user is at another stage than the facilitator stage
                   const isUnsyncedFacilitatorStage =

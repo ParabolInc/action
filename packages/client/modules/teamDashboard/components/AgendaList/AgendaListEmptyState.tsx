@@ -1,6 +1,7 @@
 import React from 'react'
 import styled from '@emotion/styled'
 import {PALETTE} from '../../../../styles/paletteV3'
+import {NavSidebar} from '../../../../types/constEnums'
 
 interface Props {
   isComplete: boolean
@@ -10,7 +11,8 @@ interface Props {
 const EmptyBlock = styled('div')({
   alignItems: 'flex-start',
   display: 'flex',
-  padding: '8px 8px 0 56px'
+  padding: '8px 8px 0 56px',
+  height: NavSidebar.EMPTY_BLOCK_HEIGHT
 })
 
 const EmptyMessage = styled('div')({

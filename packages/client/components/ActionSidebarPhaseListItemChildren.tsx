@@ -6,34 +6,50 @@ import MeetingSidebarTeamMemberStageItems from './MeetingSidebarTeamMemberStageI
 import {NewMeetingPhaseTypeEnum} from '../__generated__/ActionSidebarAgendaItemsSection_meeting.graphql'
 import {ActionSidebarPhaseListItemChildren_meeting} from '~/__generated__/ActionSidebarPhaseListItemChildren_meeting.graphql'
 import useGotoStageId from '../hooks/useGotoStageId'
+import {NavSidebar} from '../types/constEnums'
 
 interface Props {
   gotoStageId: ReturnType<typeof useGotoStageId>
   handleMenuClick: () => void
-  phaseType: NewMeetingPhaseTypeEnum | string
+  phaseType: NewMeetingPhaseTypeEnum
   meeting: ActionSidebarPhaseListItemChildren_meeting
+  maxSidebarChildrenHeight: number
 }
+const agendaPhases: NewMeetingPhaseTypeEnum[] = ['firstcall', 'agendaitems', 'lastcall']
 
 const ActionSidebarPhaseListItemChildren = (props: Props) => {
-  const {gotoStageId, handleMenuClick, phaseType, meeting} = props
-  if (phaseType === 'agendaitems') {
+  const {gotoStageId, handleMenuClick, phaseType, meeting, maxSidebarChildrenHeight} = props
+  const {localPhase, phases} = meeting
+  const {phaseType: localPhaseType} = localPhase
+  const stages = phases.find((stage) => stage.phaseType === localPhaseType)?.stages
+  const stagesCount = stages?.length || 0
+  const memberStageMaxHeight = stagesCount * NavSidebar.ITEM_HEIGHT
+  const maxInactiveAgendaItemsHeight = Math.max(
+    maxSidebarChildrenHeight - memberStageMaxHeight,
+    NavSidebar.AGENDA_ITEM_INPUT_HEIGHT
+  )
+  const maxAgendaItemsHeight = agendaPhases.includes(localPhaseType)
+    ? maxSidebarChildrenHeight
+    : maxInactiveAgendaItemsHeight
+  if (agendaPhases.includes(phaseType)) {
     return (
       <ActionSidebarAgendaItemsSection
         gotoStageId={gotoStageId}
         handleMenuClick={handleMenuClick}
-        meeting={meeting}
-      />
-    )
-  } else if (meeting.localPhase && meeting.localPhase.phaseType === phaseType) {
-    return (
-      <MeetingSidebarTeamMemberStageItems
-        gotoStageId={gotoStageId}
-        handleMenuClick={handleMenuClick}
+        maxAgendaItemsHeight={maxAgendaItemsHeight}
         meeting={meeting}
       />
     )
   }
-  return null
+  return (
+    <MeetingSidebarTeamMemberStageItems
+      gotoStageId={gotoStageId}
+      handleMenuClick={handleMenuClick}
+      maxSidebarChildrenHeight={maxSidebarChildrenHeight}
+      meeting={meeting}
+      phaseType={phaseType}
+    />
+  )
 }
 
 export default createFragmentContainer(ActionSidebarPhaseListItemChildren, {
@@ -42,6 +58,13 @@ export default createFragmentContainer(ActionSidebarPhaseListItemChildren, {
       ...MeetingSidebarTeamMemberStageItems_meeting
       localPhase {
         phaseType
+      }
+      phases {
+        phaseType
+        stages {
+          id
+          phaseType
+        }
       }
       ...ActionSidebarAgendaItemsSection_meeting
     }
