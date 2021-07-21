@@ -17,8 +17,9 @@ const EmptyWrapper = styled('div')({
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center',
-  height: '100%',
-  padding: '8px 0'
+  flex: 1,
+  padding: '8px 0',
+  overflow: 'auto'
 })
 
 const Wrapper = styled('div')({
