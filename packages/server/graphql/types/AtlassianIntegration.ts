@@ -20,6 +20,7 @@ import JiraRemoteProject from './JiraRemoteProject'
 import JiraSearchQuery from './JiraSearchQuery'
 import AtlassianIntegrationId from '../../../client/shared/gqlIds/AtlassianIntegrationId'
 import updateJiraSearchQueries from '../../postgres/queries/updateJiraSearchQueries'
+import {downloadAndCacheImages, updateJiraImageUrls} from '../../utils/atlassian/jiraImages'
 
 const AtlassianIntegration = new GraphQLObjectType<any, GQLContext>({
   name: 'AtlassianIntegration',
@@ -128,12 +129,21 @@ const AtlassianIntegration = new GraphQLObjectType<any, GQLContext>({
 
         const issueRes = await manager.getIssues(queryString, isJQL, projectKeyFiltersByCloudId)
         const {error, issues} = issueRes
-        const mappedIssues = issues.map((issue) => ({
-          ...issue,
-          teamId,
-          userId,
-          updatedAt: new Date()
-        }))
+        const mappedIssues = issues.map((issue) => {
+          const {updatedDescription, imageUrlToHash} = updateJiraImageUrls(
+            issue.cloudId,
+            issue.descriptionHTML
+          )
+          downloadAndCacheImages(accessToken, imageUrlToHash)
+
+          return {
+            ...issue,
+            teamId,
+            userId,
+            descriptionHTML: updatedDescription,
+            updatedAt: new Date()
+          }
+        })
         return connectionFromTasks(
           mappedIssues,
           first,

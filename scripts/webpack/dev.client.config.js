@@ -23,7 +23,12 @@ module.exports = {
   devServer: {
     index: 'index.html',
     clientLogLevel: 'silent',
-    contentBase: [path.join(PROJECT_ROOT, 'static'), path.join(PROJECT_ROOT, 'build'), path.join(PROJECT_ROOT, 'dev', 'dll'), path.join(PROJECT_ROOT, 'self-hosted')],
+    contentBase: [
+      path.join(PROJECT_ROOT, 'static'),
+      path.join(PROJECT_ROOT, 'build'),
+      path.join(PROJECT_ROOT, 'dev', 'dll'),
+      path.join(PROJECT_ROOT, 'self-hosted')
+    ],
     contentBasePublicPath: ['/static/', '/static/', '/static/', '/self-hosted/'],
     publicPath: '/',
     hot: true,
@@ -41,6 +46,9 @@ module.exports = {
         target: `http://localhost:${SOCKET_PORT}`
       },
       '/sse-ping': {
+        target: `http://localhost:${SOCKET_PORT}`
+      },
+      '/jira-attachements': {
         target: `http://localhost:${SOCKET_PORT}`
       }
     }

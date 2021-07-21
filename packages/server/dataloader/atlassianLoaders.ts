@@ -9,6 +9,7 @@ import upsertAtlassianAuth from '../postgres/queries/upsertAtlassianAuth'
 import AtlassianServerManager from '../utils/AtlassianServerManager'
 import sendToSentry from '../utils/sendToSentry'
 import RethinkDataLoader from './RethinkDataLoader'
+import {downloadAndCacheImages, updateJiraImageUrls} from '../utils/atlassian/jiraImages'
 
 type TeamUserKey = {teamId: string; userId: string}
 export interface JiraRemoteProjectKey {
@@ -105,8 +106,15 @@ export const jiraIssue = (parent: RethinkDataLoader) => {
             sendToSentry(issueRes, {userId, tags: {cloudId, issueKey, teamId}})
             return null
           }
+          const {updatedDescription, imageUrlToHash} = updateJiraImageUrls(
+            cloudId,
+            issueRes.fields.descriptionHTML
+          )
+          downloadAndCacheImages(accessToken, imageUrlToHash)
+
           return {
             ...issueRes.fields,
+            descriptionHTML: updatedDescription,
             teamId,
             userId
           }
