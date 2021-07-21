@@ -2,6 +2,165 @@ import {GraphQLID, GraphQLList, GraphQLNonNull, GraphQLString} from 'graphql'
 import getRethink from '../../../database/rethinkDriver'
 import {requireSU} from '../../../utils/authorization'
 import {GQLContext} from '../../graphql'
+import getPg from '../../../postgres/getPg'
+import path from 'path'
+import getPgConfig from '../../../postgres/getPgConfig'
+import {Client} from 'pg'
+import {getPgMigrationsQuery} from '../../../postgres/queries/generated/getPgMigrationsQuery'
+import {insertPgMigrationsQuery} from '../../../postgres/queries/generated/insertPgMigrationsQuery'
+import {getPgPostDeployMigrationsQuery} from '../../../postgres/queries/generated/getPgPostDeployMigrationsQuery'
+import {insertPgPostDeployMigrationsQuery} from '../../../postgres/queries/generated/insertPgPostDeployMigrationsQuery'
+import {getOrgUserAuditByOrgIdQuery} from '../../../postgres/queries/generated/getOrgUserAuditByOrgIdQuery'
+import {insertOrgUserAuditQuery} from '../../../postgres/queries/generated/insertOrgUserAuditQuery'
+import {getTeamsByOrgIdQuery} from '../../../postgres/queries/generated/getTeamsByOrgIdQuery'
+import {insertTeamsQuery} from '../../../postgres/queries/generated/insertTeamsQuery'
+import {getGitHubAuthByTeamIdQuery} from '../../../postgres/queries/generated/getGitHubAuthByTeamIdQuery'
+import {insertGitHubAuthWithAllColumnsQuery} from '../../../postgres/queries/generated/insertGitHubAuthWithAllColumnsQuery'
+import {getDiscussionByTeamIdQuery} from '../../../postgres/queries/generated/getDiscussionByTeamIdQuery'
+import {insertDiscussionWithAllColumnsQuery} from '../../../postgres/queries/generated/insertDiscussionWithAllColumnsQuery'
+import {getUsersByIdQuery} from '../../../postgres/queries/generated/getUsersByIdQuery'
+import {insertUserWithAllColumnsQuery} from '../../../postgres/queries/generated/insertUserWithAllColumnsQuery'
+import {getTemplateRefByIdsQuery} from '../../../postgres/queries/generated/getTemplateRefByIdsQuery'
+import {insertTemplateRefWithAllColumnsQuery} from '../../../postgres/queries/generated/insertTemplateRefWithAllColumnsQuery'
+import {getTemplateScaleRefByIdsQuery} from '../../../postgres/queries/generated/getTemplateScaleRefByIdsQuery'
+import {insertTemplateScaleRefWithAllColumnsQuery} from '../../../postgres/queries/generated/insertTemplateScaleRefWithAllColumnsQuery'
+import PROD from '../../../PROD'
+import runExecFilePromise from '../../../utils/runExecFilePromise'
+
+const PG_ORG_BACKUP_DB_NAME = 'orgBackup'
+
+const createEmptyOrgBackupDB = async () => {
+  const pg_scripts_dir = 'packages/server/postgres/scripts'
+  const schemaDumpFile = 'artifacts/schemaDump.tar.gz'
+
+  const dumpScriptPath = path.resolve(process.cwd(), pg_scripts_dir, 'dump.sh')
+  const createScriptPath = path.resolve(process.cwd(), pg_scripts_dir, 'createDB.sh')
+  const restoreScriptPath = path.resolve(process.cwd(), pg_scripts_dir, 'restoreDB.sh')
+
+  await runExecFilePromise(dumpScriptPath, [`-Fc --schema-only -f ${schemaDumpFile}`])
+  await runExecFilePromise(createScriptPath, [PG_ORG_BACKUP_DB_NAME])
+  await runExecFilePromise(restoreScriptPath, [`-d ${PG_ORG_BACKUP_DB_NAME} ${schemaDumpFile}`])
+}
+
+// make insert use seq generator so tables with seq will has correct seq values
+const removeId = (row) => Object.assign(row, {id: undefined})
+
+const backupPgOrganization = async (orgIds: string[]) => {
+  await createEmptyOrgBackupDB()
+
+  const mainPg = getPg()
+  const mainClient = await mainPg.connect()
+
+  const orgBackupConfig = Object.assign(getPgConfig(), {
+    database: PG_ORG_BACKUP_DB_NAME,
+    max: PROD ? 5 : 1
+  })
+  const orgBackupClient = new Client(orgBackupConfig)
+  await orgBackupClient.connect()
+
+  // rethink client for when we need to join with rethink
+  const r = await getRethink()
+
+  // collect all backup writes here
+  const writePromises: Promise<any>[] = []
+
+  try {
+    const [migrations, postMigrations, auditRows, teams] = await Promise.all([
+      getPgMigrationsQuery.run(undefined, mainClient),
+      getPgPostDeployMigrationsQuery.run(undefined, mainClient),
+      getOrgUserAuditByOrgIdQuery.run({orgIds}, mainClient),
+      getTeamsByOrgIdQuery.run({orgIds}, mainClient)
+    ])
+
+    migrations.length &&
+      writePromises.push(
+        insertPgMigrationsQuery.run({migrationRows: migrations.map(removeId)}, orgBackupClient)
+      )
+
+    postMigrations.length &&
+      writePromises.push(
+        insertPgPostDeployMigrationsQuery.run(
+          {migrationRows: postMigrations.map(removeId)},
+          orgBackupClient
+        )
+      )
+
+    teams.length && writePromises.push(insertTeamsQuery.run({teams}, orgBackupClient))
+
+    auditRows.length &&
+      writePromises.push(
+        insertOrgUserAuditQuery.run({auditRows: auditRows.map(removeId)}, orgBackupClient)
+      )
+
+    const teamIds = teams.map(({id}) => id)
+
+    if (teamIds.length) {
+      const [githubAuths, discussions, userIds, templateRefIds] = await Promise.all([
+        getGitHubAuthByTeamIdQuery.run({teamIds}, mainClient),
+        getDiscussionByTeamIdQuery.run({teamIds}, mainClient),
+        r
+          .table('TeamMember')
+          .getAll(r.args(teamIds), {index: 'teamId'})('userId')
+          .coerceTo('array')
+          .distinct()
+          .run(),
+        (r
+          .table('NewMeeting')
+          .getAll(r.args(teamIds), {index: 'teamId'})
+          .filter((row) => row.hasFields('templateRefId')) as any)('templateRefId')
+          .coerceTo('array')
+          .run()
+      ])
+
+      githubAuths.length &&
+        writePromises.push(
+          insertGitHubAuthWithAllColumnsQuery.run({auths: githubAuths}, orgBackupClient)
+        )
+
+      discussions.length &&
+        writePromises.push(insertDiscussionWithAllColumnsQuery.run({discussions}, orgBackupClient))
+
+      if (userIds.length) {
+        const users = await getUsersByIdQuery.run({ids: userIds}, mainClient)
+        users.length &&
+          writePromises.push(insertUserWithAllColumnsQuery.run({users}, orgBackupClient))
+      }
+
+      if (templateRefIds.length) {
+        const templateRefs = await getTemplateRefByIdsQuery.run({ids: templateRefIds}, mainClient)
+        templateRefs.length &&
+          writePromises.push(
+            insertTemplateRefWithAllColumnsQuery.run({refs: templateRefs}, orgBackupClient)
+          )
+
+        const scaleRefIds = Array.from(
+          new Set(
+            templateRefs.reduce(
+              (acc, curr) =>
+                acc.concat((curr as any).template.dimensions.map(({scaleRefId}) => scaleRefId)),
+              []
+            )
+          )
+        )
+
+        if (scaleRefIds.length) {
+          const scaleRefs = await getTemplateScaleRefByIdsQuery.run({ids: scaleRefIds}, mainClient)
+          scaleRefs.length &&
+            writePromises.push(
+              insertTemplateScaleRefWithAllColumnsQuery.run({refs: scaleRefs}, orgBackupClient)
+            )
+        }
+      }
+    }
+
+    await Promise.all(writePromises)
+  } catch (e) {
+    console.log(e)
+  } finally {
+    mainClient.release()
+    orgBackupClient.end()
+  }
+}
 
 const backupOrganization = {
   type: GraphQLNonNull(GraphQLString),
@@ -16,8 +175,10 @@ const backupOrganization = {
     requireSU(authToken)
 
     // RESOLUTION
-    const r = await getRethink()
+    await backupPgOrganization(orgIds)
+
     const DESTINATION = 'orgBackup'
+    const r = await getRethink()
 
     // create the DB
     try {
